@@ -8,7 +8,7 @@ configurations.all {
 }
 
 group = 'com.github.figaf'
-version = '2.22'
+version = '1.0.0'
 
 repositories {
     mavenLocal()
@@ -16,26 +16,38 @@ repositories {
     maven { url "https://jitpack.io" }
 }
 
+ext {
+    lombokVersion = '1.18.8'
+    integrationCommonsVersion = '1.24'
+    slf4jApiVersion = '1.7.25'
+    httpmimeVersion = '4.5.3'
+    gsonVersion = '2.10'
+    integrationCommonsTestVersion = '1.4'
+    assertjCoreVersion = '3.18.0'
+    mockitoCoreVersion = '3.6.0'
+    mockitoJunitJupiterVersion = '3.6.0'
+    logbackClassicVersion = '1.2.3'
+    junitJupiterEngineVersion = '5.7.0'
+}
+
 dependencies {
 
-    compileOnly 'org.projectlombok:lombok:1.18.8'
-    annotationProcessor 'org.projectlombok:lombok:1.18.8'
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
-    api 'com.github.figaf:integration-commons:1.24'
-    implementation 'org.slf4j:slf4j-api:1.7.25'
-    implementation 'org.apache.httpcomponents:httpmime:4.5.3'
-    implementation 'com.google.code.gson:gson:2.10'
-    testCompileOnly 'org.projectlombok:lombok:1.18.8'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.8'
+    implementation "com.github.figaf:integration-commons:${integrationCommonsVersion}"
+    implementation "org.slf4j:slf4j-api:${slf4jApiVersion}"
 
-    testImplementation 'com.github.figaf:integration-commons-test:1.4'
-    testImplementation 'org.assertj:assertj-core:3.18.0'
-    testImplementation 'org.mockito:mockito-core:3.6.0'
-    testImplementation 'org.mockito:mockito-junit-jupiter:3.6.0'
-    testImplementation 'ch.qos.logback:logback-classic:1.2.3'
+    testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
+    testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    testImplementation "com.github.figaf:integration-commons-test:${integrationCommonsTestVersion}"
+    testImplementation "org.assertj:assertj-core:${assertjCoreVersion}"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:${junitJupiterEngineVersion}"
+
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitJupiterEngineVersion}"
 }
+
 
 publishing {
     publications {

@@ -1,4 +1,4 @@
-package com.figaf.integration.tpm.entity.company;
+package com.figaf.integration.tpm.entity.agreement;
 
 import com.figaf.integration.tpm.entity.BaseTpmObject;
 import lombok.Getter;
@@ -8,6 +8,6 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class CompanyProfile extends BaseTpmObject {
+public class AgreementTemplate extends BaseTpmObject {
 
 }

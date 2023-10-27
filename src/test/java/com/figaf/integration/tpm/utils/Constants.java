@@ -1,4 +1,4 @@
-package com.figaf.integration.cpi.utils;
+package com.figaf.integration.tpm.utils;
 
 import static org.junit.jupiter.params.ParameterizedTest.DEFAULT_DISPLAY_NAME;
 import static org.junit.jupiter.params.ParameterizedTest.DISPLAY_NAME_PLACEHOLDER;

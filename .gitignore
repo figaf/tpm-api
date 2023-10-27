@@ -4,12 +4,9 @@ out
 .gradle
 *.jar
 *.ear
+*.dll
 !gradle/wrapper/gradle-wrapper.jar
-node_modules
-logs
-package-lock.json
 gradle.properties
-files
 
 ### IntelliJ IDEA ###
 .idea
