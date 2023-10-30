@@ -11,7 +11,7 @@ import java.io.Serializable;
 @Setter
 @NoArgsConstructor
 @ToString
-public class BaseTpmObject implements Serializable {
+public abstract class BaseTpmObject implements Serializable {
 
     private String id;
     private String uniqueId;
@@ -20,4 +20,6 @@ public class BaseTpmObject implements Serializable {
     private String artifactStatus;
     private AdministrativeData administrativeData;
     private String jsonPayload;
+
+    public abstract String getType();
 }

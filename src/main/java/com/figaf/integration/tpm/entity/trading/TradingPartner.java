@@ -9,4 +9,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class TradingPartner extends BaseTpmObject {
+    @Override
+    public String getType() {
+        return "CLOUD_TRADING_PARTNER";
+    }
 }

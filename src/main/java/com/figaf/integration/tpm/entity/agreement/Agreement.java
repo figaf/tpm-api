@@ -10,4 +10,8 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Agreement extends BaseTpmObject {
 
+    @Override
+    public String getType() {
+        return "CLOUD_AGREEMENT";
+    }
 }

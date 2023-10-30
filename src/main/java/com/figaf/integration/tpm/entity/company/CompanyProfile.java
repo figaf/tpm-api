@@ -10,4 +10,8 @@ import lombok.Setter;
 @NoArgsConstructor
 public class CompanyProfile extends BaseTpmObject {
 
+    @Override
+    public String getType() {
+        return "CLOUD_COMPANY_PROFILE";
+    }
 }

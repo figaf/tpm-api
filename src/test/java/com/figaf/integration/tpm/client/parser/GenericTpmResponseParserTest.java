@@ -2,6 +2,7 @@ package com.figaf.integration.tpm.client.parser;
 
 import com.figaf.integration.tpm.entity.AdministrativeData;
 import com.figaf.integration.tpm.entity.BaseTpmObject;
+import com.figaf.integration.tpm.entity.company.CompanyProfile;
 import com.figaf.integration.tpm.parser.GenericTpmResponseParser;
 import org.junit.jupiter.api.Test;
 
@@ -50,8 +51,9 @@ public class GenericTpmResponseParserTest {
         assertEquals("user2", adminData.getModifiedBy());
     }
 
+    // it's enough to test only one child of BaseTpmObject because it provides the full coverage of setting BaseTpmObject fields
     private List<BaseTpmObject> parseJsonResponse(String jsonResponse) throws Exception {
-        GenericTpmResponseParser<BaseTpmObject> parser = new GenericTpmResponseParser<>(BaseTpmObject::new);
+        GenericTpmResponseParser<BaseTpmObject> parser = new GenericTpmResponseParser<>(CompanyProfile::new);
         return parser.parseResponse(jsonResponse);
     }
 }
