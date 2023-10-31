@@ -3,7 +3,8 @@ package com.figaf.integration.tpm.client.company;
 import com.figaf.integration.common.entity.RequestContext;
 import com.figaf.integration.common.factory.HttpClientsFactory;
 import com.figaf.integration.tpm.client.TpmBaseClient;
-import com.figaf.integration.tpm.entity.company.CompanyProfile;
+import com.figaf.integration.tpm.entity.TpmObjectMetadata;
+import com.figaf.integration.tpm.enumtypes.TpmObjectType;
 import lombok.extern.slf4j.Slf4j;
 import com.figaf.integration.tpm.parser.GenericTpmResponseParser;
 
@@ -16,13 +17,13 @@ public class CompanyProfileClient extends TpmBaseClient {
         super(httpClientsFactory);
     }
 
-    public List<CompanyProfile> getAll(RequestContext requestContext) {
-        log.debug("#getAll: requestContext={}", requestContext);
+    public List<TpmObjectMetadata> getAllMetadata(RequestContext requestContext) {
+        log.debug("#getAllMetadata: requestContext={}", requestContext);
 
         return executeGet(
             requestContext,
             COMPANY_PROFILE_RESOURCE,
-            new GenericTpmResponseParser<>(CompanyProfile::new)::parseResponse
+            (response) -> new GenericTpmResponseParser().parseResponse(response, TpmObjectType.CLOUD_COMPANY_PROFILE)
         );
     }
 }

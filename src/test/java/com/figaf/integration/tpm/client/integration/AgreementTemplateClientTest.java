@@ -5,7 +5,7 @@ import com.figaf.integration.common.entity.RequestContext;
 import com.figaf.integration.common.factory.HttpClientsFactory;
 import com.figaf.integration.tpm.client.agreement.AgreementTemplateClient;
 import com.figaf.integration.tpm.data_provider.AgentTestDataProvider;
-import com.figaf.integration.tpm.entity.agreement.AgreementTemplate;
+import com.figaf.integration.tpm.entity.TpmObjectMetadata;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
 public class AgreementTemplateClientTest {
-    private static final String EXPECTED_NOT_NULL_MSG = "Expected agreement templates not to be null.";
+    private static final String METADATA_NOT_NULL_MSG = "Actual agreementTemplatesResponse metadata not to be null.";
 
     private static AgreementTemplateClient agreementTemplateClient;
 
@@ -29,12 +29,12 @@ public class AgreementTemplateClientTest {
 
     @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
     @ArgumentsSource(AgentTestDataProvider.class)
-    void test_getAllAgreementTemplate(AgentTestData agentTestData) {
-        log.debug("#test_getAll: agentTestData={}", agentTestData);
+    void test_getAllMetadata(AgentTestData agentTestData) {
+        log.debug("#test_getAllMetadata: agentTestData={}", agentTestData);
         RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
 
-        List<AgreementTemplate> agreementTemplates = agreementTemplateClient.getAll(requestContext);
+        List<TpmObjectMetadata> agreementTemplates = agreementTemplateClient.getAllMetadata(requestContext);
 
-        assertThat(agreementTemplates).as(EXPECTED_NOT_NULL_MSG).isNotNull();
+        assertThat(agreementTemplates).as(METADATA_NOT_NULL_MSG).isNotNull();
     }
 }

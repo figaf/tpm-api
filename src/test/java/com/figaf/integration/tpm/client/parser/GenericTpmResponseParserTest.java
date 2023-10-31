@@ -1,8 +1,8 @@
 package com.figaf.integration.tpm.client.parser;
 
 import com.figaf.integration.tpm.entity.AdministrativeData;
-import com.figaf.integration.tpm.entity.BaseTpmObject;
-import com.figaf.integration.tpm.entity.company.CompanyProfile;
+import com.figaf.integration.tpm.entity.TpmObjectMetadata;
+import com.figaf.integration.tpm.enumtypes.TpmObjectType;
 import com.figaf.integration.tpm.parser.GenericTpmResponseParser;
 import org.junit.jupiter.api.Test;
 
@@ -31,12 +31,12 @@ public class GenericTpmResponseParserTest {
             "}" +
             "}]";
 
-        List<BaseTpmObject> parsedObjects = parseJsonResponse(jsonResponse);
+        List<TpmObjectMetadata> parsedObjects = parseJsonResponse(jsonResponse);
 
         assertNotNull(parsedObjects);
         assertEquals(1, parsedObjects.size());
 
-        BaseTpmObject obj = parsedObjects.get(0);
+        TpmObjectMetadata obj = parsedObjects.get(0);
         assertEquals("1", obj.getId());
         assertEquals("UID1", obj.getUniqueId());
         assertEquals("TestName", obj.getDisplayName());
@@ -52,8 +52,8 @@ public class GenericTpmResponseParserTest {
     }
 
     // it's enough to test only one child of BaseTpmObject because it provides the full coverage of setting BaseTpmObject fields
-    private List<BaseTpmObject> parseJsonResponse(String jsonResponse) throws Exception {
-        GenericTpmResponseParser<BaseTpmObject> parser = new GenericTpmResponseParser<>(CompanyProfile::new);
-        return parser.parseResponse(jsonResponse);
+    private List<TpmObjectMetadata> parseJsonResponse(String jsonResponse) throws Exception {
+        GenericTpmResponseParser parser = new GenericTpmResponseParser();
+        return parser.parseResponse(jsonResponse, TpmObjectType.CLOUD_TRADING_PARTNER);
     }
 }

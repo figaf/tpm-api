@@ -1,5 +1,6 @@
 package com.figaf.integration.tpm.entity;
 
+import com.figaf.integration.tpm.enumtypes.TpmObjectType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,15 +12,15 @@ import java.io.Serializable;
 @Setter
 @NoArgsConstructor
 @ToString
-public abstract class BaseTpmObject implements Serializable {
+public class TpmObjectMetadata implements Serializable {
 
     private String id;
     private String uniqueId;
     private String displayName;
     private String semanticVersion;
     private String artifactStatus;
+    private TpmObjectReference tpmObjectReference;
     private AdministrativeData administrativeData;
     private String jsonPayload;
-
-    public abstract String getType();
+    private TpmObjectType tpmObjectType;
 }
