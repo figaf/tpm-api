@@ -28,11 +28,11 @@ public class GenericTpmResponseParser {
         for (JsonNode node : rootNode) {
             TpmObjectMetadata tpmObject = new TpmObjectMetadata();
 
-            tpmObject.setId(node.path("id").asText());
-            tpmObject.setUniqueId(node.path("uniqueId").asText());
-            tpmObject.setDisplayName(node.path("displayName").asText());
-            tpmObject.setSemanticVersion(node.path("semanticVersion").asText());
-            tpmObject.setArtifactStatus(node.path("artifactStatus").asText());
+            tpmObject.setObjectId(node.path("id").asText());
+            tpmObject.setVersionId(node.path("versionId").asText());
+            tpmObject.setDisplayedName(node.path("displayName").asText());
+            tpmObject.setVersion(node.path("semanticVersion").asText());
+            tpmObject.setStatus(node.path("artifactStatus").asText());
             tpmObject.setTpmObjectType(tpmObjectType);
 
             // Parse AdministrativeData
@@ -51,21 +51,44 @@ public class GenericTpmResponseParser {
             boolean isParentIdNodePresent = !node.path("ParentId").isMissingNode();
 
             if (isCompanyDataNodePresent || isTradingPartnerDataNodePresent || isParentIdNodePresent) {
-                TpmObjectReference tpmObjectReference = new TpmObjectReference();
-                tpmObject.setTpmObjectReference(tpmObjectReference);
-                if (isCompanyDataNodePresent) {
-                    tpmObjectReference.setCompanyProfileId(node.path("CompanyData").path("Id").asText());
-                }
-                if (isTradingPartnerDataNodePresent) {
-                    tpmObjectReference.setTradingPartnerId(node.path("TradingPartnerData").path("Id").asText());
-                }
-                if (isParentIdNodePresent) {
-                    tpmObjectReference.setAgreementTemplateId(node.path("ParentId").asText());
-                }
+                setTpmObjectReferences(
+                    isCompanyDataNodePresent,
+                    isTradingPartnerDataNodePresent,
+                    isParentIdNodePresent,
+                    node,
+                    tpmObject
+                );
             }
             tpmObject.setJsonPayload(node.toString());
             tpmObjects.add(tpmObject);
         }
         return tpmObjects;
+    }
+
+    private void setTpmObjectReferences(
+        boolean isCompanyDataNodePresent,
+        boolean isTradingPartnerDataNodePresent,
+        boolean isParentIdNodePresent,
+        JsonNode node,
+        TpmObjectMetadata tpmObjectMetadata
+    ) {
+        List<TpmObjectReference> tpmObjectReferences = new ArrayList<>();
+        if (isCompanyDataNodePresent) {
+            tpmObjectReferences.add(createTpmObjectReference(node.path("CompanyData").path("Id").asText(), TpmObjectType.CLOUD_COMPANY_PROFILE));
+        }
+        if (isTradingPartnerDataNodePresent) {
+            tpmObjectReferences.add(createTpmObjectReference(node.path("TradingPartnerData").path("Id").asText(), TpmObjectType.CLOUD_TRADING_PARTNER));
+        }
+        if (isParentIdNodePresent) {
+            tpmObjectReferences.add(createTpmObjectReference(node.path("ParentId").asText(), TpmObjectType.CLOUD_AGREEMENT_TEMPLATE));
+        }
+        tpmObjectMetadata.setTpmObjectReferences(tpmObjectReferences);
+    }
+
+    private TpmObjectReference createTpmObjectReference(String id, TpmObjectType tpmObjectType) {
+        TpmObjectReference tpmObjectReference = new TpmObjectReference();
+        tpmObjectReference.setObjectId(id);
+        tpmObjectReference.setTpmObjectType(tpmObjectType);
+        return tpmObjectReference;
     }
 }

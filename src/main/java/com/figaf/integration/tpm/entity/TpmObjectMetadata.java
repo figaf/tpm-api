@@ -7,6 +7,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Getter
 @Setter
@@ -14,13 +15,13 @@ import java.io.Serializable;
 @ToString
 public class TpmObjectMetadata implements Serializable {
 
-    private String id;
-    private String uniqueId;
-    private String displayName;
-    private String semanticVersion;
-    private String artifactStatus;
-    private TpmObjectReference tpmObjectReference;
+    private String objectId;
+    private TpmObjectType tpmObjectType;
+    private String versionId;
+    private String displayedName;
+    private String version;
+    private String status;
+    private List<TpmObjectReference> tpmObjectReferences;
     private AdministrativeData administrativeData;
     private String jsonPayload;
-    private TpmObjectType tpmObjectType;
 }

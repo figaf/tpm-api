@@ -37,11 +37,10 @@ public class GenericTpmResponseParserTest {
         assertEquals(1, parsedObjects.size());
 
         TpmObjectMetadata obj = parsedObjects.get(0);
-        assertEquals("1", obj.getId());
-        assertEquals("UID1", obj.getUniqueId());
-        assertEquals("TestName", obj.getDisplayName());
-        assertEquals("1.0.0", obj.getSemanticVersion());
-        assertEquals("ACTIVE", obj.getArtifactStatus());
+        assertEquals("1", obj.getObjectId());
+        assertEquals("TestName", obj.getDisplayedName());
+        assertEquals("1.0.0", obj.getVersion());
+        assertEquals("ACTIVE", obj.getStatus());
 
         AdministrativeData adminData = obj.getAdministrativeData();
         assertNotNull(adminData);

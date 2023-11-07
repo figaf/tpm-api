@@ -53,7 +53,7 @@ public class TradingPartnerClientTest {
         List<TpmObjectMetadata> tradingPartners = tradingPartnerClient.getAllMetadata(requestContext);
 
         tradingPartners.forEach(tradingPartner -> {
-            TradingPartner tradingPartnerVerboseDto = tradingPartnerClient.getById(tradingPartner.getId(), requestContext);
+            TradingPartner tradingPartnerVerboseDto = tradingPartnerClient.getById(tradingPartner.getObjectId(), requestContext);
             assertThat(tradingPartnerVerboseDto).as(EXPECTED_NOT_NULL_VERBOSE_MSG).isNotNull();
         });
     }
@@ -67,7 +67,7 @@ public class TradingPartnerClientTest {
         List<TpmObjectMetadata> tradingPartners = tradingPartnerClient.getAllMetadata(requestContext);
 
         tradingPartners.forEach(tradingPartner -> {
-            String tradingPartnerRawResponse = tradingPartnerClient.getRawById(tradingPartner.getId(), requestContext);
+            String tradingPartnerRawResponse = tradingPartnerClient.getRawById(tradingPartner.getObjectId(), requestContext);
             assertThat(tradingPartnerRawResponse).as(EXPECTED_NOT_NULL_RAW_MSG).isNotEmpty();
         });
     }

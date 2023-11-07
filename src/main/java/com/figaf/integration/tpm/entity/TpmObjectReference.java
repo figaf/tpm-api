@@ -1,5 +1,6 @@
 package com.figaf.integration.tpm.entity;
 
+import com.figaf.integration.tpm.enumtypes.TpmObjectType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -9,7 +10,6 @@ import lombok.Setter;
 @NoArgsConstructor
 public class TpmObjectReference {
 
-    private String companyProfileId;
-    private String tradingPartnerId;
-    private String agreementTemplateId;
+    private String objectId;
+    private TpmObjectType tpmObjectType;
 }
