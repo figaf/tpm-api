@@ -34,16 +34,20 @@ dependencies {
 
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
-
-    implementation "com.github.figaf:integration-commons:${integrationCommonsVersion}"
-    implementation "org.slf4j:slf4j-api:${slf4jApiVersion}"
-
     testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
     testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+    api "com.github.figaf:integration-commons:${integrationCommonsVersion}"
+    api ('org.slf4j:slf4j-api') {
+        version {
+            strictly "${slf4jApiVersion}"
+        }
+    }
 
     testImplementation "com.github.figaf:integration-commons-test:${integrationCommonsTestVersion}"
     testImplementation "org.assertj:assertj-core:${assertjCoreVersion}"
     testImplementation "org.junit.jupiter:junit-jupiter-api:${junitJupiterEngineVersion}"
+    testImplementation 'ch.qos.logback:logback-classic:1.2.3'
 
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitJupiterEngineVersion}"
 }
