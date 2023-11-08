@@ -47,7 +47,7 @@ dependencies {
     testImplementation "com.github.figaf:integration-commons-test:${integrationCommonsTestVersion}"
     testImplementation "org.assertj:assertj-core:${assertjCoreVersion}"
     testImplementation "org.junit.jupiter:junit-jupiter-api:${junitJupiterEngineVersion}"
-    testImplementation 'ch.qos.logback:logback-classic:1.2.3'
+    testImplementation "ch.qos.logback:logback-classic:${logbackClassicVersion}"
 
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitJupiterEngineVersion}"
 }
