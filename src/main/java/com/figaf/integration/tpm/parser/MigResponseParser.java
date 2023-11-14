@@ -48,7 +48,6 @@ public class MigResponseParser {
                 adminData.setModifiedBy(node.path("ModifiedBy").asText());
                 metadata.setAdministrativeData(adminData);
 
-                metadata.setJsonPayload(rootElement.toString());
                 tpmObjects.add(metadata);
             }
         }
