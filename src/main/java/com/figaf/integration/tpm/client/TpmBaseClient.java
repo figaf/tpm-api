@@ -8,8 +8,9 @@ import com.figaf.integration.common.factory.HttpClientsFactory;
  */
 public abstract class TpmBaseClient extends BaseClient {
 
+    protected static final String MIG_RESOURCE = "/api/1.0/migs";
+    protected static final String MIG_RESOURCE_BY_ID = "/api/1.0/migs/%s";
     protected static final String COMPANY_PROFILE_RESOURCE = "/itspaces/tpm/company";
-
     protected static final String TRADING_PARTNER_RESOURCE = "/itspaces/tpm/tradingpartners";
     protected static final String TRADING_PARTNER_RESOURCE_BY_ID = "/itspaces/tpm/tradingpartners/%s";
     protected static final String AGREEMENT_TEMPLATE_RESOURCE = "/itspaces/tpm/agreementtemplates";
