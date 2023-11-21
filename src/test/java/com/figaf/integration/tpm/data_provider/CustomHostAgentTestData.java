@@ -9,10 +9,10 @@ import lombok.Setter;
 @Setter
 public class CustomHostAgentTestData extends AgentTestData {
 
-    private String alternativeHost;
+    private String integrationSuiteHost;
 
-    public CustomHostAgentTestData(AgentTestData originalTestData, String alternativeHost) {
+    public CustomHostAgentTestData(AgentTestData originalTestData, String integrationSuiteHost) {
         super(originalTestData.getTitle(), originalTestData.getPlatform(), originalTestData.getCloudPlatformType(), originalTestData.getConnectionProperties());
-        this.alternativeHost = alternativeHost;
+        this.integrationSuiteHost = integrationSuiteHost;
     }
 }

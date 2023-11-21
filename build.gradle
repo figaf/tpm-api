@@ -69,7 +69,6 @@ test {
 
         systemProperty propertyName, propertyValue
     }
-    systemProperty 'agentTestData.alternativeHost', project.property('agent-test-data.alternativeHost')
 
     testLogging {
         showStandardStreams = true
