@@ -6,6 +6,7 @@ import com.figaf.integration.tpm.entity.AdministrativeData;
 import com.figaf.integration.tpm.entity.TpmObjectMetadata;
 import com.figaf.integration.tpm.entity.TpmObjectReference;
 import com.figaf.integration.tpm.enumtypes.TpmObjectType;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -45,44 +46,70 @@ public class GenericTpmResponseParser {
                 administrativeData.setModifiedBy(administrativeDataNode.path("modifiedBy").asText());
                 tpmObject.setAdministrativeData(administrativeData);
             }
+            setTpmObjectReferences(
+                node,
+                tpmObject
+            );
 
-            boolean isCompanyDataNodePresent = !node.path("CompanyData").path("Id").isMissingNode();
-            boolean isTradingPartnerDataNodePresent = !node.path("TradingPartnerData").path("Id").isMissingNode();
-            boolean isParentIdNodePresent = !node.path("ParentId").isMissingNode();
-
-            if (isCompanyDataNodePresent || isTradingPartnerDataNodePresent || isParentIdNodePresent) {
-                setTpmObjectReferences(
-                    isCompanyDataNodePresent,
-                    isTradingPartnerDataNodePresent,
-                    isParentIdNodePresent,
-                    node,
-                    tpmObject
-                );
-            }
             tpmObject.setJsonPayload(node.toString());
             tpmObjects.add(tpmObject);
         }
         return tpmObjects;
     }
 
-    private void setTpmObjectReferences(
-        boolean isCompanyDataNodePresent,
-        boolean isTradingPartnerDataNodePresent,
-        boolean isParentIdNodePresent,
-        JsonNode node,
-        TpmObjectMetadata tpmObjectMetadata
-    ) {
+    private void setTpmObjectReferences(JsonNode node, TpmObjectMetadata tpmObjectMetadata) {
         List<TpmObjectReference> tpmObjectReferences = new ArrayList<>();
+        boolean isCompanyDataNodePresent = !node.path("CompanyData").path("Id").isMissingNode();
         if (isCompanyDataNodePresent) {
             tpmObjectReferences.add(createTpmObjectReference(node.path("CompanyData").path("Id").asText(), TpmObjectType.CLOUD_COMPANY_PROFILE));
         }
+        boolean isTradingPartnerDataNodePresent = !node.path("TradingPartnerData").path("Id").isMissingNode();
+
         if (isTradingPartnerDataNodePresent) {
             tpmObjectReferences.add(createTpmObjectReference(node.path("TradingPartnerData").path("Id").asText(), TpmObjectType.CLOUD_TRADING_PARTNER));
         }
+        boolean isParentIdNodePresent = !node.path("ParentId").isMissingNode();
         if (isParentIdNodePresent) {
             tpmObjectReferences.add(createTpmObjectReference(node.path("ParentId").asText(), TpmObjectType.CLOUD_AGREEMENT_TEMPLATE));
         }
+        collectMigReferences(node, tpmObjectReferences);
         tpmObjectMetadata.setTpmObjectReferences(tpmObjectReferences);
+    }
+
+    private void collectMigReferences(JsonNode rootNode, List<TpmObjectReference> tpmObjectReferences) {
+        JsonNode businessTransactionsNode = rootNode.path("BusinessTransactions");
+        if (businessTransactionsNode.isMissingNode() || !businessTransactionsNode.isArray()) {
+            return;
+        }
+
+        for (JsonNode businessTransaction : businessTransactionsNode) {
+            collectMigsFromActivities(businessTransaction, tpmObjectReferences);
+        }
+    }
+
+    private void collectMigsFromActivities(JsonNode businessTransaction, List<TpmObjectReference> tpmObjectReferences) {
+        JsonNode activitiesNode = businessTransaction.path("BusinessTransactionActivities");
+        for (JsonNode activity : activitiesNode) {
+            collectMigsFromChoreography(activity, tpmObjectReferences);
+        }
+    }
+
+    private void collectMigsFromChoreography(JsonNode activity, List<TpmObjectReference> tpmObjectReferences) {
+        JsonNode choreographyPropertiesNode = activity.path("ChoreographyProperties");
+        for (JsonNode choreographyProperty : choreographyPropertiesNode) {
+            collectMigsFromProperties(choreographyProperty, tpmObjectReferences);
+        }
+    }
+
+    private void collectMigsFromProperties(JsonNode choreographyProperty, List<TpmObjectReference> tpmObjectReferences) {
+        JsonNode propertiesNode = choreographyProperty.path("Properties");
+        for (JsonNode property : propertiesNode) {
+            String key = property.path("key").asText();
+            String value = property.path("value").asText();
+            if ("MIGGUID".equals(key) && !value.isEmpty()) {
+                tpmObjectReferences.add(createTpmObjectReference(value, TpmObjectType.CLOUD_MIG));
+            }
+        }
     }
 
     private TpmObjectReference createTpmObjectReference(String id, TpmObjectType tpmObjectType) {
