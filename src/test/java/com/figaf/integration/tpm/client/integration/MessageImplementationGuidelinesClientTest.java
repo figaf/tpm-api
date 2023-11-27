@@ -55,8 +55,17 @@ public class MessageImplementationGuidelinesClientTest {
 
         //its too heavy test to trigger getRawById for all migs
         TpmObjectMetadata migFirstMetadata = migs.get(0);
-        String tradingPartnerRawResponse = messageImplementationGuidelinesClient.getRawById(migFirstMetadata.getVersionId(), requestContext);
-        assertThat(tradingPartnerRawResponse).as(EXPECTED_NOT_NULL_RAW_MSG).isNotEmpty();
+        String migRawResponse = messageImplementationGuidelinesClient.getRawById(migFirstMetadata.getVersionId(), requestContext);
+        assertThat(migRawResponse).as(EXPECTED_NOT_NULL_RAW_MSG).isNotEmpty();
+    }
 
+    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
+    @ArgumentsSource(AgentTestDataProvider.class)
+    void test_updateMig(CustomHostAgentTestData customHostAgentTestData) {
+        log.debug("#test_updateMig: customHostAgentTestData={}", customHostAgentTestData);
+        RequestContext requestContext = customHostAgentTestData.createRequestContext(customHostAgentTestData.getTitle());
+        requestContext.getConnectionProperties().setHost(customHostAgentTestData.getIntegrationSuiteHost());
+
+        messageImplementationGuidelinesClient.editMig(requestContext, "a22e8f3a44254bc084fba9b0cd5c7fb1");
     }
 }

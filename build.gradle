@@ -18,7 +18,7 @@ repositories {
 
 ext {
     lombokVersion = '1.18.8'
-    integrationCommonsVersion = '1.24'
+    integrationCommonsVersion = '1.26'
     slf4jApiVersion = '1.7.25'
     httpmimeVersion = '4.5.3'
     gsonVersion = '2.10'
