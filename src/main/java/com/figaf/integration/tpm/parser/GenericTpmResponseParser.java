@@ -103,11 +103,24 @@ public class GenericTpmResponseParser {
 
     private void collectMigsFromProperties(JsonNode choreographyProperty, List<TpmObjectReference> tpmObjectReferences) {
         JsonNode propertiesNode = choreographyProperty.path("Properties");
+        String migGuid = "";
+        String migVersionId = "";
         for (JsonNode property : propertiesNode) {
             String key = property.path("key").asText();
             String value = property.path("value").asText();
-            if ("MIGGUID".equals(key) && !value.isEmpty()) {
-                tpmObjectReferences.add(createTpmObjectReference(value, TpmObjectType.CLOUD_MIG));
+
+            if ("MIGGUID".equals(key)) {
+                migGuid = value;
+            } else if ("MIGVersionId".equals(key)) {
+                migVersionId = value;
+            }
+
+            // If both MIGGUID and MIGVersionId have been found, create the object.
+            if (!migGuid.isEmpty() && !migVersionId.isEmpty()) {
+                TpmObjectReference objectRef = createTpmObjectReference(migGuid, migVersionId, TpmObjectType.CLOUD_MIG);
+                tpmObjectReferences.add(objectRef);
+                migGuid = "";
+                migVersionId = "";
             }
         }
     }
@@ -115,6 +128,14 @@ public class GenericTpmResponseParser {
     private TpmObjectReference createTpmObjectReference(String id, TpmObjectType tpmObjectType) {
         TpmObjectReference tpmObjectReference = new TpmObjectReference();
         tpmObjectReference.setObjectId(id);
+        tpmObjectReference.setTpmObjectType(tpmObjectType);
+        return tpmObjectReference;
+    }
+
+    private TpmObjectReference createTpmObjectReference(String id, String versionId, TpmObjectType tpmObjectType) {
+        TpmObjectReference tpmObjectReference = new TpmObjectReference();
+        tpmObjectReference.setObjectId(id);
+        tpmObjectReference.setVersionId(versionId);
         tpmObjectReference.setTpmObjectType(tpmObjectType);
         return tpmObjectReference;
     }
