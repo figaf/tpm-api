@@ -12,4 +12,6 @@ public class TpmObjectReference {
 
     private String objectId;
     private TpmObjectType tpmObjectType;
+    private String objectVersion;
+    private String objectVersionId;
 }
