@@ -6,7 +6,6 @@ import com.figaf.integration.tpm.entity.AdministrativeData;
 import com.figaf.integration.tpm.entity.TpmObjectMetadata;
 import com.figaf.integration.tpm.entity.TpmObjectReference;
 import com.figaf.integration.tpm.enumtypes.TpmObjectType;
-import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -102,11 +101,32 @@ public class GenericTpmResponseParser {
     }
     private void collectMigsFromProperties(JsonNode choreographyProperty, List<TpmObjectReference> tpmObjectReferences) {
         JsonNode propertiesNode = choreographyProperty.path("Properties");
+        String migGuid = "";
+        String objectVersion = "";
+        String objectVersionId = "";
         for (JsonNode property : propertiesNode) {
             String key = property.path("key").asText();
             String value = property.path("value").asText();
-            if ("MIGGUID".equals(key) && !value.isEmpty()) {
-                tpmObjectReferences.add(createTpmObjectReference(value, TpmObjectType.CLOUD_MIG));
+
+            switch (key) {
+                case "MIGGUID":
+                    migGuid = value;
+                    break;
+                case "MIGVersionId":
+                    objectVersion = value;
+                    break;
+                case "ObjectGUID":
+                    objectVersionId = value;
+                    break;
+            }
+
+            // If  MIGGUID, ObjectGUID and MIGVersionId have been found, create the object.
+            if (!migGuid.isEmpty() && !objectVersion.isEmpty() && !objectVersionId.isEmpty()) {
+                TpmObjectReference objectRef = createTpmObjectReference(migGuid, objectVersion, objectVersionId, TpmObjectType.CLOUD_MIG);
+                tpmObjectReferences.add(objectRef);
+                migGuid = "";
+                objectVersion = "";
+                objectVersionId = "";
             }
         }
     }
@@ -114,6 +134,15 @@ public class GenericTpmResponseParser {
     private TpmObjectReference createTpmObjectReference(String id, TpmObjectType tpmObjectType) {
         TpmObjectReference tpmObjectReference = new TpmObjectReference();
         tpmObjectReference.setObjectId(id);
+        tpmObjectReference.setTpmObjectType(tpmObjectType);
+        return tpmObjectReference;
+    }
+
+    private TpmObjectReference createTpmObjectReference(String id, String objectVersion, String objectVersionId, TpmObjectType tpmObjectType) {
+        TpmObjectReference tpmObjectReference = new TpmObjectReference();
+        tpmObjectReference.setObjectId(id);
+        tpmObjectReference.setObjectVersion(objectVersion);
+        tpmObjectReference.setObjectVersionId(objectVersionId);
         tpmObjectReference.setTpmObjectType(tpmObjectType);
         return tpmObjectReference;
     }
