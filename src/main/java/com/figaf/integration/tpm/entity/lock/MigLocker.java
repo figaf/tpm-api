@@ -8,15 +8,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.springframework.http.*;
-import org.springframework.util.Assert;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
-import java.util.function.BiFunction;
 
 import static com.figaf.integration.tpm.client.TpmBaseClient.MIG_RESOURCE_BY_ID;
+import static java.lang.String.format;
+import static org.springframework.http.HttpStatus.OK;
 
 
 @Slf4j
@@ -24,14 +24,15 @@ public class MigLocker {
 
     public static void lockMigObject(
         RequestContext requestContext,
-        String migVersionId,
-        BiFunction<RequestContext, String, String> requestContextStringStringBiFunction
+        String userApiCsrfToken,
+        RestTemplate restTemplate,
+        String migVersionId
     ) throws MigEntityIsLockedException {
         try {
-            lockOrUnlockMigObject(requestContext, migVersionId, "LOCK", true, false, requestContextStringStringBiFunction);
+            lockOrUnlockMigObject(requestContext.getConnectionProperties(), "LOCK", false, userApiCsrfToken, restTemplate, format(MIG_RESOURCE_BY_ID, migVersionId));
         } catch (HttpClientErrorException ex) {
             if (HttpStatus.LOCKED.equals(ex.getStatusCode())) {
-                LockInfo lockInfo = MigLocker.requestLockInfoForCpiObject(requestContext, migVersionId, requestContextStringStringBiFunction);
+                LockInfo lockInfo = MigLocker.requestLockInfoForCpiObject(requestContext, userApiCsrfToken, restTemplate, migVersionId);
                 if (lockInfo.isLocked() && !lockInfo.isCurrentUserHasLock()) {
                     throw new MigEntityIsLockedException(String.format("Locked by another user: %s", lockInfo.getLockedBy()), lockInfo, migVersionId);
                 }
@@ -46,43 +47,54 @@ public class MigLocker {
     }
 
     private static String lockOrUnlockMigObject(
-        RequestContext requestContext,
-        String migVersionId,
+        ConnectionProperties connectionProperties,
         String webdav,
-        boolean forceLock,
         boolean lockinfo,
-        BiFunction<RequestContext, String, String> requestContextStringStringBiFunction
+        String userApiCsrfToken,
+        RestTemplate restTemplate,
+        String urlOfLockOrUnlockCpiObject
     ) {
-        log.debug("#lockOrUnlockPackage(RequestContext requestContext, String migVersionId, String webdav, boolean forceLock, boolean lockinfo): " +
-            "{}, {}, {}, {}, {}", requestContext.getConnectionProperties(), migVersionId, webdav, forceLock, lockinfo);
 
-        Assert.notNull(requestContext.getConnectionProperties(), "connectionProperties must be not null!");
-        Assert.notNull(migVersionId, "migId must be not null!");
-
-        StringBuilder uriBuilder = new StringBuilder();
-        String baseUri = String.format(MIG_RESOURCE_BY_ID, migVersionId);
-
-        uriBuilder.append(baseUri);
-
-        if(forceLock){
-            uriBuilder.append("?forcelock=").append(forceLock);
-        }
-        uriBuilder.append("&webdav=").append(webdav);
+        UriComponentsBuilder uriBuilder = UriComponentsBuilder.newInstance()
+            .scheme(connectionProperties.getProtocol())
+            .host(connectionProperties.getHost())
+            .path(urlOfLockOrUnlockCpiObject);
         if (lockinfo) {
-            uriBuilder.append("&lockinfo=true");
+            uriBuilder.queryParam("lockinfo", "true");
         }
-        String finalUri = uriBuilder.toString();
+        uriBuilder.queryParam("webdav", webdav);
 
-        String rawResponse = requestContextStringStringBiFunction.apply(requestContext, finalUri);
-        return rawResponse;
+        if (StringUtils.isNotEmpty(connectionProperties.getPort())) {
+            uriBuilder.port(connectionProperties.getPort());
+        }
+
+        URI lockOrUnlockArtifactUri = uriBuilder.build().toUri();
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add("X-CSRF-Token", userApiCsrfToken);
+
+        HttpEntity<Void> requestEntity = new HttpEntity<>(httpHeaders);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(
+            lockOrUnlockArtifactUri,
+            HttpMethod.PUT,
+            requestEntity,
+            String.class
+        );
+
+        if (!OK.equals(responseEntity.getStatusCode())) {
+            throw new RuntimeException("Couldn't lock or unlock mig object\n" + responseEntity.getBody());
+        }
+
+        return responseEntity.getBody();
     }
 
     private static LockInfo requestLockInfoForCpiObject(
         RequestContext requestContext,
-        String migVersionId,
-        BiFunction<RequestContext, String, String> requestContextStringStringBiFunction
+        String userApiCsrfToken,
+        RestTemplate restTemplate,
+        String migVersionId
     ) {
-        String lockInfoString = lockOrUnlockMigObject(requestContext, migVersionId, "LOCK", true, true, requestContextStringStringBiFunction);
+        String lockInfoString = lockOrUnlockMigObject(requestContext.getConnectionProperties(), "LOCK", true, userApiCsrfToken, restTemplate, format(MIG_RESOURCE_BY_ID, migVersionId));
         return getLockInfo(lockInfoString);
     }
 
@@ -97,5 +109,14 @@ public class MigLocker {
         lockInfo.setLockedBy(jsonObject.optString("lockedBy"));
         lockInfo.setLockedTime(jsonObject.optString("lockedTime"));
         return lockInfo;
+    }
+
+    public static void unlockMig(
+        RequestContext requestContext,
+        String userApiCsrfToken,
+        RestTemplate restTemplate,
+        String migVersionId
+    ) {
+        lockOrUnlockMigObject(requestContext.getConnectionProperties(), "UNLOCK", false, userApiCsrfToken, restTemplate, format(MIG_RESOURCE_BY_ID, migVersionId));
     }
 }

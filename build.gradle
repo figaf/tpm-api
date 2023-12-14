@@ -8,7 +8,7 @@ configurations.all {
 }
 
 group = 'com.github.figaf'
-version = '1.2'
+version = '1.3'
 
 repositories {
     mavenLocal()
@@ -18,7 +18,7 @@ repositories {
 
 ext {
     lombokVersion = '1.18.8'
-    integrationCommonsVersion = '1.26'
+    integrationCommonsVersion = '1.25'
     slf4jApiVersion = '1.7.25'
     httpmimeVersion = '4.5.3'
     gsonVersion = '2.10'
@@ -28,6 +28,7 @@ ext {
     mockitoJunitJupiterVersion = '3.6.0'
     logbackClassicVersion = '1.2.3'
     junitJupiterEngineVersion = '5.7.0'
+    snakeyaml = '2.2'
 }
 
 dependencies {
@@ -38,7 +39,7 @@ dependencies {
     testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
     api "com.github.figaf:integration-commons:${integrationCommonsVersion}"
-    api ('org.slf4j:slf4j-api') {
+    api('org.slf4j:slf4j-api') {
         version {
             strictly "${slf4jApiVersion}"
         }
@@ -48,6 +49,7 @@ dependencies {
     testImplementation "org.assertj:assertj-core:${assertjCoreVersion}"
     testImplementation "org.junit.jupiter:junit-jupiter-api:${junitJupiterEngineVersion}"
     testImplementation "ch.qos.logback:logback-classic:${logbackClassicVersion}"
+    testImplementation "org.yaml:snakeyaml:${snakeyaml}"
 
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitJupiterEngineVersion}"
 }
@@ -64,7 +66,7 @@ publishing {
 test {
     useJUnitPlatform()
 
-    project.properties.each {propertyName, propertyValue ->
+    project.properties.each { propertyName, propertyValue ->
         if (!propertyName.startsWith("agent-test-data")) return
 
         systemProperty propertyName, propertyValue
