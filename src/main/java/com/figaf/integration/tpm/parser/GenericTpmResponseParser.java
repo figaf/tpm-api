@@ -99,7 +99,6 @@ public class GenericTpmResponseParser {
             collectMigsFromProperties(choreographyProperty, tpmObjectReferences);
         }
     }
-
     private void collectMigsFromProperties(JsonNode choreographyProperty, List<TpmObjectReference> tpmObjectReferences) {
         JsonNode propertiesNode = choreographyProperty.path("Properties");
         String migGuid = "";
