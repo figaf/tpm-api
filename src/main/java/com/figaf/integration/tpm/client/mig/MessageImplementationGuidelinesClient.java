@@ -54,6 +54,7 @@ public class MessageImplementationGuidelinesClient extends TpmBaseClient {
         );
     }
 
+    //TODO see comments on method createDraftWithAllSegmentsAndFieldsSelected
     public void saveAllSegmentsAndFields(RequestContext requestContext, String migVersionId) {
         log.debug("#saveAllSegmentsAndFields: requestContext={}, migVersionId={}", requestContext, migVersionId);
         executeMethod(
@@ -96,6 +97,10 @@ public class MessageImplementationGuidelinesClient extends TpmBaseClient {
         );
     }
 
+    //TODO extract 2 operations from implementation of that API:
+    // 1. Draft creation
+    // 2. Draft update
+    // Also review a need to have payload transformation logic at API client level, like all segments selection
     public DraftCreationResponse createDraftWithAllSegmentsAndFieldsSelected(RequestContext requestContext, String name, String sourceMigVersionId) {
         log.debug("#createDraftWithAllSegmentsAndFieldsSelected: requestContext={}, name={}, sourceMigVersionId={}", requestContext, name, sourceMigVersionId);
         return executeMethod(
