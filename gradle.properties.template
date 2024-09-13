@@ -1,3 +1,8 @@
+enableSnapshots=false
+snapshotsRepoUrl=http://localhost:8097/nexus
+snapshotsRepoUsername=user
+snapshotsRepoPassword=1234
+
 agent-test-data.cpi-cf-integration-suite.host=
 agent-test-data.cpi-cf-integration-suite.username=
 agent-test-data.cpi-cf-integration-suite.password=
