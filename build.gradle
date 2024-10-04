@@ -3,32 +3,35 @@ plugins {
     id 'maven-publish'
 }
 
-configurations.all {
-    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-}
-
 group = 'com.github.figaf'
-version = '1.3'
+version = '2.0-SNAPSHOT'
+
+ext {
+    enableSnapshotsForDependencyResolutionAndPublishing = project.findProperty('enableSnapshots') ?: 'false'
+    snapshotsRepoUrl = project.findProperty('snapshotsRepoUrl') ?: ''
+    snapshotsRepoUsername = project.findProperty('snapshotsRepoUsername') ?: ''
+    snapshotsRepoPassword = project.findProperty('snapshotsRepoPassword') ?: ''
+
+    lombokVersion = '1.18.34'
+    integrationCommonsVersion = '2.0-SNAPSHOT'
+    integrationCommonsTestVersion = '2.0-SNAPSHOT'
+    snakeyamlVersion = '2.2'
+}
 
 repositories {
     mavenLocal()
     mavenCentral()
+    if (enableSnapshotsForDependencyResolutionAndPublishing == 'true') {
+        maven {
+            url "$snapshotsRepoUrl/content/groups/public/"
+            allowInsecureProtocol true
+            credentials {
+                username "$snapshotsRepoUsername"
+                password "$snapshotsRepoPassword"
+            }
+        }
+    }
     maven { url "https://jitpack.io" }
-}
-
-ext {
-    lombokVersion = '1.18.8'
-    integrationCommonsVersion = '1.25'
-    slf4jApiVersion = '1.7.25'
-    httpmimeVersion = '4.5.3'
-    gsonVersion = '2.10'
-    integrationCommonsTestVersion = '1.4'
-    assertjCoreVersion = '3.18.0'
-    mockitoCoreVersion = '3.6.0'
-    mockitoJunitJupiterVersion = '3.6.0'
-    logbackClassicVersion = '1.2.3'
-    junitJupiterEngineVersion = '5.7.0'
-    snakeyaml = '2.2'
 }
 
 dependencies {
@@ -39,28 +42,13 @@ dependencies {
     testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
     api "com.github.figaf:integration-commons:${integrationCommonsVersion}"
-    api('org.slf4j:slf4j-api') {
-        version {
-            strictly "${slf4jApiVersion}"
-        }
-    }
 
     testImplementation "com.github.figaf:integration-commons-test:${integrationCommonsTestVersion}"
-    testImplementation "org.assertj:assertj-core:${assertjCoreVersion}"
-    testImplementation "org.junit.jupiter:junit-jupiter-api:${junitJupiterEngineVersion}"
-    testImplementation "ch.qos.logback:logback-classic:${logbackClassicVersion}"
-    testImplementation "org.yaml:snakeyaml:${snakeyaml}"
-
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitJupiterEngineVersion}"
+    testImplementation "org.yaml:snakeyaml:${snakeyamlVersion}"
 }
 
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-        }
-    }
+java {
+    withSourcesJar()
 }
 
 test {
@@ -78,4 +66,41 @@ test {
     }
 
     maxHeapSize = "2G"
+}
+
+configurations.configureEach {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+
+    repositories {
+        maven {
+            def snapshotsRepoUrl = "$snapshotsRepoUrl/content/repositories/snapshots"
+            url snapshotsRepoUrl
+            allowInsecureProtocol true
+            credentials {
+                username snapshotsRepoUsername
+                password snapshotsRepoPassword
+            }
+        }
+    }
+}
+
+tasks.withType(PublishToMavenRepository).configureEach {
+    doFirst {
+        if (enableSnapshotsForDependencyResolutionAndPublishing != 'true') {
+            throw new GradleException("It's not possible to perform publishing because property 'enableSnapshots' " +
+                "is not configured or set to 'false'")
+        }
+        // Prevent release publishing
+        if (!version.endsWith("-SNAPSHOT")) {
+            throw new GradleException("Release publishing is not allowed, it's done by JitPack")
+        }
+    }
 }
