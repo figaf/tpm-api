@@ -14,9 +14,9 @@ public abstract class TpmBaseClient extends BaseClient {
     protected static final String COMPANY_PROFILE_RESOURCE = "/itspaces/tpm/company";
     protected static final String TRADING_PARTNER_RESOURCE = "/itspaces/tpm/tradingpartners";
     protected static final String TRADING_PARTNER_RESOURCE_BY_ID = "/itspaces/tpm/tradingpartners/%s";
-    protected static final String AGREEMENT_TEMPLATE_RESOURCE = "/itspaces/tpm/agreementtemplates";
+    protected static final String AGREEMENT_TEMPLATE_RESOURCE = "/itspaces/tpm/api/2.0/agreementtemplates";
     public static final String MIG_DELETE_DRAFT_RESOURCE = "/api/1.0/migs/%s/migVersions/%s";
-    protected static final String AGREEMENT_RESOURCE = "/itspaces/tpm/tradingpartneragreements";
+    protected static final String AGREEMENT_RESOURCE = "/itspaces/tpm/api/2.0/tradingpartneragreements";
 
     public TpmBaseClient(HttpClientsFactory httpClientsFactory) {
         super(httpClientsFactory);
