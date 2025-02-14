@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'com.github.figaf'
-version = '2.1-IRT-4861-SNAPSHOT'
+version = '2.1'
 
 ext {
     enableSnapshotsForDependencyResolutionAndPublishing = project.findProperty('enableSnapshots') ?: 'false'
@@ -13,8 +13,8 @@ ext {
     snapshotsRepoPassword = project.findProperty('snapshotsRepoPassword') ?: ''
 
     lombokVersion = '1.18.34'
-    integrationCommonsVersion = '2.0'
-    integrationCommonsTestVersion = '2.0'
+    integrationCommonsVersion = '2.4'
+    integrationCommonsTestVersion = '2.1'
     snakeyamlVersion = '2.2'
 }
 
