@@ -23,5 +23,5 @@ public class TpmObjectMetadata implements Serializable {
     private String status;
     private List<TpmObjectReference> tpmObjectReferences;
     private AdministrativeData administrativeData;
-    private String jsonPayload;
+    private String payload;
 }
