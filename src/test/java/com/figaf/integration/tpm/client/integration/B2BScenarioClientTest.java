@@ -39,7 +39,7 @@ class B2BScenarioClientTest {
 
         List<B2BScenarioMetadata> b2BScenarios = new ArrayList<>();
         for (TpmObjectMetadata agreement : agreements) {
-            b2BScenarios.addAll(b2BScenarioClient.getB2BScenariosByAgreementId(requestContext, agreement.getObjectId()));
+            b2BScenarios.addAll(b2BScenarioClient.getB2BScenariosByAgreementId(requestContext, agreement));
         }
 
         assertThat(b2BScenarios).isNotEmpty();
