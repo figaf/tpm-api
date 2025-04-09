@@ -12,7 +12,7 @@ public class CustomHostAgentTestData extends AgentTestData {
     private String integrationSuiteHost;
 
     public CustomHostAgentTestData(AgentTestData originalTestData, String integrationSuiteHost) {
-        super(originalTestData.getTitle(), originalTestData.getPlatform(), originalTestData.getCloudPlatformType(), originalTestData.getConnectionProperties());
+        super(originalTestData.getTitle(), originalTestData.getPlatform(), originalTestData.getCloudPlatformType(), originalTestData.getConnectionProperties(), originalTestData.getLoginPageUrl(), originalTestData.getSsoUrl(), originalTestData.getWebApiAccessMode(), originalTestData.getSamlUrl(), originalTestData.getIdpName(), originalTestData.getIdpApiClientId(), originalTestData.getIdpApiClientSecret(), originalTestData.getClientId(), originalTestData.getClientSecret(), originalTestData.getTokenUrl(), originalTestData.getAuthenticationType(), originalTestData.getCertificatePath(), originalTestData.getCertificatePassword());
         this.integrationSuiteHost = integrationSuiteHost;
     }
 }

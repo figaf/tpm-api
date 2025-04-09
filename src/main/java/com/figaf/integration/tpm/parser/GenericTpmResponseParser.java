@@ -35,25 +35,28 @@ public class GenericTpmResponseParser {
             tpmObject.setStatus(node.path("artifactStatus").asText());
             tpmObject.setTpmObjectType(tpmObjectType);
 
-            // Parse AdministrativeData
-            JsonNode administrativeDataNode = node.path("administrativeData");
-            if (!administrativeDataNode.isMissingNode()) {
-                AdministrativeData administrativeData = new AdministrativeData();
-                administrativeData.setCreatedAt(new Date(administrativeDataNode.path("createdAt").asLong()));
-                administrativeData.setCreatedBy(administrativeDataNode.path("createdBy").asText());
-                administrativeData.setModifiedAt(new Date(administrativeDataNode.path("modifiedAt").asLong()));
-                administrativeData.setModifiedBy(administrativeDataNode.path("modifiedBy").asText());
-                tpmObject.setAdministrativeData(administrativeData);
-            }
+            initAdministrativeData(tpmObject, node);
             setTpmObjectReferences(
                 node,
                 tpmObject
             );
 
-            tpmObject.setJsonPayload(node.toString());
+            tpmObject.setPayload(node.toString());
             tpmObjects.add(tpmObject);
         }
         return tpmObjects;
+    }
+
+    protected void initAdministrativeData(TpmObjectMetadata tpmObject, JsonNode node) {
+        JsonNode administrativeDataNode = node.path("administrativeData");
+        if (!administrativeDataNode.isMissingNode()) {
+            AdministrativeData administrativeData = new AdministrativeData();
+            administrativeData.setCreatedAt(new Date(administrativeDataNode.path("createdAt").asLong()));
+            administrativeData.setCreatedBy(administrativeDataNode.path("createdBy").asText());
+            administrativeData.setModifiedAt(new Date(administrativeDataNode.path("modifiedAt").asLong()));
+            administrativeData.setModifiedBy(administrativeDataNode.path("modifiedBy").asText());
+            tpmObject.setAdministrativeData(administrativeData);
+        }
     }
 
     private void setTpmObjectReferences(JsonNode node, TpmObjectMetadata tpmObjectMetadata) {
@@ -138,7 +141,7 @@ public class GenericTpmResponseParser {
         return tpmObjectReference;
     }
 
-    private TpmObjectReference createTpmObjectReference(String id, String objectVersion, String objectVersionId, TpmObjectType tpmObjectType) {
+    protected TpmObjectReference createTpmObjectReference(String id, String objectVersion, String objectVersionId, TpmObjectType tpmObjectType) {
         TpmObjectReference tpmObjectReference = new TpmObjectReference();
         tpmObjectReference.setObjectId(id);
         tpmObjectReference.setObjectVersion(objectVersion);
