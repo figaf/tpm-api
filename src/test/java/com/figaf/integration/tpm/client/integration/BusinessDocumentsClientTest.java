@@ -5,11 +5,13 @@ import com.figaf.integration.common.factory.HttpClientsFactory;
 import com.figaf.integration.tpm.client.b2bscenario.BusinessDocumentsClient;
 import com.figaf.integration.tpm.data_provider.AgentTestDataProvider;
 import com.figaf.integration.tpm.data_provider.CustomHostAgentTestData;
+import com.figaf.integration.tpm.entity.ErrorDetails;
 import com.figaf.integration.tpm.entity.Interchange;
 import com.figaf.integration.tpm.entity.InterchangePayloadData;
 import com.figaf.integration.tpm.entity.InterchangeRequest;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
@@ -35,9 +37,11 @@ class BusinessDocumentsClientTest {
         RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
         requestContext.getConnectionProperties().setHost(agentTestData.getIntegrationSuiteHost());
 
-        Date date = DateUtils.addDays(new Date(), -1);
+        Date leftBoundDate = DateUtils.addDays(new Date(), -1);
+        Date rightBoundDate = new Date();
 
-        InterchangeRequest interchangeRequest = new InterchangeRequest();
+        InterchangeRequest interchangeRequest = new InterchangeRequest(leftBoundDate);
+        interchangeRequest.setRightBoundDate(rightBoundDate);
         interchangeRequest.setOverallStatus("COMPLETED");
         interchangeRequest.setAgreedSenderIdentiferAtSenderSide("GIRAFT");
         interchangeRequest.setAgreedSenderIdentiferQualifierAtSenderSide("14");
@@ -53,7 +57,7 @@ class BusinessDocumentsClientTest {
         interchangeRequest.setReceiverDocumentStandard("GS1_XML");
         interchangeRequest.setReceiverMessageType("ORDERS.ORDERS05");
 
-        List<Interchange> interchanges = businessDocumentsClient.searchInterchanges(requestContext, date, interchangeRequest);
+        List<Interchange> interchanges = businessDocumentsClient.searchInterchanges(requestContext, interchangeRequest);
         assertThat(interchanges).isNotEmpty();
 
         for (Interchange interchange : interchanges) {
@@ -65,6 +69,16 @@ class BusinessDocumentsClientTest {
             assertThat(interchange.getInterchangePayloadDataList().get(0).getEventType()).isEqualTo("BUSINESSDOCUMENT_CREATE_EVENT");
         }
 
+    }
+
+    @Test
+    void test_getLastErrorDetailsByInterchangeId() {
+        CustomHostAgentTestData agentTestData = AgentTestDataProvider.buildAgentTestDataForCfIntegrationSuite();
+        RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
+        requestContext.getConnectionProperties().setHost(agentTestData.getIntegrationSuiteHost());
+
+        ErrorDetails errorDetails = businessDocumentsClient.getLastErrorDetailsByInterchangeId(requestContext, "4017ab06cafccefc2f0643aaead8e1d4");
+        assertThat(errorDetails).isNotNull();
     }
 
 }
