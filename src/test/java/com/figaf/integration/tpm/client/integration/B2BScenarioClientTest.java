@@ -9,7 +9,6 @@ import com.figaf.integration.tpm.data_provider.AgentTestDataProvider;
 import com.figaf.integration.tpm.entity.B2BScenarioMetadata;
 import com.figaf.integration.tpm.entity.TpmObjectMetadata;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
@@ -33,13 +32,13 @@ class B2BScenarioClientTest {
 
     @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
     @ArgumentsSource(AgentTestDataProvider.class)
-    void test_getB2BScenariosByAgreementId(AgentTestData agentTestData) {
+    void test_getB2BScenariosForAgreement(AgentTestData agentTestData) {
         RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
         List<TpmObjectMetadata> agreements = agreementClient.getAllMetadata(requestContext);
 
         List<B2BScenarioMetadata> b2BScenarios = new ArrayList<>();
         for (TpmObjectMetadata agreement : agreements) {
-            b2BScenarios.addAll(b2BScenarioClient.getB2BScenariosByAgreementId(requestContext, agreement));
+            b2BScenarios.addAll(b2BScenarioClient.getB2BScenariosForAgreement(requestContext, agreement));
         }
 
         assertThat(b2BScenarios).isNotEmpty();
