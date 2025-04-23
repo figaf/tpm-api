@@ -3,6 +3,7 @@ package com.figaf.integration.tpm.client.b2bscenario;
 import com.figaf.integration.common.entity.RequestContext;
 import com.figaf.integration.common.factory.HttpClientsFactory;
 import com.figaf.integration.tpm.client.TpmBaseClient;
+import com.figaf.integration.tpm.entity.ErrorDetails;
 import com.figaf.integration.tpm.entity.Interchange;
 import com.figaf.integration.tpm.entity.InterchangePayloadData;
 import com.figaf.integration.tpm.entity.InterchangeRequest;
@@ -11,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
 import java.util.List;
 
 @Slf4j
@@ -21,10 +21,10 @@ public class BusinessDocumentsClient extends TpmBaseClient {
         super(httpClientsFactory);
     }
 
-    public List<Interchange> searchInterchanges(RequestContext requestContext, Date leftBoundDate, InterchangeRequest interchangeRequest) {
-        log.debug("#searchInterchanges: requestContext = {}, leftBoundDate = {}, interchangeRequest = {}", requestContext, leftBoundDate, interchangeRequest);
-        String filter = interchangeRequest.buildFilter(leftBoundDate);
-        String path = String.format("/odata/api/v1/BusinessDocuments?$orderby=DocumentCreationTime&20desc&$filter=%s&$format=json", URLEncoder.encode(filter, StandardCharsets.UTF_8));
+    public List<Interchange> searchInterchanges(RequestContext requestContext, InterchangeRequest interchangeRequest) {
+        log.debug("#searchInterchanges: requestContext = {}, interchangeRequest = {}", requestContext, interchangeRequest);
+        String filter = interchangeRequest.buildFilter();
+        String path = String.format("/odata/api/v1/BusinessDocuments?$orderby=EndedAt+desc&$filter=%s&$format=json", URLEncoder.encode(filter, StandardCharsets.UTF_8));
         List<Interchange> interchanges = executeGet(
             requestContext,
             path,
@@ -49,6 +49,16 @@ public class BusinessDocumentsClient extends TpmBaseClient {
             requestContext,
             path,
             (response) -> new BusinessDocumentsParser().parsePayloadsResponse(response)
+        );
+    }
+
+    public ErrorDetails getLastErrorDetailsByInterchangeId(RequestContext requestContext, String interchangeId) {
+        log.debug("#getLastErrorDetailsByInterchangeId: requestContext = {}, interchangeId = {}", requestContext, interchangeId);
+        String path = String.format("/odata/api/v1/BusinessDocuments('%s')/LastErrorDetails?$format=json", interchangeId);
+        return executeGet(
+            requestContext,
+            path,
+            (response) -> new BusinessDocumentsParser().parseErrorDetails(response)
         );
     }
 

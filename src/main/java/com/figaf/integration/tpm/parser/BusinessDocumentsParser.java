@@ -1,6 +1,7 @@
 package com.figaf.integration.tpm.parser;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.figaf.integration.tpm.entity.ErrorDetails;
 import com.figaf.integration.tpm.entity.Interchange;
 import com.figaf.integration.tpm.entity.InterchangePayloadData;
 import org.json.JSONArray;
@@ -63,6 +64,15 @@ public class BusinessDocumentsParser {
         );
 
         return interchangePayloadDataList;
+    }
+
+    public ErrorDetails parseErrorDetails(String response) {
+        JSONObject errorDetailsJsonObject = new JSONObject(response).getJSONObject("d");
+        ErrorDetails errorDetails = new ErrorDetails();
+        errorDetails.setId(optString(errorDetailsJsonObject, "Id"));
+        errorDetails.setErrorInformation(optString(errorDetailsJsonObject, "ErrorInformation"));
+        errorDetails.setErrorCategory(optString(errorDetailsJsonObject, "ErrorCategory"));
+        return errorDetails;
     }
 
 }

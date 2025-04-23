@@ -3,11 +3,10 @@ package com.figaf.integration.tpm.entity;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.apache.commons.lang3.time.FastDateFormat;
 
 import java.util.Date;
-import java.util.TimeZone;
 
+import static com.figaf.integration.tpm.utils.TpmUtils.GMT_DATE_FORMAT;
 import static java.lang.String.format;
 
 @Getter
@@ -15,7 +14,8 @@ import static java.lang.String.format;
 @ToString
 public class InterchangeRequest {
 
-    private final static FastDateFormat GMT_DATE_FORMAT = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss.SSS", TimeZone.getTimeZone("GMT"));
+    private final Date leftBoundDate;
+    private Date rightBoundDate;
 
     private String overallStatus;
 
@@ -33,9 +33,16 @@ public class InterchangeRequest {
     private String receiverDocumentStandard;
     private String receiverMessageType;
 
-    public String buildFilter(Date leftBoundDate) {
+    public InterchangeRequest(Date leftBoundDate) {
+        this.leftBoundDate = leftBoundDate;
+    }
+
+    public String buildFilter() {
         StringBuilder builder = new StringBuilder();
-        builder.append(format("DocumentCreationTime ge datetime'%s'", GMT_DATE_FORMAT.format(leftBoundDate)));
+        builder.append(format("StartedAt ge datetime'%s'", GMT_DATE_FORMAT.format(leftBoundDate)));
+        if (rightBoundDate != null) {
+            builder.append(format(" and StartedAt le datetime'%s'", GMT_DATE_FORMAT.format(rightBoundDate)));
+        }
         if (overallStatus != null) {
             builder.append(format(" and OverallStatus eq '%s'", overallStatus));
         }
