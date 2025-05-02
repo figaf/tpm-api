@@ -20,8 +20,6 @@ public class MigResponseParser {
     private static final String MIGS = "Migs";
 
     public List<TpmObjectMetadata> parseJsonToTpmObjectMetadata(String json) throws IOException, TpmException {
-        log.debug("#parseJsonToTpmObjectMetadata: json={}", json);
-
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode rootNode = objectMapper.readTree(json);
         if (!rootNode.isArray()) {

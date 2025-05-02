@@ -19,8 +19,8 @@ public class B2BScenarioClient extends TpmBaseClient {
         super(httpClientsFactory);
     }
 
-    public List<B2BScenarioMetadata> getB2BScenariosByAgreementId(RequestContext requestContext, TpmObjectMetadata agreementMetadata) {
-        log.debug("#getB2BScenariosByAgreementId: requestContext = {}, agreementMetadata = {}", requestContext, agreementMetadata);
+    public List<B2BScenarioMetadata> getB2BScenariosForAgreement(RequestContext requestContext, TpmObjectMetadata agreementMetadata) {
+        log.debug("#getB2BScenariosForAgreement: requestContext = {}, agreementMetadata = {}", requestContext, agreementMetadata);
         return executeGet(
             requestContext,
             format(B2B_SCENARIOS_RESOURCE, agreementMetadata.getObjectId()),
