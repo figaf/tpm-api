@@ -21,7 +21,7 @@ public class GenericTpmResponseParserTest {
             "\"id\": \"1\"," +
             "\"uniqueId\": \"UID1\"," +
             "\"displayName\": \"TestName\"," +
-            "\"semanticVersion\": \"1.0.0\"," +
+            "\"Version\": \"2.0\"," +
             "\"artifactStatus\": \"ACTIVE\"," +
             "\"administrativeData\": {" +
             "\"createdAt\": 1635292800000," +
@@ -39,7 +39,7 @@ public class GenericTpmResponseParserTest {
         TpmObjectMetadata obj = parsedObjects.get(0);
         assertEquals("1", obj.getObjectId());
         assertEquals("TestName", obj.getDisplayedName());
-        assertEquals("1.0.0", obj.getVersion());
+        assertEquals("2.0", obj.getVersion());
         assertEquals("ACTIVE", obj.getStatus());
 
         AdministrativeData adminData = obj.getAdministrativeData();
