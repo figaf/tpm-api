@@ -50,7 +50,6 @@ public class B2BScenarioResponseParser extends GenericTpmResponseParser {
 
         XmlMapper xmlMapper = new XmlMapper();
         String b2BScenarioDetailsId = businessScenarioDetailsNode.path("id").asText();
-        String semanticVersion = businessScenarioDetailsNode.path("semanticVersion").asText();
         String artifactStatus = businessScenarioDetailsNode.path("artifactStatus").asText();
 
         JsonNode businessTransactions = businessScenarioDetailsNode.get("BusinessTransactions");
@@ -59,7 +58,6 @@ public class B2BScenarioResponseParser extends GenericTpmResponseParser {
             B2BScenarioMetadata b2bScenarioMetadata = new B2BScenarioMetadata();
             b2bScenarioMetadata.setObjectId(format("%s|%s", b2BScenarioDetailsId, businessTransactionId));
             b2bScenarioMetadata.setTpmObjectType(TpmObjectType.CLOUD_B2B_SCENARIO);
-            b2bScenarioMetadata.setVersion(semanticVersion);
             b2bScenarioMetadata.setStatus(artifactStatus);
             b2bScenarioMetadata.setAgreementId(agreementMetadata.getObjectId());
 

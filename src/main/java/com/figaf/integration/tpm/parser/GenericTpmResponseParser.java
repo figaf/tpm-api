@@ -29,9 +29,8 @@ public class GenericTpmResponseParser {
             TpmObjectMetadata tpmObject = new TpmObjectMetadata();
 
             tpmObject.setObjectId(node.path("id").asText());
-            tpmObject.setVersionId(node.path("versionId").asText());
             tpmObject.setDisplayedName(node.path("displayName").asText());
-            tpmObject.setVersion(node.path("semanticVersion").asText());
+            tpmObject.setVersion(node.path("Version").asText(null)); //not null only for Agreements and Agreement Templates
             tpmObject.setStatus(node.path("artifactStatus").asText());
             tpmObject.setTpmObjectType(tpmObjectType);
 
