@@ -15,6 +15,9 @@ public class B2BScenarioMetadata extends TpmObjectMetadata {
     private String customMappingIFlowUrl;
     private String preIFlowUrl;
     private String postIFlowUrl;
+    private MigMetadata senderMigMetadata;
+    private MigMetadata receiverMigMetadata;
+    private MagMetadata magMetadata;
     private Direction direction;
     private String initiator;
     private String reactor;
