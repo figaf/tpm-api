@@ -6,8 +6,7 @@ import com.figaf.integration.common.factory.HttpClientsFactory;
 import com.figaf.integration.tpm.client.agreement.AgreementClient;
 import com.figaf.integration.tpm.client.b2bscenario.B2BScenarioClient;
 import com.figaf.integration.tpm.data_provider.AgentTestDataProvider;
-import com.figaf.integration.tpm.entity.B2BScenarioMetadata;
-import com.figaf.integration.tpm.entity.TpmObjectMetadata;
+import com.figaf.integration.tpm.entity.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
@@ -42,5 +41,28 @@ class B2BScenarioClientTest {
         }
 
         assertThat(b2BScenarios).isNotEmpty();
+
+        List<TpmObjectReference> tpmObjectReferences = new ArrayList<>();
+        List<MigMetadata> senderMigMetadataList = new ArrayList<>();
+        List<MigMetadata> receiverMigMetadataList = new ArrayList<>();
+        List<MagMetadata> magMetadataList = new ArrayList<>();
+        for (B2BScenarioMetadata b2BScenario : b2BScenarios) {
+            tpmObjectReferences.addAll(b2BScenario.getTpmObjectReferences());
+            if (b2BScenario.getSenderMigMetadata() != null) {
+                senderMigMetadataList.add(b2BScenario.getSenderMigMetadata());
+            }
+            if (b2BScenario.getReceiverMigMetadata() != null) {
+                receiverMigMetadataList.add(b2BScenario.getReceiverMigMetadata());
+            }
+            if (b2BScenario.getMagMetadata() != null) {
+                magMetadataList.add(b2BScenario.getMagMetadata());
+            }
+        }
+
+
+        assertThat(tpmObjectReferences).isNotEmpty();
+        assertThat(senderMigMetadataList).isNotEmpty();
+        assertThat(receiverMigMetadataList).isNotEmpty();
+        assertThat(magMetadataList).isNotEmpty();
     }
 }
