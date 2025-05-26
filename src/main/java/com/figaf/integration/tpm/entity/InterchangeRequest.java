@@ -3,8 +3,11 @@ package com.figaf.integration.tpm.entity;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.figaf.integration.tpm.utils.TpmUtils.GMT_DATE_FORMAT;
 import static java.lang.String.format;
@@ -17,7 +20,8 @@ public class InterchangeRequest {
     private final Date leftBoundDate;
     private Date rightBoundDate;
 
-    private String overallStatus;
+    private List<String> overallStatuses;
+    private List<String> processingStatuses;
 
     private String agreedSenderIdentiferAtSenderSide;
     private String agreedSenderIdentiferQualifierAtSenderSide;
@@ -43,9 +47,22 @@ public class InterchangeRequest {
         if (rightBoundDate != null) {
             builder.append(format(" and StartedAt le datetime'%s'", GMT_DATE_FORMAT.format(rightBoundDate)));
         }
-        if (overallStatus != null) {
-            builder.append(format(" and OverallStatus eq '%s'", overallStatus));
+
+        if (CollectionUtils.isNotEmpty(overallStatuses)) {
+            String overallStatusFilter = overallStatuses.stream()
+                .map(status -> format("OverallStatus eq '%s'", status))
+                .collect(Collectors.joining(" or ", " and (", ")"));
+            builder.append(overallStatusFilter);
         }
+
+        if (CollectionUtils.isNotEmpty(processingStatuses)) {
+            String overallStatusFilter = processingStatuses.stream()
+                .map(status -> format("ProcessingStatus eq '%s'", status))
+                .collect(Collectors.joining(" or ", " and (", ")"));
+            builder.append(overallStatusFilter);
+        }
+
+
         if (agreedSenderIdentiferAtSenderSide != null) {
             builder.append(format(" and AgreedSenderIdentiferAtSenderSide eq '%s'", agreedSenderIdentiferAtSenderSide));
         }

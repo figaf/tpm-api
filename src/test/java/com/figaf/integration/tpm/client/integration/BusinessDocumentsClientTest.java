@@ -15,9 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static com.figaf.integration.tpm.utils.Constants.PARAMETERIZED_TEST_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,12 +35,13 @@ class BusinessDocumentsClientTest {
         RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
         requestContext.getConnectionProperties().setHost(agentTestData.getIntegrationSuiteHost());
 
-        Date leftBoundDate = DateUtils.addDays(new Date(), -1);
+        Date leftBoundDate = DateUtils.addDays(new Date(), -10);
         Date rightBoundDate = new Date();
 
         InterchangeRequest interchangeRequest = new InterchangeRequest(leftBoundDate);
         interchangeRequest.setRightBoundDate(rightBoundDate);
-        interchangeRequest.setOverallStatus("COMPLETED");
+        interchangeRequest.setOverallStatuses(Arrays.asList("COMPLETED", "WAITING_FOR_ACKNOWLEDGEMENT", "ACKNOWLEDGEMENT_OVERDUE"));
+        interchangeRequest.setProcessingStatuses(Collections.singletonList("COMPLETED"));
         interchangeRequest.setAgreedSenderIdentiferAtSenderSide("GIRAFT");
         interchangeRequest.setAgreedSenderIdentiferQualifierAtSenderSide("14");
         interchangeRequest.setAgreedReceiverIdentiferAtSenderSide("KUNDENET");
