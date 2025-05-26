@@ -4,9 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.figaf.integration.tpm.entity.B2BScenarioMetadata;
-import com.figaf.integration.tpm.entity.TpmObjectMetadata;
-import com.figaf.integration.tpm.entity.TpmObjectReference;
+import com.figaf.integration.tpm.entity.*;
 import com.figaf.integration.tpm.enumtypes.TpmObjectType;
 import com.figaf.integration.tpm.exception.TpmException;
 import lombok.extern.slf4j.Slf4j;
@@ -149,12 +147,26 @@ public class B2BScenarioResponseParser extends GenericTpmResponseParser {
                 String propertyKey = property.getKey();
                 JsonNode propertiesInnerNode = property.getValue().get("Properties");
                 switch (propertyKey) {
-                    case "MAPPING" ->
+                    case "MAPPING" -> {
                         b2bScenarioMetadata.setCustomMappingIFlowUrl(propertiesInnerNode.path("CUSTOM_MAPPING").asText());
-                    case "SENDER_INTERCHANGE" ->
+                        b2bScenarioMetadata.setMagMetadata(buildMagMetadata(propertiesInnerNode));
+                    }
+                    case "SENDER_INTERCHANGE" -> {
                         b2bScenarioMetadata.setPreIFlowUrl(propertiesInnerNode.path("CUSTOM_PRE_PROC").asText());
-                    case "RECEIVER_INTERCHANGE" ->
+                        MigMetadata migMetadata = buildMigMetadata(propertiesInnerNode);
+                        if (migMetadata != null) {
+                            b2bScenarioMetadata.setSenderMigMetadata(migMetadata);
+                            tpmObjectReferences.add(createTpmObjectReference(migMetadata));
+                        }
+                    }
+                    case "RECEIVER_INTERCHANGE" -> {
                         b2bScenarioMetadata.setPostIFlowUrl(propertiesInnerNode.path("CUSTOM_POST_PROC").asText());
+                        MigMetadata migMetadata = buildMigMetadata(propertiesInnerNode);
+                        if (migMetadata != null) {
+                            b2bScenarioMetadata.setReceiverMigMetadata(migMetadata);
+                            tpmObjectReferences.add(createTpmObjectReference(migMetadata));
+                        }
+                    }
                     case "SENDER_SYSTEM" -> {
                         senderSystemId = propertiesInnerNode.path("Id").asText();
                         b2bScenarioMetadata.setInitiator(format("%s|%s", propertiesInnerNode.path("Label_Name").asText(), propertiesInnerNode.path("Label_SystemInstanceName").asText()));
@@ -164,21 +176,44 @@ public class B2BScenarioResponseParser extends GenericTpmResponseParser {
                         b2bScenarioMetadata.setReactor(format("%s|%s", propertiesInnerNode.path("Label_Name").asText(), propertiesInnerNode.path("Label_SystemInstanceName").asText()));
                     }
                 }
-
-                String migGuid = propertiesInnerNode.path("MIGGUID").asText();
-                String migVersionId = propertiesInnerNode.path("MIGVersionId").asText();
-                String objectGuid = propertiesInnerNode.path("ObjectGUID").asText();
-                if (StringUtils.isEmpty(migGuid) || StringUtils.isEmpty(migVersionId) || StringUtils.isEmpty(objectGuid)) {
-                    continue;
-                }
-
-                TpmObjectReference tpmObjectReference = createTpmObjectReference(migGuid, migVersionId, objectGuid, TpmObjectType.CLOUD_MIG);
-                tpmObjectReferences.add(tpmObjectReference);
             }
         }
 
         defineDirection(b2bScenarioMetadata, agreementMetadataRootNode, senderSystemId, receiverSystemId);
 
+    }
+
+    private MigMetadata buildMigMetadata(JsonNode propertiesInnerNode) {
+        String migGuid = propertiesInnerNode.path("MIGGUID").asText();
+        String migVersionId = propertiesInnerNode.path("MIGVersionId").asText();
+        String objectGuid = propertiesInnerNode.path("ObjectGUID").asText();
+        String migName = propertiesInnerNode.path("Label_MIGIdName").asText();
+        if (StringUtils.isEmpty(migGuid) || StringUtils.isEmpty(migVersionId) || StringUtils.isEmpty(objectGuid) || StringUtils.isEmpty(migName)) {
+            return null;
+        }
+
+        return new MigMetadata(migGuid, migVersionId, migName, objectGuid);
+    }
+
+    private MagMetadata buildMagMetadata(JsonNode propertiesInnerNode) {
+        String magGuid = propertiesInnerNode.path("MAGGUID").asText();
+        String magVersionId = propertiesInnerNode.path("MAGVersionId").asText();
+        String objectGuid = propertiesInnerNode.path("ObjectGUID").asText();
+        String magName = propertiesInnerNode.path("Label_MAGName").asText();
+        if (StringUtils.isEmpty(magGuid) || StringUtils.isEmpty(magVersionId) || StringUtils.isEmpty(objectGuid) || StringUtils.isEmpty(magName)) {
+            return null;
+        }
+
+        return new MagMetadata(magGuid, magVersionId, magName, objectGuid);
+    }
+
+    private TpmObjectReference createTpmObjectReference(MigMetadata migMetadata) {
+        TpmObjectReference tpmObjectReference = new TpmObjectReference();
+        tpmObjectReference.setObjectId(migMetadata.getMigGuid());
+        tpmObjectReference.setObjectVersion(migMetadata.getMigVersion());
+        tpmObjectReference.setObjectVersionId(migMetadata.getObjectGuid());
+        tpmObjectReference.setTpmObjectType(TpmObjectType.CLOUD_MIG);
+        return tpmObjectReference;
     }
 
     private void defineDirection(B2BScenarioMetadata b2bScenarioMetadata, JsonNode agreementMetadataRootNode, String senderSystemId, String receiverSystemId) {
