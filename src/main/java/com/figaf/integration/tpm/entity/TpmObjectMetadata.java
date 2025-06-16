@@ -1,5 +1,6 @@
 package com.figaf.integration.tpm.entity;
 
+import com.figaf.integration.tpm.entity.trading.verbose.ArtifactProperties;
 import com.figaf.integration.tpm.enumtypes.TpmObjectType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,4 +25,7 @@ public class TpmObjectMetadata implements Serializable {
     private List<TpmObjectReference> tpmObjectReferences;
     private AdministrativeData administrativeData;
     private String payload;
+
+    //only for trading partner
+    private ArtifactProperties artifactProperties;
 }

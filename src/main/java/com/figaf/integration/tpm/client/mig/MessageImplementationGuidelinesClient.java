@@ -1,8 +1,6 @@
 package com.figaf.integration.tpm.client.mig;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.figaf.integration.common.entity.RequestContext;
 import com.figaf.integration.common.exception.ClientIntegrationException;
@@ -190,9 +188,8 @@ public class MessageImplementationGuidelinesClient extends TpmBaseClient {
             ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
             if (HttpStatus.CREATED.equals(responseEntity.getStatusCode())) {
                 String rawDraftCreationResponse = responseEntity.getBody();
-                ObjectMapper objectMapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                 try {
-                    draftCreationResponse = objectMapper.readValue(rawDraftCreationResponse, DraftCreationResponse.class);
+                    draftCreationResponse = jsonMapper.readValue(rawDraftCreationResponse, DraftCreationResponse.class);
                     saveAllSegmentsAndFields(requestContext, draftCreationResponse.getId());
                 } catch (IOException e) {
                     log.error(e.getMessage());
@@ -259,11 +256,10 @@ public class MessageImplementationGuidelinesClient extends TpmBaseClient {
 
     private String createRequestWithSelectedTrueToAllFields(String rawMigWithAllSegmentsAndFields) throws
         IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode rootNode = mapper.readTree(rawMigWithAllSegmentsAndFields);
+        JsonNode rootNode = jsonMapper.readTree(rawMigWithAllSegmentsAndFields);
         updateAllIsSelected(rootNode);
 
-        return mapper.writeValueAsString(rootNode);
+        return jsonMapper.writeValueAsString(rootNode);
     }
 
     private static void updateAllIsSelected(JsonNode node) {

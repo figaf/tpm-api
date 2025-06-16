@@ -1,4 +1,4 @@
-package com.figaf.integration.tpm.entity.trading;
+package com.figaf.integration.tpm.entity.trading.verbose;
 
 import com.figaf.integration.tpm.entity.AdministrativeData;
 import lombok.Getter;
@@ -11,7 +11,7 @@ import java.util.Map;
 @Getter
 @Setter
 @NoArgsConstructor
-public class TradingPartner {
+public class TradingPartnerVerboseDto {
 
     private String name;
     private String shortName;
