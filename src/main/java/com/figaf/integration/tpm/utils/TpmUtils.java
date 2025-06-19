@@ -7,4 +7,5 @@ import java.util.TimeZone;
 public class TpmUtils {
 
     public final static FastDateFormat GMT_DATE_FORMAT = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss.SSS", TimeZone.getTimeZone("GMT"));
+    public final static String PATH_FOR_TOKEN = "/api/1.0/user";
 }

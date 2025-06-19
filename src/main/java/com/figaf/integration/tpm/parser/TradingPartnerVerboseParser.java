@@ -1,7 +1,7 @@
 package com.figaf.integration.tpm.parser;
 
 import com.figaf.integration.tpm.entity.AdministrativeData;
-import com.figaf.integration.tpm.entity.trading.*;
+import com.figaf.integration.tpm.entity.trading.verbose.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -15,9 +15,9 @@ public class TradingPartnerVerboseParser {
         return tradingPartnerRawResponse;
     }
 
-    public TradingPartner parse(String jsonResponse) {
+    public TradingPartnerVerboseDto parse(String jsonResponse) {
         JSONObject tradingPartnerVerboseResponse = new JSONObject(jsonResponse);
-        TradingPartner tradingPartner = new TradingPartner();
+        TradingPartnerVerboseDto tradingPartner = new TradingPartnerVerboseDto();
 
         setTradingPartnerVerboseProperties(tradingPartnerVerboseResponse, tradingPartner);
 
@@ -66,7 +66,7 @@ public class TradingPartnerVerboseParser {
         return tradingPartner;
     }
 
-    public void setTradingPartnerVerboseProperties(JSONObject jsonTradingPartnerVerbose, TradingPartner tradingPartner) {
+    public void setTradingPartnerVerboseProperties(JSONObject jsonTradingPartnerVerbose, TradingPartnerVerboseDto tradingPartner) {
         tradingPartner.setName(getString(jsonTradingPartnerVerbose, "Name"));
         tradingPartner.setShortName(getString(jsonTradingPartnerVerbose, "ShortName"));
         tradingPartner.setWebURL(getString(jsonTradingPartnerVerbose, "WebURL"));
@@ -106,12 +106,16 @@ public class TradingPartnerVerboseParser {
 
     private BusinessProcess parseBusinessProcessDTO(JSONObject jsonBusinessProcess) {
         BusinessProcess businessProcessDTO = new BusinessProcess();
-        businessProcessDTO.setBusinessProcessCodes(parseStringList(jsonBusinessProcess.getJSONArray("BusinessProcessCodeList")));
+        businessProcessDTO.setBusinessProcessCodes(parseStringList(jsonBusinessProcess.optJSONArray("BusinessProcessCodeList")));
         return businessProcessDTO;
     }
 
     private List<String> parseStringList(JSONArray jsonArray) {
         List<String> stringList = new ArrayList<>();
+        if (jsonArray == null) {
+            return stringList;
+        }
+
         for (int i = 0; i < jsonArray.length(); i++) {
             stringList.add(jsonArray.getString(i));
         }
@@ -120,19 +124,19 @@ public class TradingPartnerVerboseParser {
 
     private BusinessProcessRole parseBusinessProcessRoleDTO(JSONObject jsonBusinessProcessRole) {
         BusinessProcessRole businessProcessRoleDTO = new BusinessProcessRole();
-        businessProcessRoleDTO.setBusinessProcessRoleCodes(parseStringList(jsonBusinessProcessRole.getJSONArray("BusinessProcessRoleCodeList")));
+        businessProcessRoleDTO.setBusinessProcessRoleCodes(parseStringList(jsonBusinessProcessRole.optJSONArray("BusinessProcessRoleCodeList")));
         return businessProcessRoleDTO;
     }
 
     private IndustryClassification parseIndustryClassificationDTO(JSONObject jsonIndustryClassification) {
         IndustryClassification industryClassificationDTO = new IndustryClassification();
-        industryClassificationDTO.setIndustryClassificationCodeList(parseStringList(jsonIndustryClassification.getJSONArray("IndustryClassificationCodeList")));
+        industryClassificationDTO.setIndustryClassificationCodeList(parseStringList(jsonIndustryClassification.optJSONArray("IndustryClassificationCodeList")));
         return industryClassificationDTO;
     }
 
     private ProductClassification parseProductClassificationDTO(JSONObject jsonProductClassification) {
         ProductClassification productClassificationDTO = new ProductClassification();
-        productClassificationDTO.setProductClassificationCodeList(parseStringList(jsonProductClassification.getJSONArray("ProductClassificationCodeList")));
+        productClassificationDTO.setProductClassificationCodeList(parseStringList(jsonProductClassification.optJSONArray("ProductClassificationCodeList")));
         return productClassificationDTO;
     }
 
@@ -151,7 +155,10 @@ public class TradingPartnerVerboseParser {
 
     private GeoPolitical parseGeoPoliticalDTO(JSONObject jsonGeoPolitical) {
         GeoPolitical geoPoliticalDTO = new GeoPolitical();
-        JSONArray jsonCountryInfoList = jsonGeoPolitical.getJSONArray("CountryInfoList");
+        JSONArray jsonCountryInfoList = jsonGeoPolitical.optJSONArray("CountryInfoList");
+        if (jsonCountryInfoList == null) {
+            return geoPoliticalDTO;
+        }
         List<CountryInfo> countryInfos = new ArrayList<>();
         for (int i = 0; i < jsonCountryInfoList.length(); i++) {
             JSONObject jsonCountryInfo = jsonCountryInfoList.getJSONObject(i);

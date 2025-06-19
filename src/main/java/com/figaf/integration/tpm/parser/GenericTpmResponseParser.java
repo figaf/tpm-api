@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.figaf.integration.tpm.entity.AdministrativeData;
 import com.figaf.integration.tpm.entity.TpmObjectMetadata;
 import com.figaf.integration.tpm.entity.TpmObjectReference;
+import com.figaf.integration.tpm.entity.trading.verbose.ArtifactProperties;
 import com.figaf.integration.tpm.enumtypes.TpmObjectType;
 
 import java.io.IOException;
@@ -18,7 +19,6 @@ public class GenericTpmResponseParser {
 
     public GenericTpmResponseParser() {
         this.objectMapper = new ObjectMapper();
-
     }
 
     public List<TpmObjectMetadata> parseResponse(String response, TpmObjectType tpmObjectType) throws IOException {
@@ -35,6 +35,7 @@ public class GenericTpmResponseParser {
             tpmObject.setTpmObjectType(tpmObjectType);
 
             initAdministrativeData(tpmObject, node);
+            initArtifactProperties(tpmObject, node);
             setTpmObjectReferences(
                 node,
                 tpmObject
@@ -147,5 +148,16 @@ public class GenericTpmResponseParser {
         tpmObjectReference.setObjectVersionId(objectVersionId);
         tpmObjectReference.setTpmObjectType(tpmObjectType);
         return tpmObjectReference;
+    }
+
+    private void initArtifactProperties(TpmObjectMetadata tpmObject, JsonNode node) {
+        JsonNode artifactPropertiesNode = node.path("artifactProperties");
+        if (!artifactPropertiesNode.isMissingNode()) {
+            ArtifactProperties artifactProperties = new ArtifactProperties();
+            artifactProperties.setWebURL(artifactPropertiesNode.path("webURL").asText());
+            artifactProperties.setShortName(artifactPropertiesNode.path("shortName").asText());
+            artifactProperties.setLogoID(artifactPropertiesNode.path("logoID").asText());
+            tpmObject.setArtifactProperties(artifactProperties);
+        }
     }
 }

@@ -1,5 +1,8 @@
 package com.figaf.integration.tpm.client;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.figaf.integration.common.client.BaseClient;
 import com.figaf.integration.common.factory.HttpClientsFactory;
 
@@ -18,8 +21,23 @@ public abstract class TpmBaseClient extends BaseClient {
     public static final String MIG_DELETE_DRAFT_RESOURCE = "/api/1.0/migs/%s/migVersions/%s";
     protected static final String AGREEMENT_RESOURCE = "/itspaces/tpm/api/2.0/tradingpartneragreements";
     protected static final String B2B_SCENARIOS_RESOURCE = "/itspaces/tpm/api/2.0/tradingpartneragreements/%s/b2bscenario";
+    protected static final String SYSTEM_TYPES_RESOURCE = "/itspaces/tpm/systemtypes";
+    protected static final String SYSTEMS_RESOURCE = "/itspaces/tpm/tradingpartners/%s/systems";
+    protected static final String TYPE_SYSTEMS_RESOURCE = "/itspaces/tpm/bootstrap/?type=typesystems";
+    protected static final String TYPE_SYSTEM_VERSIONS_RESOURCE = "/itspaces/tpm/api/2.0/typesystems/%s?artifacttype=TypeSystemVersion";
+    protected static final String SENDER_ADAPTER_LIST_RESOURCE = "/itspaces/tpm/bootstrap?type=adapterlist&direction=Sender";
+    protected static final String RECEIVER_ADAPTER_LIST_RESOURCE = "/itspaces/tpm/bootstrap?type=adapterlist&direction=Receiver";
+    protected static final String PRODUCTS_RESOURCE = "/itspaces/tpm/bootstrap/?type=products";
+    protected static final String IDENTIFIERS_RESOURCE = "/itspaces/tpm/tradingpartners/%s/identifiers";
+    protected static final String COMMUNICATIONS_RESOURCE = "/itspaces/tpm/tradingpartners/%s/systems/%s/channels";
+    protected static final String SIGNATURE_VERIFICATION_CONFIGURATIONS_RESOURCE = "/itspaces/tpm/tradingpartners/%s/config.signval";
+
+    protected final ObjectMapper jsonMapper;
 
     public TpmBaseClient(HttpClientsFactory httpClientsFactory) {
         super(httpClientsFactory);
+        jsonMapper = new ObjectMapper();
+        jsonMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        jsonMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
     }
 }
