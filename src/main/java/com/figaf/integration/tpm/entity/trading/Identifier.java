@@ -5,29 +5,26 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.util.List;
-
 @Getter
 @Setter
 @ToString
-public class System {
+public class Identifier {
 
     @JsonProperty("Alias")
     private String alias;
 
-    @JsonProperty("Name")
-    private String name;
+    @JsonProperty("TypeSystemId")
+    private String typeSystemId;
 
-    @JsonProperty("SystemType")
-    private String systemType;
+    @JsonProperty("IdentifierId")
+    private String identifierId;
 
-    @JsonProperty("Purpose")
-    private String purpose;
+    @JsonProperty("SchemeName")
+    private String schemeName;
 
-    @JsonProperty("TypeSystems")
-    private List<TypeSystemWithVersions> typeSystems;
+    @JsonProperty("SchemeCode")
+    private String schemeCode;
 
     private String displayName;
     private String id;
-
 }
