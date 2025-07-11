@@ -28,4 +28,7 @@ public class TpmObjectMetadata implements Serializable {
 
     //only for trading partner
     private ArtifactProperties artifactProperties;
+
+    //only for agreement template
+    private String b2bScenarioDetailsId;
 }

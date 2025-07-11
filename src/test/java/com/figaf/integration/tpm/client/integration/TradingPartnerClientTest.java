@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.figaf.integration.tpm.utils.Constants.PARAMETERIZED_TEST_NAME;
@@ -74,6 +75,58 @@ public class TradingPartnerClientTest {
             String tradingPartnerRawResponse = tradingPartnerClient.getRawById(tradingPartner.getObjectId(), requestContext);
             assertThat(tradingPartnerRawResponse).as(EXPECTED_NOT_NULL_RAW_MSG).isNotEmpty();
         });
+    }
+
+    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
+    @ArgumentsSource(AgentTestDataProvider.class)
+    void test_getPartnerProfileSystems(AgentTestData agentTestData) {
+        RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
+
+        List<TpmObjectMetadata> tradingPartners = tradingPartnerClient.getAllMetadata(requestContext);
+
+        List<System> allSystems = new ArrayList<>();
+        tradingPartners.forEach(tradingPartner -> {
+            allSystems.addAll(tradingPartnerClient.getPartnerProfileSystems(tradingPartner.getObjectId(), requestContext));
+        });
+
+        assertThat(allSystems).isNotEmpty();
+        allSystems.forEach(system -> assertThat(system).hasNoNullFieldsOrProperties());
+    }
+
+    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
+    @ArgumentsSource(AgentTestDataProvider.class)
+    void test_getPartnerProfileIdentifiers(AgentTestData agentTestData) {
+        RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
+
+        List<TpmObjectMetadata> tradingPartners = tradingPartnerClient.getAllMetadata(requestContext);
+
+        List<Identifier> allIdentifiers = new ArrayList<>();
+        tradingPartners.forEach(tradingPartner -> {
+            allIdentifiers.addAll(tradingPartnerClient.getPartnerProfileIdentifiers(tradingPartner.getObjectId(), requestContext));
+        });
+
+        assertThat(allIdentifiers).isNotEmpty();
+        allIdentifiers.forEach(identifier -> assertThat(identifier).hasNoNullFieldsOrProperties());
+
+    }
+
+    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
+    @ArgumentsSource(AgentTestDataProvider.class)
+    void test_getPartnerProfileChannels(AgentTestData agentTestData) {
+        RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
+
+        List<TpmObjectMetadata> tradingPartners = tradingPartnerClient.getAllMetadata(requestContext);
+
+        List<Channel> allPartnerProfileChannels = new ArrayList<>();
+        tradingPartners.forEach(tradingPartner -> {
+            List<System> partnerProfileSystems = tradingPartnerClient.getPartnerProfileSystems(tradingPartner.getObjectId(), requestContext);
+            for (System partnerProfileSystem : partnerProfileSystems) {
+                allPartnerProfileChannels.addAll(tradingPartnerClient.getPartnerProfileChannels(tradingPartner.getObjectId(), partnerProfileSystem.getId(), requestContext));
+            }
+        });
+
+        assertThat(allPartnerProfileChannels).isNotEmpty();
+        allPartnerProfileChannels.forEach(channel -> assertThat(channel).hasNoNullFieldsOrPropertiesExcept("securityConfigurationMode"));
     }
 
     @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
@@ -179,11 +232,11 @@ public class TradingPartnerClientTest {
         request.setSystemType("2cef5ae5c1324d5bb0d08643d87abd84");
         request.setPurpose("Dev");
 
-        CreateSystemRequest.TypeSystem typeSystem = new CreateSystemRequest.TypeSystem();
+        TypeSystemWithVersions typeSystem = new TypeSystemWithVersions();
         typeSystem.setId("GS1_XML");
         typeSystem.setName("GS1 XML");
-        typeSystem.getVersions().add(new CreateSystemRequest.TypeSystemVersion("3.0", "3.0"));
-        typeSystem.getVersions().add(new CreateSystemRequest.TypeSystemVersion("3.2", "3.2"));
+        typeSystem.getVersions().add(new TypeSystemWithVersions.TypeSystemVersion("3.0", "3.0"));
+        typeSystem.getVersions().add(new TypeSystemWithVersions.TypeSystemVersion("3.2", "3.2"));
         request.getTypeSystems().add(typeSystem);
 
         System system = tradingPartnerClient.createSystem("82bf48ca067645d08c94b0e8cd7fbd19", request, requestContext);

@@ -30,7 +30,7 @@ public class CreateSystemRequest {
     private String link;
 
     @JsonProperty("TypeSystems")
-    private List<TypeSystem> typeSystems = new ArrayList<>();
+    private List<TypeSystemWithVersions> typeSystems = new ArrayList<>();
 
     @JsonProperty("CommunicationChannelTemplates")
     private List<String> communicationChannelTemplates = new ArrayList<>();
@@ -38,33 +38,4 @@ public class CreateSystemRequest {
     @JsonProperty("Id")
     private String id;
 
-    @Getter
-    @Setter
-    @ToString
-    public static class TypeSystem {
-
-        @JsonProperty("Id")
-        private String id;
-
-        @JsonProperty("Name")
-        private String name;
-
-        @JsonProperty("Versions")
-        private List<TypeSystemVersion> versions = new ArrayList<>();
-
-    }
-
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Getter
-    @Setter
-    @ToString
-    public static class TypeSystemVersion {
-
-        @JsonProperty("Id")
-        private String id;
-
-        @JsonProperty("Name")
-        private String name;
-    }
 }

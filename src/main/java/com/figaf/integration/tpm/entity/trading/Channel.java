@@ -5,12 +5,10 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.util.List;
-
 @Getter
 @Setter
 @ToString
-public class System {
+public class Channel {
 
     @JsonProperty("Alias")
     private String alias;
@@ -18,14 +16,14 @@ public class System {
     @JsonProperty("Name")
     private String name;
 
-    @JsonProperty("SystemType")
-    private String systemType;
+    @JsonProperty("Direction")
+    private String direction;
 
-    @JsonProperty("Purpose")
-    private String purpose;
+    @JsonProperty("AdapterType")
+    private String adapterType;
 
-    @JsonProperty("TypeSystems")
-    private List<TypeSystemWithVersions> typeSystems;
+    @JsonProperty("SecurityConfigurationMode")
+    private String securityConfigurationMode;
 
     private String displayName;
     private String id;

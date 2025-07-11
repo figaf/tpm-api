@@ -7,6 +7,7 @@ import com.figaf.integration.tpm.client.agreement.AgreementClient;
 import com.figaf.integration.tpm.client.b2bscenario.B2BScenarioClient;
 import com.figaf.integration.tpm.data_provider.AgentTestDataProvider;
 import com.figaf.integration.tpm.entity.*;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
@@ -17,6 +18,7 @@ import java.util.List;
 import static com.figaf.integration.tpm.utils.Constants.PARAMETERIZED_TEST_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Slf4j
 class B2BScenarioClientTest {
 
     private static AgreementClient agreementClient;
@@ -65,4 +67,17 @@ class B2BScenarioClientTest {
         assertThat(receiverMigMetadataList).isNotEmpty();
         assertThat(magMetadataList).isNotEmpty();
     }
+
+    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
+    @ArgumentsSource(AgentTestDataProvider.class)
+    void test_getB2BScenariosForAgreementAsJsonResponse(AgentTestData agentTestData) {
+        RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
+
+        List<TpmObjectMetadata> agreements = agreementClient.getAllMetadata(requestContext);
+        for (TpmObjectMetadata agreement : agreements) {
+            String jsonResponse = b2BScenarioClient.getB2BScenariosForAgreementAsJsonResponse(requestContext, agreement.getObjectId());
+            assertThat(jsonResponse).isNotEmpty();
+        }
+    }
+
 }

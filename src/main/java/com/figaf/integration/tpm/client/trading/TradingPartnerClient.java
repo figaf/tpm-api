@@ -65,6 +65,42 @@ public class TradingPartnerClient extends TpmBaseClient {
         );
     }
 
+    public List<System> getPartnerProfileSystems(String tradingPartnerId, RequestContext requestContext) {
+        log.debug("#getPartnerProfileSystems: tradingPartnerId = {}, requestContext = {}", tradingPartnerId, requestContext);
+        return executeGet(
+            requestContext,
+            format(TRADING_PARTNER_SYSTEMS_RESOURCE, tradingPartnerId),
+            response -> {
+                System[] systems = jsonMapper.readValue(response, System[].class);
+                return Arrays.asList(systems);
+            }
+        );
+    }
+
+    public List<Identifier> getPartnerProfileIdentifiers(String tradingPartnerId, RequestContext requestContext) {
+        log.debug("#getPartnerProfileIdentifiers: tradingPartnerId = {}, requestContext = {}", tradingPartnerId, requestContext);
+        return executeGet(
+            requestContext,
+            format(TRADING_PARTNER_IDENTIFIERS_RESOURCE, tradingPartnerId),
+            response -> {
+                Identifier[] systems = jsonMapper.readValue(response, Identifier[].class);
+                return Arrays.asList(systems);
+            }
+        );
+    }
+
+    public List<Channel> getPartnerProfileChannels(String tradingPartnerId, String systemId, RequestContext requestContext) {
+        log.debug("#getPartnerProfileChannels: tradingPartnerId = {}, systemId = {}, requestContext = {}", tradingPartnerId, systemId, requestContext);
+        return executeGet(
+            requestContext,
+            format(COMMUNICATIONS_RESOURCE, tradingPartnerId, systemId),
+            response -> {
+                Channel[] systems = jsonMapper.readValue(response, Channel[].class);
+                return Arrays.asList(systems);
+            }
+        );
+    }
+
     public List<SystemType> getAllSystemTypes(RequestContext requestContext) {
         log.debug("#getAllSystemTypes: requestContext = {}", requestContext);
 
@@ -283,7 +319,7 @@ public class TradingPartnerClient extends TpmBaseClient {
         return executeMethod(
             requestContext,
             PATH_FOR_TOKEN,
-            format(SYSTEMS_RESOURCE, tradingPartnerId),
+            format(TRADING_PARTNER_SYSTEMS_RESOURCE, tradingPartnerId),
             (url, token, restTemplateWrapper) -> {
                 HttpHeaders httpHeaders = createHttpHeadersWithCSRFToken(token);
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
@@ -335,7 +371,7 @@ public class TradingPartnerClient extends TpmBaseClient {
         executeMethod(
             requestContext,
             PATH_FOR_TOKEN,
-            format(IDENTIFIERS_RESOURCE, tradingPartnerId),
+            format(TRADING_PARTNER_IDENTIFIERS_RESOURCE, tradingPartnerId),
             (url, token, restTemplateWrapper) -> {
                 HttpHeaders httpHeaders = createHttpHeadersWithCSRFToken(token);
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
