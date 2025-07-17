@@ -3,18 +3,24 @@ package com.figaf.integration.tpm.client.company;
 import com.figaf.integration.common.entity.RequestContext;
 import com.figaf.integration.common.factory.HttpClientsFactory;
 import com.figaf.integration.tpm.client.TpmBaseClient;
+import com.figaf.integration.tpm.entity.AdministrativeData;
 import com.figaf.integration.tpm.entity.Subsidiary;
 import com.figaf.integration.tpm.entity.TpmObjectMetadata;
+import com.figaf.integration.tpm.entity.TpmObjectReference;
 import com.figaf.integration.tpm.entity.trading.Channel;
 import com.figaf.integration.tpm.entity.trading.Identifier;
 import com.figaf.integration.tpm.entity.trading.System;
 import com.figaf.integration.tpm.enumtypes.TpmObjectType;
 import lombok.extern.slf4j.Slf4j;
 import com.figaf.integration.tpm.parser.GenericTpmResponseParser;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.figaf.integration.common.utils.Utils.optString;
 import static java.lang.String.format;
 
 @Slf4j
@@ -30,7 +36,21 @@ public class CompanyProfileClient extends TpmBaseClient {
         return executeGet(
             requestContext,
             COMPANY_PROFILE_RESOURCE,
-            (response) -> new GenericTpmResponseParser().parseResponse(response, TpmObjectType.CLOUD_COMPANY_PROFILE)
+            response -> {
+                List<TpmObjectMetadata> companies = new GenericTpmResponseParser().parseResponse(response, TpmObjectType.CLOUD_COMPANY_PROFILE);
+                for (TpmObjectMetadata company : companies) {
+                    List<Subsidiary> subsidiaries = getSubsidiaries(requestContext, company.getObjectId());
+                    List<TpmObjectReference> tpmObjectReferences = new ArrayList<>();
+                    for (Subsidiary subsidiary : subsidiaries) {
+                        TpmObjectReference tpmObjectReference = new TpmObjectReference();
+                        tpmObjectReference.setObjectId(subsidiary.getObjectId());
+                        tpmObjectReference.setTpmObjectType(TpmObjectType.CLOUD_SUBSIDIARY);
+                        tpmObjectReferences.add(tpmObjectReference);
+                    }
+                    company.setTpmObjectReferences(tpmObjectReferences);
+                }
+                return companies;
+            }
         );
     }
 
@@ -40,8 +60,30 @@ public class CompanyProfileClient extends TpmBaseClient {
             requestContext,
             format(COMPANY_SUBSIDIARIES_RESOURCE, companyId),
             response -> {
-                Subsidiary[] subsidiaries = jsonMapper.readValue(response, Subsidiary[].class);
-                return Arrays.asList(subsidiaries);
+                JSONArray subsidiariesJsonArray = new JSONArray(response);
+                List<Subsidiary> subsidiaries = new ArrayList<>();
+                for (int i = 0; i < subsidiariesJsonArray.length(); i++) {
+                    JSONObject subsidiaryJsonObject = subsidiariesJsonArray.getJSONObject(i);
+                    Subsidiary subsidiary = new Subsidiary();
+                    subsidiary.setObjectId(subsidiaryJsonObject.getString("id"));
+                    subsidiary.setTpmObjectType(TpmObjectType.CLOUD_SUBSIDIARY);
+                    subsidiary.setDisplayedName(subsidiaryJsonObject.getString("displayName"));
+                    JSONObject administrativeDataJsonObject = subsidiaryJsonObject.getJSONObject("administrativeData");
+                    AdministrativeData administrativeData = buildAdministrativeDataObject(administrativeDataJsonObject);
+                    subsidiary.setAdministrativeData(administrativeData);
+                    subsidiary.setPayload(subsidiaryJsonObject.toString());
+
+                    subsidiary.setShortName(optString(subsidiaryJsonObject, "ShortName"));
+                    subsidiary.setWebUrl(optString(subsidiaryJsonObject, "WebURL"));
+                    subsidiary.setLogoId(optString(subsidiaryJsonObject, "LogoId"));
+                    subsidiary.setEmailAddress(optString(subsidiaryJsonObject, "EmailAddress"));
+                    subsidiary.setPhoneNumber(optString(subsidiaryJsonObject, "PhoneNumber"));
+
+                    subsidiary.setParentId(companyId);
+
+                    subsidiaries.add(subsidiary);
+                }
+                return subsidiaries;
             }
         );
     }

@@ -3,17 +3,18 @@ package com.figaf.integration.tpm.client.agreement;
 import com.figaf.integration.common.entity.RequestContext;
 import com.figaf.integration.common.factory.HttpClientsFactory;
 import com.figaf.integration.tpm.client.TpmBaseClient;
-import com.figaf.integration.tpm.entity.B2BScenarioInAgreementTemplate;
-import com.figaf.integration.tpm.entity.TpmObjectMetadata;
+import com.figaf.integration.tpm.entity.*;
 import com.figaf.integration.tpm.enumtypes.TpmObjectType;
-import com.figaf.integration.tpm.parser.GenericTpmResponseParser;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
+import static com.figaf.integration.common.utils.Utils.optString;
 
 @Slf4j
 public class AgreementTemplateClient extends TpmBaseClient {
@@ -22,13 +23,44 @@ public class AgreementTemplateClient extends TpmBaseClient {
         super(httpClientsFactory);
     }
 
-    public List<TpmObjectMetadata> getAllMetadata(RequestContext requestContext) {
+    public List<AgreementTemplateMetadata> getAllMetadata(RequestContext requestContext) {
         log.debug("#getAllMetadata: requestContext={}", requestContext);
 
         return executeGet(
             requestContext,
             AGREEMENT_TEMPLATE_RESOURCE,
-            (response) -> new GenericTpmResponseParser().parseResponse(response, TpmObjectType.CLOUD_AGREEMENT_TEMPLATE)
+            response -> {
+                JSONArray agreementTemplates = new JSONArray(response);
+                List<AgreementTemplateMetadata> agreementTemplateMetadataList = new ArrayList<>();
+                for (int i = 0; i < agreementTemplates.length(); i++) {
+                    JSONObject agreementTemplateJSONObject = agreementTemplates.getJSONObject(i);
+                    AgreementTemplateMetadata agreementTemplateMetadata = new AgreementTemplateMetadata();
+                    agreementTemplateMetadata.setObjectId(agreementTemplateJSONObject.getString("id"));
+                    agreementTemplateMetadata.setTpmObjectType(TpmObjectType.CLOUD_AGREEMENT_TEMPLATE);
+                    agreementTemplateMetadata.setDisplayedName(agreementTemplateJSONObject.getString("displayName"));
+                    JSONObject administrativeDataJsonObject = agreementTemplateJSONObject.getJSONObject("administrativeData");
+                    AdministrativeData administrativeData = buildAdministrativeDataObject(administrativeDataJsonObject);
+                    agreementTemplateMetadata.setAdministrativeData(administrativeData);
+                    agreementTemplateMetadata.setPayload(agreementTemplateJSONObject.toString());
+                    agreementTemplateMetadata.setB2bScenarioDetailsId(optString(agreementTemplateJSONObject, "B2BScenarioDetailsId"));
+
+                    JSONObject companyDataJsonObject = agreementTemplateJSONObject.getJSONObject("CompanyData");
+                    TpmObjectReference tpmObjectReference = new TpmObjectReference();
+                    tpmObjectReference.setObjectId(companyDataJsonObject.getString("Id"));
+                    String selectedProfileType = optString(companyDataJsonObject, "SelectedProfileType");
+                    if ("SUBSIDIARY".equals(selectedProfileType)) {
+                        tpmObjectReference.setTpmObjectType(TpmObjectType.CLOUD_SUBSIDIARY);
+                    } else {
+                        tpmObjectReference.setTpmObjectType(TpmObjectType.CLOUD_COMPANY_PROFILE);
+                    }
+                    agreementTemplateMetadata.setTpmObjectReferences(Collections.singletonList(tpmObjectReference));
+
+                    agreementTemplateMetadataList.add(agreementTemplateMetadata);
+                }
+
+                return agreementTemplateMetadataList;
+            }
+
         );
     }
 

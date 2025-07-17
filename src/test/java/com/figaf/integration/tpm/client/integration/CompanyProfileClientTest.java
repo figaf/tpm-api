@@ -53,7 +53,6 @@ public class CompanyProfileClientTest {
         List<Subsidiary> subsidiaries = companyProfileClient.getSubsidiaries(requestContext, COMPANY_ID);
 
         assertThat(subsidiaries).isNotEmpty();
-        subsidiaries.forEach(subsidiary -> assertThat(subsidiary).hasNoNullFieldsOrProperties());
     }
 
     @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
@@ -75,7 +74,7 @@ public class CompanyProfileClientTest {
         List<System> allSystems = new ArrayList<>();
         List<Subsidiary> subsidiaries = companyProfileClient.getSubsidiaries(requestContext, COMPANY_ID);
         for (Subsidiary subsidiary : subsidiaries) {
-            allSystems.addAll(companyProfileClient.getSubsidiarySystems(requestContext, COMPANY_ID, subsidiary.getId()));
+            allSystems.addAll(companyProfileClient.getSubsidiarySystems(requestContext, COMPANY_ID, subsidiary.getObjectId()));
         }
 
         assertThat(allSystems).isNotEmpty();
@@ -101,7 +100,7 @@ public class CompanyProfileClientTest {
         List<Identifier> allIdentifiers = new ArrayList<>();
         List<Subsidiary> subsidiaries = companyProfileClient.getSubsidiaries(requestContext, COMPANY_ID);
         for (Subsidiary subsidiary : subsidiaries) {
-            allIdentifiers.addAll(companyProfileClient.getSubsidiaryIdentifiers(requestContext, COMPANY_ID, subsidiary.getId()));
+            allIdentifiers.addAll(companyProfileClient.getSubsidiaryIdentifiers(requestContext, COMPANY_ID, subsidiary.getObjectId()));
         }
 
         assertThat(allIdentifiers).isNotEmpty();
@@ -132,9 +131,9 @@ public class CompanyProfileClientTest {
         List<Channel> allChannels = new ArrayList<>();
         List<Subsidiary> subsidiaries = companyProfileClient.getSubsidiaries(requestContext, COMPANY_ID);
         for (Subsidiary subsidiary : subsidiaries) {
-            List<System> systems = companyProfileClient.getSubsidiarySystems(requestContext, COMPANY_ID, subsidiary.getId());
+            List<System> systems = companyProfileClient.getSubsidiarySystems(requestContext, COMPANY_ID, subsidiary.getObjectId());
             for (System system : systems) {
-                List<Channel> channels = companyProfileClient.getSubsidiaryChannels(requestContext, COMPANY_ID, subsidiary.getId(), system.getId());
+                List<Channel> channels = companyProfileClient.getSubsidiaryChannels(requestContext, COMPANY_ID, subsidiary.getObjectId(), system.getId());
                 allChannels.addAll(channels);
             }
         }
