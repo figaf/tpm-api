@@ -30,4 +30,8 @@ public class TradingPartnerData {
 
     @JsonProperty("AliasForIdentifierInCompanyTS")
     private Map<String, Object> aliasForIdentifierInCompanyTs = new HashMap<>();
+
+    @JsonProperty("AliasForContactPersonRole")
+    private AliasWrapper aliasForContactPersonRole;
+
 }
