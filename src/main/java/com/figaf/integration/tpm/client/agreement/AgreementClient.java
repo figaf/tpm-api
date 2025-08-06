@@ -6,6 +6,7 @@ import com.figaf.integration.common.factory.HttpClientsFactory;
 import com.figaf.integration.tpm.client.TpmBaseClient;
 import com.figaf.integration.tpm.entity.TpmObjectMetadata;
 import com.figaf.integration.tpm.entity.agreement.AgreementCreationRequest;
+import com.figaf.integration.tpm.entity.agreement.AgreementUpdateRequest;
 import com.figaf.integration.tpm.enumtypes.TpmObjectType;
 import com.figaf.integration.tpm.parser.GenericTpmResponseParser;
 import lombok.extern.slf4j.Slf4j;
@@ -53,6 +54,29 @@ public class AgreementClient extends TpmBaseClient {
                     );
                 }
                 return new JSONObject(responseEntity.getBody()).getString("id");
+            }
+        );
+    }
+
+    public void updateAgreement(RequestContext requestContext, String agreementId, AgreementUpdateRequest agreementUpdateRequest) {
+        log.debug("#updateAgreement: requestContext = {}, agreementId = {}, agreementUpdateRequest = {}", requestContext, agreementId, agreementUpdateRequest);
+        executeMethod(
+            requestContext,
+            PATH_FOR_TOKEN,
+            format(AGREEMENT_RESOURCE, agreementId),
+            (url, token, restTemplateWrapper) -> {
+                HttpHeaders httpHeaders = createHttpHeadersWithCSRFToken(token);
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                HttpEntity<AgreementCreationRequest> requestEntity = new HttpEntity<>(agreementUpdateRequest, httpHeaders);
+                ResponseEntity<String> responseEntity = restTemplateWrapper.getRestTemplate().exchange(url, HttpMethod.PUT, requestEntity, String.class);
+                if (!responseEntity.getStatusCode().is2xxSuccessful()) {
+                    throw new ClientIntegrationException(format(
+                        "Couldn't update agreement. Code: %d, Message: %s",
+                        responseEntity.getStatusCode().value(),
+                        requestEntity.getBody())
+                    );
+                }
+                return null;
             }
         );
     }

@@ -87,20 +87,33 @@ public class AgreementClientTest {
         tpDetails.setIdForContactPerson(new IdWrapper(""));        // empty Id
 
 //         ---------- Root object ----------
-        AgreementCreationRequest req = new AgreementCreationRequest();
-        req.setName("ZZ Arsenii Test 7");
-        req.setDescription("");
-        req.setVersion("1.0");
-        req.setOwnerId("myCompany");
-        req.setShared(false);
-        req.setTransactionOption(tx);
-        req.setCompanyData(company);
-        req.setTradingPartnerData(tpData);
-        req.setTradingPartnerDetails(tpDetails);
-        req.setParentId("81a36697276f4695860705388ad6b262");
+        AgreementCreationRequest agreementCreationRequest = new AgreementCreationRequest();
+        agreementCreationRequest.setName("ZZ Arsenii Test 7");
+        agreementCreationRequest.setDescription("");
+        agreementCreationRequest.setVersion("1.0");
+        agreementCreationRequest.setOwnerId("myCompany");
+        agreementCreationRequest.setShared(false);
+        agreementCreationRequest.setTransactionOption(tx);
+        agreementCreationRequest.setCompanyData(company);
+        agreementCreationRequest.setTradingPartnerData(tpData);
+        agreementCreationRequest.setTradingPartnerDetails(tpDetails);
+        agreementCreationRequest.setParentId("81a36697276f4695860705388ad6b262");
 
-        String agreementId = agreementClient.createAgreement(requestContext, req);
+        String agreementId = agreementClient.createAgreement(requestContext, agreementCreationRequest);
         assertThat(agreementId).isNotEmpty();
+
+        List<TpmObjectMetadata> agreements = agreementClient.getAllMetadata(requestContext);
+        TpmObjectMetadata createdAgreement = agreements.stream()
+            .filter(agreement -> agreement.getObjectId().equals(agreementId))
+            .findFirst()
+            .get();
+
+        AgreementUpdateRequest agreementUpdateRequest = AgreementRequestMapper.INSTANCE.toUpdateRequest(agreementCreationRequest);
+        agreementUpdateRequest.setB2bScenarioDetailsId(createdAgreement.getB2bScenarioDetailsId());
+        agreementUpdateRequest.setAdministrativeData(createdAgreement.getAdministrativeData());
+        agreementUpdateRequest.setUniqueId(agreementId);
+        agreementUpdateRequest.setId(agreementId);
+        agreementClient.updateAgreement(requestContext, agreementId, agreementUpdateRequest);
 
         agreementClient.deleteAgreement(requestContext, agreementId);
 

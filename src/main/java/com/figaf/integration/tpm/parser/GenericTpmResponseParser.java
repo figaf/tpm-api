@@ -41,6 +41,10 @@ public class GenericTpmResponseParser {
                 tpmObject
             );
 
+            if (tpmObjectType == TpmObjectType.CLOUD_AGREEMENT) {
+                tpmObject.setB2bScenarioDetailsId(node.path("B2BScenarioDetailsId").asText(null));
+            }
+
             tpmObject.setPayload(node.toString());
             tpmObjects.add(tpmObject);
         }

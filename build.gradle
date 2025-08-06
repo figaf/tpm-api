@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.github.figaf'
-version = '2.6-IRT-5185-SNAPSHOT'
+version = '2.6-IRT-5201-SNAPSHOT'
 
 ext {
     enableSnapshotsForDependencyResolutionAndPublishing = project.findProperty('enableSnapshots') ?: 'false'
@@ -18,6 +18,7 @@ ext {
     integrationCommonsTestVersion = '2.2-IRT-5185-SNAPSHOT'
     snakeyamlVersion = '2.2'
     logbackVersion = "1.5.7"
+    mapStructVersion = '1.6.0'
 }
 
 repositories {
@@ -40,10 +41,14 @@ dependencies {
 
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.mapstruct:mapstruct-processor:${mapStructVersion}"
     testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
     testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
     api "com.github.figaf:integration-commons:${integrationCommonsVersion}"
+
+    implementation "org.mapstruct:mapstruct:${mapStructVersion}"
+    implementation "org.mapstruct:mapstruct-processor:${mapStructVersion}"
 
     testImplementation "com.github.figaf:integration-commons-test:${integrationCommonsTestVersion}"
     testImplementation "org.yaml:snakeyaml:${snakeyamlVersion}"
