@@ -3,13 +3,14 @@ package com.figaf.integration.tpm.entity.trading;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 @Setter
 @ToString
-public class TypeSystemWithVersions {
+public class TypeSystemWithVersions implements Serializable {
 
     @JsonProperty("Id")
     private String id;
@@ -25,7 +26,7 @@ public class TypeSystemWithVersions {
     @Getter
     @Setter
     @ToString
-    public static class TypeSystemVersion {
+    public static class TypeSystemVersion implements Serializable {
 
         @JsonProperty("Id")
         private String id;
