@@ -3,10 +3,7 @@ package com.figaf.integration.tpm.client.company;
 import com.figaf.integration.common.entity.RequestContext;
 import com.figaf.integration.common.factory.HttpClientsFactory;
 import com.figaf.integration.tpm.client.TpmBaseClient;
-import com.figaf.integration.tpm.entity.AdministrativeData;
-import com.figaf.integration.tpm.entity.Subsidiary;
-import com.figaf.integration.tpm.entity.TpmObjectMetadata;
-import com.figaf.integration.tpm.entity.TpmObjectReference;
+import com.figaf.integration.tpm.entity.*;
 import com.figaf.integration.tpm.entity.trading.Channel;
 import com.figaf.integration.tpm.entity.trading.Identifier;
 import com.figaf.integration.tpm.entity.trading.System;
@@ -30,14 +27,33 @@ public class CompanyProfileClient extends TpmBaseClient {
         super(httpClientsFactory);
     }
 
-    public List<TpmObjectMetadata> getAllMetadata(RequestContext requestContext) {
+    public List<Company> getAllMetadata(RequestContext requestContext) {
         log.debug("#getAllMetadata: requestContext={}", requestContext);
 
         return executeGet(
             requestContext,
             COMPANY_PROFILE_RESOURCE,
             response -> {
-                List<TpmObjectMetadata> companies = new GenericTpmResponseParser().parseResponse(response, TpmObjectType.CLOUD_COMPANY_PROFILE);
+                JSONArray companiesJsonArray = new JSONArray(response);
+                List<Company> companies = new ArrayList<>();
+                for (int i = 0; i < companiesJsonArray.length(); i++) {
+                    JSONObject companyJsonObject = companiesJsonArray.getJSONObject(i);
+                    Company company = new Company();
+                    company.setObjectId(companyJsonObject.getString("id"));
+                    company.setTpmObjectType(TpmObjectType.CLOUD_COMPANY_PROFILE);
+                    company.setDisplayedName(companyJsonObject.getString("displayName"));
+
+                    JSONObject administrativeDataJsonObject = companyJsonObject.getJSONObject("administrativeData");
+                    company.setAdministrativeData(buildAdministrativeDataObject(administrativeDataJsonObject));
+
+                    JSONObject profileJsonObject = companyJsonObject.getJSONObject("Profile");
+                    company.setProfile(parseProfileDto(profileJsonObject));
+
+                    company.setPayload(companyJsonObject.toString());
+
+                    companies.add(company);
+                }
+
                 for (TpmObjectMetadata company : companies) {
                     List<Subsidiary> subsidiaries = getSubsidiaries(requestContext, company.getObjectId());
                     List<TpmObjectReference> tpmObjectReferences = new ArrayList<>();
@@ -78,6 +94,9 @@ public class CompanyProfileClient extends TpmBaseClient {
                     subsidiary.setLogoId(optString(subsidiaryJsonObject, "LogoId"));
                     subsidiary.setEmailAddress(optString(subsidiaryJsonObject, "EmailAddress"));
                     subsidiary.setPhoneNumber(optString(subsidiaryJsonObject, "PhoneNumber"));
+
+                    JSONObject profileJsonObject = subsidiaryJsonObject.getJSONObject("Profile");
+                    subsidiary.setProfile(parseProfileDto(profileJsonObject));
 
                     subsidiary.setParentId(companyId);
 
