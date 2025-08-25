@@ -11,17 +11,13 @@ import com.figaf.integration.tpm.entity.trading.System;
 import com.figaf.integration.tpm.entity.trading.verbose.TradingPartnerVerboseDto;
 import com.figaf.integration.tpm.enumtypes.TpmObjectType;
 import com.figaf.integration.tpm.parser.GenericTpmResponseParser;
-import com.figaf.integration.tpm.parser.TradingPartnerVerboseParser;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.http.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static com.figaf.integration.common.utils.Utils.optString;
 import static com.figaf.integration.common.utils.Utils.parseDate;
@@ -51,7 +47,7 @@ public class TradingPartnerClient extends TpmBaseClient {
         return executeGet(
             requestContext,
             format(TRADING_PARTNER_RESOURCE_BY_ID, tradingPartnerId),
-            new TradingPartnerVerboseParser()::parse
+            this::buildTradingPartnerVerboseDto
         );
     }
 
@@ -283,10 +279,25 @@ public class TradingPartnerClient extends TpmBaseClient {
                     );
                 }
 
-                TradingPartnerVerboseParser tradingPartnerVerboseParser = new TradingPartnerVerboseParser();
-                return tradingPartnerVerboseParser.parse(responseEntity.getBody());
+                return buildTradingPartnerVerboseDto(responseEntity.getBody());
             }
         );
+    }
+
+    private TradingPartnerVerboseDto buildTradingPartnerVerboseDto(String responseEntityBody) {
+        JSONObject tradingPartnerVerboseResponse = new JSONObject(responseEntityBody);
+        TradingPartnerVerboseDto tradingPartner = new TradingPartnerVerboseDto();
+
+        setTradingPartnerVerboseProperties(tradingPartnerVerboseResponse, tradingPartner);
+
+        JSONObject jsonArtifactProperties = tradingPartnerVerboseResponse.getJSONObject("artifactProperties");
+        tradingPartner.setArtifactProperties(parseArtifactProperties(jsonArtifactProperties));
+
+        JSONObject profileJsonObject = tradingPartnerVerboseResponse.getJSONObject("Profile");
+        tradingPartner.setProfile(parseProfileDto(profileJsonObject));
+
+        tradingPartner.setPayload(responseEntityBody);
+        return tradingPartner;
     }
 
     public String createSystemType(CreateSystemTypeRequest createSystemTypeRequest, RequestContext requestContext) {
@@ -411,6 +422,40 @@ public class TradingPartnerClient extends TpmBaseClient {
                 return null;
             }
         );
+    }
+
+    public void setTradingPartnerVerboseProperties(JSONObject jsonTradingPartnerVerbose, TradingPartnerVerboseDto tradingPartner) {
+        tradingPartner.setName(optString(jsonTradingPartnerVerbose, "Name"));
+        tradingPartner.setShortName(optString(jsonTradingPartnerVerbose, "ShortName"));
+        tradingPartner.setWebURL(optString(jsonTradingPartnerVerbose, "WebURL"));
+        tradingPartner.setLogoId(optString(jsonTradingPartnerVerbose, "LogoId"));
+        tradingPartner.setEmailAddress(optString(jsonTradingPartnerVerbose, "EmailAddress"));
+        tradingPartner.setPhoneNumber(optString(jsonTradingPartnerVerbose, "PhoneNumber"));
+        tradingPartner.setDocumentSchemaVersion(optString(jsonTradingPartnerVerbose, "DocumentSchemaVersion"));
+        tradingPartner.setArtifactType(optString(jsonTradingPartnerVerbose, "artifactType"));
+        tradingPartner.setArtifactStatus(optString(jsonTradingPartnerVerbose, "artifactStatus"));
+        tradingPartner.setDisplayedName(optString(jsonTradingPartnerVerbose, "displayName"));
+        tradingPartner.setSemanticVersion(optString(jsonTradingPartnerVerbose, "semanticVersion"));
+        tradingPartner.setUniqueId(optString(jsonTradingPartnerVerbose, "uniqueId"));
+        tradingPartner.setId(optString(jsonTradingPartnerVerbose, "id"));
+        tradingPartner.setSearchableAttributes(parseSearchableAttributes(jsonTradingPartnerVerbose));
+        tradingPartner.setAdministrativeData(buildAdministrativeDataObject(jsonTradingPartnerVerbose.getJSONObject("administrativeData")));
+    }
+
+    private Map<String, List<String>> parseSearchableAttributes(JSONObject jsonObject) {
+        Map<String, List<String>> searchableAttributesMap = new HashMap<>();
+        if (jsonObject.has("searchableAttributes")) {
+            JSONObject jsonSearchableAttributes = jsonObject.getJSONObject("searchableAttributes");
+            for (String key : jsonSearchableAttributes.keySet()) {
+                JSONArray jsonArray = jsonSearchableAttributes.getJSONArray(key);
+                List<String> values = new ArrayList<>();
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    values.add(jsonArray.getString(i));
+                }
+                searchableAttributesMap.put(key, values);
+            }
+        }
+        return searchableAttributesMap;
     }
 
 }

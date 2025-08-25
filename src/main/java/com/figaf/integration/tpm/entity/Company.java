@@ -8,16 +8,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class Subsidiary extends TpmObjectMetadata {
-
-    private String shortName;
-    private String webUrl;
-    private String logoId;
-    private String emailAddress;
-    private String phoneNumber;
+public class Company extends TpmObjectMetadata {
 
     private ProfileDto profile;
-
-    private String parentId;
-
 }

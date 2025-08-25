@@ -32,4 +32,6 @@ public class TradingPartnerVerboseDto {
     private String uniqueId;
     private String id;
     private String displayedName;
+
+    private String payload;
 }

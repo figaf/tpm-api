@@ -5,8 +5,8 @@ import com.figaf.integration.common.entity.RequestContext;
 import com.figaf.integration.common.factory.HttpClientsFactory;
 import com.figaf.integration.tpm.client.company.CompanyProfileClient;
 import com.figaf.integration.tpm.data_provider.AgentTestDataProvider;
+import com.figaf.integration.tpm.entity.Company;
 import com.figaf.integration.tpm.entity.Subsidiary;
-import com.figaf.integration.tpm.entity.TpmObjectMetadata;
 import com.figaf.integration.tpm.entity.trading.Channel;
 import com.figaf.integration.tpm.entity.trading.Identifier;
 import com.figaf.integration.tpm.entity.trading.System;
@@ -40,7 +40,7 @@ public class CompanyProfileClientTest {
         log.debug("#test_getAllMetadata: agentTestData={}", agentTestData);
         RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
 
-        List<TpmObjectMetadata> companyProfiles = companyProfileClient.getAllMetadata(requestContext);
+        List<Company> companyProfiles = companyProfileClient.getAllMetadata(requestContext);
 
         assertThat(companyProfiles).as(METADATA_NOT_NULL_MSG).isNotNull();
     }
