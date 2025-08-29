@@ -57,7 +57,9 @@ class BusinessDocumentsClientTest {
         interchangeRequest.setReceiverMessageType("ORDERS.ORDERS05");
 
         List<Interchange> interchanges = businessDocumentsClient.searchInterchanges(requestContext, interchangeRequest);
-        assertThat(interchanges).isNotEmpty();
+        // we can't really rely on presence of these interchanges. No guarantees that somebody triggers them.
+        // ideally we need to send message from tests but even then, it may fail due to a problem with runtime
+        //assertThat(interchanges).isNotEmpty();
 
         for (Interchange interchange : interchanges) {
             List<byte[]> payloads = new ArrayList<>();
