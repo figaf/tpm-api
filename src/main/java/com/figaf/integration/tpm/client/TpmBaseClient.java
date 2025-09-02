@@ -53,6 +53,10 @@ public abstract class TpmBaseClient extends BaseClient {
     protected static final String COMMUNICATIONS_RESOURCE = "/itspaces/tpm/tradingpartners/%s/systems/%s/channels";
     protected static final String SIGNATURE_VERIFICATION_CONFIGURATIONS_RESOURCE = "/itspaces/tpm/tradingpartners/%s/config.signval";
 
+    protected static final String CROSS_ACTIONS_UPLOAD_ARCHIVE_RESOURCE = "/itspaces/tpm/resourcefile";
+    protected static final String CROSS_ACTIONS_EXECUTE_IMPORT_RESOURCE = "/itspaces/tpm/api/2.0/tasks.bulk";
+    protected static final String CROSS_ACTIONS_TASK_STATUS_RESOURCE = "/itspaces/tpm/api/2.0/task.logs/%s";
+
     protected final ObjectMapper jsonMapper;
 
     public TpmBaseClient(HttpClientsFactory httpClientsFactory) {
