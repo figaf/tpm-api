@@ -1,6 +1,7 @@
 package com.figaf.integration.tpm.entity.trading;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.figaf.integration.tpm.entity.AdministrativeData;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -28,7 +29,11 @@ public class System implements Serializable {
     @JsonProperty("TypeSystems")
     private List<TypeSystemWithVersions> typeSystems;
 
+    private AdministrativeData administrativeData;
+
     private String displayName;
     private String id;
+
+    private String rawPayload;
 
 }

@@ -6,11 +6,12 @@ import com.figaf.integration.common.factory.HttpClientsFactory;
 import com.figaf.integration.tpm.client.trading.TradingPartnerClient;
 import com.figaf.integration.tpm.data_provider.AgentTestDataProvider;
 import com.figaf.integration.tpm.data_provider.CustomHostAgentTestData;
-import com.figaf.integration.tpm.entity.*;
+import com.figaf.integration.tpm.entity.TpmObjectMetadata;
 import com.figaf.integration.tpm.entity.trading.*;
 import com.figaf.integration.tpm.entity.trading.System;
-import com.figaf.integration.tpm.entity.trading.verbose.TradingPartnerVerboseDto;
+import com.figaf.integration.tpm.entity.trading.verbose.TpmObjectDetails;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -58,8 +59,8 @@ public class TradingPartnerClientTest {
         List<TpmObjectMetadata> tradingPartners = tradingPartnerClient.getAllMetadata(requestContext);
 
         tradingPartners.forEach(tradingPartner -> {
-            TradingPartnerVerboseDto tradingPartnerVerboseDto = tradingPartnerClient.getById(tradingPartner.getObjectId(), requestContext);
-            assertThat(tradingPartnerVerboseDto).as(EXPECTED_NOT_NULL_VERBOSE_MSG).isNotNull();
+            TpmObjectDetails tpmObjectDetails = tradingPartnerClient.getById(tradingPartner.getObjectId(), requestContext);
+            assertThat(tpmObjectDetails).as(EXPECTED_NOT_NULL_VERBOSE_MSG).isNotNull();
         });
     }
 
@@ -74,6 +75,28 @@ public class TradingPartnerClientTest {
         tradingPartners.forEach(tradingPartner -> {
             String tradingPartnerRawResponse = tradingPartnerClient.getRawById(tradingPartner.getObjectId(), requestContext);
             assertThat(tradingPartnerRawResponse).as(EXPECTED_NOT_NULL_RAW_MSG).isNotEmpty();
+        });
+    }
+
+    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
+    @ArgumentsSource(AgentTestDataProvider.class)
+    void test_getAggregatedTradingPartner(AgentTestData agentTestData) {
+        log.debug("#test_getAggregatedTradingPartner: agentTestData={}", agentTestData);
+        RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
+
+        List<TpmObjectMetadata> tradingPartners = tradingPartnerClient.getAllMetadata(requestContext);
+
+        tradingPartners.forEach(tradingPartner -> {
+            //skip test objects
+            if (StringUtils.containsAnyIgnoreCase(tradingPartner.getDisplayedName(), "test", "ZZ")) {
+                return;
+            }
+            AggregatedTpmObject aggregatedTradingPartner = tradingPartnerClient.getAggregatedTradingPartner(tradingPartner.getObjectId(), requestContext);
+            assertThat(aggregatedTradingPartner).isNotNull();
+            assertThat(aggregatedTradingPartner.getTpmObjectDetails()).isNotNull();
+            assertThat(aggregatedTradingPartner.getSystems()).isNotEmpty();
+            assertThat(aggregatedTradingPartner.getIdentifiers()).isNotEmpty();
+            assertThat(aggregatedTradingPartner.getSystemIdToChannels()).isNotEmpty();
         });
     }
 
@@ -214,7 +237,7 @@ public class TradingPartnerClientTest {
         request.getProfile().getAddress().setStreetName("My Street");
         request.getProfile().getAddress().setStreetPostalCode("567");
 
-        TradingPartnerVerboseDto tradingPartner = tradingPartnerClient.createTradingPartner(request, requestContext);
+        TpmObjectDetails tradingPartner = tradingPartnerClient.createTradingPartner(request, requestContext);
 
         assertThat(tradingPartner).as(METADATA_NOT_NULL_MSG).isNotNull();
     }

@@ -2,26 +2,25 @@ package com.figaf.integration.tpm.client.company;
 
 import com.figaf.integration.common.entity.RequestContext;
 import com.figaf.integration.common.factory.HttpClientsFactory;
-import com.figaf.integration.tpm.client.TpmBaseClient;
+import com.figaf.integration.tpm.client.TpmBaseClientForTradingPartnerOrCompanyOrSubsidiary;
 import com.figaf.integration.tpm.entity.*;
 import com.figaf.integration.tpm.entity.trading.Channel;
 import com.figaf.integration.tpm.entity.trading.Identifier;
 import com.figaf.integration.tpm.entity.trading.System;
+import com.figaf.integration.tpm.entity.trading.AggregatedTpmObject;
+import com.figaf.integration.tpm.entity.trading.verbose.TpmObjectDetails;
 import com.figaf.integration.tpm.enumtypes.TpmObjectType;
 import lombok.extern.slf4j.Slf4j;
-import com.figaf.integration.tpm.parser.GenericTpmResponseParser;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static com.figaf.integration.common.utils.Utils.optString;
 import static java.lang.String.format;
 
 @Slf4j
-public class CompanyProfileClient extends TpmBaseClient {
+public class CompanyProfileClient extends TpmBaseClientForTradingPartnerOrCompanyOrSubsidiary {
 
     public CompanyProfileClient(HttpClientsFactory httpClientsFactory) {
         super(httpClientsFactory);
@@ -107,15 +106,62 @@ public class CompanyProfileClient extends TpmBaseClient {
         );
     }
 
+    public TpmObjectDetails getCompanyDetails(RequestContext requestContext) {
+        log.debug("#getCompanyDetails: requestContext={}", requestContext);
+
+        return executeGet(
+            requestContext,
+            format(COMPANY_PROFILE_RESOURCE),
+            this::buildTpmObjectDetails
+        );
+    }
+
+    public TpmObjectDetails getSubsidiaryDetails(RequestContext requestContext, String parentCompanyId, String subsidiaryId) {
+        log.debug("#getSubsidiaryDetails: requestContext = {}", requestContext);
+
+        return executeGet(
+            requestContext,
+            format(SUBSIDIARY_RESOURCE, parentCompanyId, subsidiaryId),
+            this::buildTpmObjectDetails
+        );
+    }
+
+    public AggregatedTpmObject getAggregatedCompany(RequestContext requestContext) {
+        log.debug("#getAggregatedCompany: requestContext = {}", requestContext);
+
+        TpmObjectDetails tpmObjectDetails = getCompanyDetails(requestContext);
+        List<System> systems = getCompanySystems(requestContext, tpmObjectDetails.getId());
+        List<Identifier> identifiers = getCompanyIdentifiers(requestContext, tpmObjectDetails.getId());
+        Map<String, List<Channel>> systemIdToChannels = new LinkedHashMap<>();
+        for (System system : systems) {
+            List<Channel> partnerProfileChannels = getCompanyChannels(requestContext, tpmObjectDetails.getId(), system.getId());
+            systemIdToChannels.put(system.getId(), partnerProfileChannels);
+        }
+
+        return new AggregatedTpmObject(tpmObjectDetails, systems, identifiers, systemIdToChannels);
+    }
+
+    public AggregatedTpmObject getAggregatedSubsidiary(RequestContext requestContext, String parentCompanyId, String subsidiaryId) {
+        log.debug("#getAggregatedSubsidiary: requestContext = {}, parentCompanyId = {}, subsidiaryId = {}", requestContext, parentCompanyId, subsidiaryId);
+
+        TpmObjectDetails tpmObjectDetails = getSubsidiaryDetails(requestContext, parentCompanyId, subsidiaryId);
+        List<System> systems = getSubsidiarySystems(requestContext, parentCompanyId, subsidiaryId);
+        List<Identifier> identifiers = getSubsidiaryIdentifiers(requestContext, parentCompanyId, subsidiaryId);
+        Map<String, List<Channel>> systemIdToChannels = new LinkedHashMap<>();
+        for (System system : systems) {
+            List<Channel> partnerProfileChannels = getSubsidiaryChannels(requestContext, parentCompanyId, subsidiaryId, system.getId());
+            systemIdToChannels.put(system.getId(), partnerProfileChannels);
+        }
+
+        return new AggregatedTpmObject(tpmObjectDetails, systems, identifiers, systemIdToChannels);
+    }
+
     public List<System> getCompanySystems(RequestContext requestContext, String companyId) {
         log.debug("#getCompanySystems: requestContext = {}, companyId = {}", requestContext, companyId);
         return executeGet(
             requestContext,
             format(COMPANY_SYSTEMS_RESOURCE, companyId),
-            response -> {
-                System[] systems = jsonMapper.readValue(response, System[].class);
-                return Arrays.asList(systems);
-            }
+            this::parseSystemsList
         );
     }
 
@@ -124,10 +170,7 @@ public class CompanyProfileClient extends TpmBaseClient {
         return executeGet(
             requestContext,
             format(SUBSIDIARY_SYSTEMS_RESOURCE, parentCompanyId, subsidiaryId),
-            response -> {
-                System[] systems = jsonMapper.readValue(response, System[].class);
-                return Arrays.asList(systems);
-            }
+            this::parseSystemsList
         );
     }
 
@@ -136,10 +179,7 @@ public class CompanyProfileClient extends TpmBaseClient {
         return executeGet(
             requestContext,
             format(COMPANY_IDENTIFIERS_RESOURCE, companyId),
-            response -> {
-                Identifier[] identifiers = jsonMapper.readValue(response, Identifier[].class);
-                return Arrays.asList(identifiers);
-            }
+            this::parseIdentifiersList
         );
     }
 
@@ -148,10 +188,7 @@ public class CompanyProfileClient extends TpmBaseClient {
         return executeGet(
             requestContext,
             format(SUBSIDIARY_IDENTIFIERS_RESOURCE, parentCompanyId, subsidiaryId),
-            response -> {
-                Identifier[] identifiers = jsonMapper.readValue(response, Identifier[].class);
-                return Arrays.asList(identifiers);
-            }
+            this::parseIdentifiersList
         );
     }
 
@@ -160,10 +197,7 @@ public class CompanyProfileClient extends TpmBaseClient {
         return executeGet(
             requestContext,
             format(COMPANY_CHANNELS_RESOURCE, companyId, systemId),
-            response -> {
-                Channel[] channels = jsonMapper.readValue(response, Channel[].class);
-                return Arrays.asList(channels);
-            }
+            this::parseChannelsList
         );
     }
 
@@ -172,10 +206,7 @@ public class CompanyProfileClient extends TpmBaseClient {
         return executeGet(
             requestContext,
             format(SUBSIDIARY_CHANNELS_RESOURCE, parentCompanyId, subsidiaryId, systemId),
-            response -> {
-                Channel[] channels = jsonMapper.readValue(response, Channel[].class);
-                return Arrays.asList(channels);
-            }
+            this::parseChannelsList
         );
     }
 
