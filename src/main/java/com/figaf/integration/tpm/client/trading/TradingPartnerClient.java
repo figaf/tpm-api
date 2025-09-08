@@ -5,13 +5,14 @@ import com.figaf.integration.common.entity.RequestContext;
 import com.figaf.integration.common.exception.ClientIntegrationException;
 import com.figaf.integration.common.factory.HttpClientsFactory;
 import com.figaf.integration.tpm.client.TpmBaseClientForTradingPartnerOrCompanyOrSubsidiary;
-import com.figaf.integration.tpm.entity.*;
+import com.figaf.integration.tpm.entity.TpmObjectMetadata;
 import com.figaf.integration.tpm.entity.trading.*;
 import com.figaf.integration.tpm.entity.trading.System;
 import com.figaf.integration.tpm.entity.trading.verbose.TpmObjectDetails;
 import com.figaf.integration.tpm.enumtypes.TpmObjectType;
 import com.figaf.integration.tpm.parser.GenericTpmResponseParser;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -44,7 +45,7 @@ public class TradingPartnerClient extends TpmBaseClientForTradingPartnerOrCompan
     public TpmObjectDetails getById(String tradingPartnerId, RequestContext requestContext) {
         log.debug("#getById: requestContext={}, tradingPartnerId={}", requestContext, tradingPartnerId);
 
-        return executeGet(
+        return executeGetAndReturnNullIfNotFoundErrorOccurs(
             requestContext,
             format(TRADING_PARTNER_RESOURCE_BY_ID, tradingPartnerId),
             this::buildTpmObjectDetails
@@ -54,6 +55,10 @@ public class TradingPartnerClient extends TpmBaseClientForTradingPartnerOrCompan
     public AggregatedTpmObject getAggregatedTradingPartner(String tradingPartnerId, RequestContext requestContext) {
         log.debug("#getAggregatedTradingPartner: requestContext={}, tradingPartnerId={}", requestContext, tradingPartnerId);
         TpmObjectDetails tpmObjectDetails = getById(tradingPartnerId, requestContext);
+        if (tpmObjectDetails == null) {
+            return null;
+        }
+
         List<System> systems = getPartnerProfileSystems(tradingPartnerId, requestContext);
         List<Identifier> identifiers = getPartnerProfileIdentifiers(tradingPartnerId, requestContext);
         Map<String, List<Channel>> systemIdToChannels = new LinkedHashMap<>();
@@ -62,7 +67,9 @@ public class TradingPartnerClient extends TpmBaseClientForTradingPartnerOrCompan
             systemIdToChannels.put(system.getId(), partnerProfileChannels);
         }
 
-        return new AggregatedTpmObject(tpmObjectDetails, systems, identifiers, systemIdToChannels);
+        ProfileConfiguration profileConfiguration = resolveProfileConfiguration(tradingPartnerId, requestContext);
+
+        return new AggregatedTpmObject(tpmObjectDetails, systems, identifiers, systemIdToChannels, profileConfiguration);
     }
 
     public String getRawById(String tradingPartnerId, RequestContext requestContext) {
@@ -112,6 +119,15 @@ public class TradingPartnerClient extends TpmBaseClientForTradingPartnerOrCompan
                 SystemType[] systemTypes = jsonMapper.readValue(response, SystemType[].class);
                 return Arrays.asList(systemTypes);
             }
+        );
+    }
+
+    public String getAllSystemTypesAsRawPayload(RequestContext requestContext) {
+        log.debug("#getAllSystemTypesAsRawPayload: requestContext = {}", requestContext);
+
+        return executeGet(
+            requestContext,
+            SYSTEM_TYPES_RESOURCE
         );
     }
 
@@ -180,7 +196,7 @@ public class TradingPartnerClient extends TpmBaseClientForTradingPartnerOrCompan
                 JSONObject jsonObject = new JSONObject(response);
                 JSONArray valueArray = jsonObject.getJSONArray("value");
                 List<TypeSystemVersion> typeSystemVersions = new ArrayList<>();
-                for  (int i = 0; i < valueArray.length(); i++) {
+                for (int i = 0; i < valueArray.length(); i++) {
                     JSONObject valueObject = valueArray.getJSONObject(i);
                     TypeSystemVersion typeSystemVersion = new TypeSystemVersion();
                     typeSystemVersion.setId(valueObject.getString("Id"));
@@ -262,6 +278,41 @@ public class TradingPartnerClient extends TpmBaseClientForTradingPartnerOrCompan
                 return Arrays.asList(adapters);
             }
         );
+    }
+
+    public ProfileConfiguration resolveProfileConfiguration(String tradingPartnerId, RequestContext requestContext) {
+        JSONObject partnerProfileConfig = executeGetAndReturnNullIfNotFoundErrorOccurs(
+            requestContext,
+            format(TRADING_PARTNER_CONFIGURATION_RESOURCE, tradingPartnerId),
+            JSONObject::new
+        );
+        if (partnerProfileConfig == null) {
+            return null;
+        }
+
+        JSONArray signatureVerificationConfigurations = executeGetAndReturnNullIfNotFoundErrorOccurs(
+            requestContext,
+            format(TRADING_PARTNER_CONFIG_SIGNVAL_RESOURCE, tradingPartnerId),
+            JSONArray::new
+        );
+        if (IterableUtils.isEmpty(signatureVerificationConfigurations)) {
+            return null;
+        }
+
+        JSONObject signatureValidationConfig = new JSONObject();
+        JSONObject configurationEntries = new JSONObject();
+
+        signatureValidationConfig.put("ConfigurationType", "SIGNATURE_VALIDATION_CONFIG");
+        signatureValidationConfig.put("ConfigurationEntries", configurationEntries);
+
+        for (int i = 0; i < signatureVerificationConfigurations.length(); i++) {
+            JSONObject signatureVerificationConfigurationsJSONObject = signatureVerificationConfigurations.getJSONObject(i);
+            configurationEntries.put(signatureVerificationConfigurationsJSONObject.getString("Alias"), signatureVerificationConfigurationsJSONObject);
+        }
+
+        partnerProfileConfig.put("SignatureValidationConfigurations", signatureValidationConfig);
+
+        return parseProfileConfiguration(partnerProfileConfig);
     }
 
     public TpmObjectDetails createTradingPartner(CreateTradingPartnerRequest createTradingPartnerRequest, RequestContext requestContext) {
@@ -395,7 +446,7 @@ public class TradingPartnerClient extends TpmBaseClientForTradingPartnerOrCompan
         executeMethod(
             requestContext,
             PATH_FOR_TOKEN,
-            format(SIGNATURE_VERIFICATION_CONFIGURATIONS_RESOURCE, tradingPartnerId),
+            format(TRADING_PARTNER_CONFIG_SIGNVAL_RESOURCE, tradingPartnerId),
             (url, token, restTemplateWrapper) -> {
                 HttpHeaders httpHeaders = createHttpHeadersWithCSRFToken(token);
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);

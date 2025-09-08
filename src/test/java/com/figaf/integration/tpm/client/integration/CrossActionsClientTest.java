@@ -7,10 +7,12 @@ import com.figaf.integration.tpm.data_provider.AgentTestDataProvider;
 import com.figaf.integration.tpm.data_provider.CustomHostAgentTestData;
 import com.figaf.integration.tpm.entity.crossactions.ImportRequest;
 import com.figaf.integration.tpm.entity.crossactions.ImportTaskResult;
+import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -28,14 +30,14 @@ class CrossActionsClientTest {
     }
 
     @Test
-    void testCrossActions() throws InterruptedException {
+    void testCrossActions() throws InterruptedException, IOException {
         CustomHostAgentTestData customHostAgentTestData = AgentTestDataProvider.buildAgentTestDataForTestSystem();
         RequestContext requestContext = customHostAgentTestData.createRequestContext(customHostAgentTestData.getTitle());
         requestContext.getConnectionProperties().setHost(customHostAgentTestData.getIntegrationSuiteHost());
 
         File file = new File("src/test/resources/import-archive.zip");
 
-        String importRequestId = crossActionsClient.uploadAgreementsArchive(requestContext, file);
+        String importRequestId = crossActionsClient.uploadAgreementsArchive(requestContext, FileUtils.readFileToByteArray(file));
         assertThat(importRequestId).isNotEmpty();
 
         ImportRequest importRequest = buildImportRequest(importRequestId);

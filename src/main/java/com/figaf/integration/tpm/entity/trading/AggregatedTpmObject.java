@@ -2,15 +2,15 @@ package com.figaf.integration.tpm.entity.trading;
 
 import com.figaf.integration.tpm.entity.AdministrativeData;
 import com.figaf.integration.tpm.entity.trading.verbose.TpmObjectDetails;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.*;
 import java.util.stream.Stream;
 
+@NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@Setter
 @ToString
 public class AggregatedTpmObject {
 
@@ -18,7 +18,7 @@ public class AggregatedTpmObject {
     private List<System> systems;
     private List<Identifier> identifiers;
     private Map<String, List<Channel>> systemIdToChannels;
-    //TODO partner profile / company configuration object
+    private ProfileConfiguration profileConfiguration;
 
     public List<System> getSystems() {
         if (systems == null) {
@@ -47,7 +47,8 @@ public class AggregatedTpmObject {
                 systems.stream().map(System::getAdministrativeData),
                 identifiers.stream().map(Identifier::getAdministrativeData),
                 systemIdToChannels.values().stream()
-                    .flatMap(channels -> channels.stream().map(Channel::getAdministrativeData))
+                    .flatMap(channels -> channels.stream().map(Channel::getAdministrativeData)),
+                profileConfiguration == null ? Stream.<AdministrativeData>empty() : Stream.of(profileConfiguration.getAdministrativeData())
             )
             .flatMap(s -> s)
             .filter(Objects::nonNull)

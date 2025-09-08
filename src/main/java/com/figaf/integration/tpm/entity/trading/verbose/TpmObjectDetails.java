@@ -33,4 +33,6 @@ public class TpmObjectDetails {
     private String id;
     private String displayedName;
 
+    private String rawPayload;
+
 }

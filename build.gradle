@@ -14,7 +14,7 @@ ext {
     snapshotsRepoPassword = project.findProperty('snapshotsRepoPassword') ?: ''
 
     lombokVersion = '1.18.34'
-    integrationCommonsVersion = '2.8'
+    integrationCommonsVersion = '2.10-IRT-5227-SNAPSHOT'
     integrationCommonsTestVersion = '2.2'
     snakeyamlVersion = '2.2'
     logbackVersion = "1.5.7"

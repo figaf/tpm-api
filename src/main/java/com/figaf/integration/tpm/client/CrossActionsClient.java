@@ -31,7 +31,7 @@ public class CrossActionsClient extends TpmBaseClient {
         super(httpClientsFactory);
     }
 
-    public String uploadAgreementsArchive(RequestContext requestContext, File zipFile) {
+    public String uploadAgreementsArchive(RequestContext requestContext, byte[] zipFile) {
         log.debug("#uploadAgreementsArchive: requestContext = {}", requestContext);
         return executeMethod(
             requestContext,
@@ -41,8 +41,8 @@ public class CrossActionsClient extends TpmBaseClient {
                 try {
                     MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create()
                         .setMode(HttpMultipartMode.LEGACY)
-                        .addBinaryBody("datum", FileUtils.readFileToByteArray(zipFile), ContentType.create("application/x-zip-compressed"), zipFile.getName())
-                        .addTextBody("name", zipFile.getName(), ContentType.TEXT_PLAIN);
+                        .addBinaryBody("datum", zipFile, ContentType.create("application/x-zip-compressed"), "archive.zip")
+                        .addTextBody("name", "archive.zip", ContentType.TEXT_PLAIN);
 
                     HttpPost post = new HttpPost(url);
                     post.setHeader(X_CSRF_TOKEN, token);

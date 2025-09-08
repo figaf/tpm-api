@@ -94,4 +94,12 @@ public class AgreementTemplateClient extends TpmBaseClient {
         );
     }
 
+    public String getB2BScenariosForAgreementTemplateAsRawPayload(String agreementTemplateId, String b2BScenarioDetailsId, RequestContext requestContext) {
+        log.debug("#getB2BScenariosForAgreementTemplateAsRawPayload: agreementTemplateId = {}, b2BScenarioDetailsId = {}, requestContext = {}", agreementTemplateId, b2BScenarioDetailsId, requestContext);
+        return executeGet(
+            requestContext,
+            String.format(AGREEMENT_TEMPLATE_B2B_SCENARIOS_RESOURCE, agreementTemplateId, b2BScenarioDetailsId)
+        );
+    }
+
 }

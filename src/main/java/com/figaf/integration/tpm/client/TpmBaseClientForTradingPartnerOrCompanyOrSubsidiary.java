@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.figaf.integration.common.factory.HttpClientsFactory;
 import com.figaf.integration.tpm.entity.trading.Channel;
 import com.figaf.integration.tpm.entity.trading.Identifier;
+import com.figaf.integration.tpm.entity.trading.ProfileConfiguration;
 import com.figaf.integration.tpm.entity.trading.System;
 import com.figaf.integration.tpm.entity.trading.verbose.*;
 import org.json.JSONArray;
@@ -68,25 +69,27 @@ public class TpmBaseClientForTradingPartnerOrCompanyOrSubsidiary extends TpmBase
 
     protected TpmObjectDetails buildTpmObjectDetails(String responseEntityBody) {
         Object object = new JSONTokener(responseEntityBody).nextValue();
-        JSONObject tradingPartnerVerboseResponse;
+        JSONObject tpmObjectDetailsJsonObject;
         if (object instanceof JSONArray jsonArray) {
-            tradingPartnerVerboseResponse = jsonArray.getJSONObject(0);
+            tpmObjectDetailsJsonObject = jsonArray.getJSONObject(0);
         } else if (object instanceof JSONObject jsonObject) {
-            tradingPartnerVerboseResponse = jsonObject;
+            tpmObjectDetailsJsonObject = jsonObject;
         } else {
             throw new JSONException("Unexpected JSON type: " + object.getClass());
         }
-        TpmObjectDetails tradingPartner = new TpmObjectDetails();
+        TpmObjectDetails tpmObjectDetails = new TpmObjectDetails();
 
-        setTradingPartnerVerboseProperties(tradingPartnerVerboseResponse, tradingPartner);
+        setTpmObjectDetailsProperties(tpmObjectDetailsJsonObject, tpmObjectDetails);
 
-        JSONObject jsonArtifactProperties = tradingPartnerVerboseResponse.getJSONObject("artifactProperties");
-        tradingPartner.setArtifactProperties(parseArtifactProperties(jsonArtifactProperties));
+        JSONObject jsonArtifactProperties = tpmObjectDetailsJsonObject.getJSONObject("artifactProperties");
+        tpmObjectDetails.setArtifactProperties(parseArtifactProperties(jsonArtifactProperties));
 
-        JSONObject profileJsonObject = tradingPartnerVerboseResponse.getJSONObject("Profile");
-        tradingPartner.setProfile(parseProfileDto(profileJsonObject));
+        JSONObject profileJsonObject = tpmObjectDetailsJsonObject.getJSONObject("Profile");
+        tpmObjectDetails.setProfile(parseProfileDto(profileJsonObject));
 
-        return tradingPartner;
+        tpmObjectDetails.setRawPayload(tpmObjectDetailsJsonObject.toString());
+
+        return tpmObjectDetails;
     }
 
     protected ArtifactProperties parseArtifactProperties(final JSONObject jsonArtifactProperties) {
@@ -139,7 +142,19 @@ public class TpmBaseClientForTradingPartnerOrCompanyOrSubsidiary extends TpmBase
         return profile;
     }
 
-    private void setTradingPartnerVerboseProperties(JSONObject jsonTradingPartnerVerbose, TpmObjectDetails tradingPartner) {
+    protected ProfileConfiguration parseProfileConfiguration(JSONObject profileConfig) {
+        ProfileConfiguration profileConfiguration = new ProfileConfiguration();
+        profileConfiguration.setParentId(profileConfig.getString("ParentId"));
+        profileConfiguration.setParentArtifactType(profileConfig.getString("ParentArtifactType"));
+        profileConfiguration.setDisplayName(profileConfig.getString("displayName"));
+        profileConfiguration.setId(profileConfig.getString("id"));
+        profileConfiguration.setArtifactType(profileConfig.getString("artifactType"));
+        profileConfiguration.setAdministrativeData(buildAdministrativeDataObject(profileConfig.getJSONObject("administrativeData")));
+        profileConfiguration.setRawPayload(profileConfig.toString());
+        return profileConfiguration;
+    }
+
+    private void setTpmObjectDetailsProperties(JSONObject jsonTradingPartnerVerbose, TpmObjectDetails tradingPartner) {
         tradingPartner.setName(optString(jsonTradingPartnerVerbose, "Name"));
         tradingPartner.setShortName(optString(jsonTradingPartnerVerbose, "ShortName"));
         tradingPartner.setWebURL(optString(jsonTradingPartnerVerbose, "WebURL"));

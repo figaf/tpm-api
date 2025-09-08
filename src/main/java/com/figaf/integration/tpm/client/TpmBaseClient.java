@@ -6,15 +6,9 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.figaf.integration.common.client.BaseClient;
 import com.figaf.integration.common.factory.HttpClientsFactory;
 import com.figaf.integration.tpm.entity.AdministrativeData;
-import com.figaf.integration.tpm.entity.trading.verbose.*;
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 
-import java.util.*;
-
-import static com.figaf.integration.common.utils.Utils.optString;
+import java.util.Date;
 
 /**
  * @author Kostas Charalambous
@@ -23,6 +17,8 @@ public abstract class TpmBaseClient extends BaseClient {
 
     protected static final String MIG_RESOURCE = "/api/1.0/migs";
     public static final String MIG_RESOURCE_BY_ID = "/api/1.0/migs/%s";
+    public static final String MIG_VERSION_INFO_RESOURCE = "/externalApi/1.0/migs/%s";
+    public static final String MAG_VERSION_INFO_RESOURCE = "/externalApi/1.0/mags/%s";;
     public static final String MIG_CREATE_DRAFT_RESOURCE = "/api/1.0/migs/%s/migVersions?source=%s&status=draft";
     protected static final String COMPANY_PROFILE_RESOURCE = "/itspaces/tpm/company";
     protected static final String COMPANY_SUBSIDIARIES_RESOURCE = "/itspaces/tpm/company/%s/subsidiaries";
@@ -52,7 +48,13 @@ public abstract class TpmBaseClient extends BaseClient {
     protected static final String PRODUCTS_RESOURCE = "/itspaces/tpm/bootstrap/?type=products";
     protected static final String TRADING_PARTNER_IDENTIFIERS_RESOURCE = "/itspaces/tpm/tradingpartners/%s/identifiers";
     protected static final String COMMUNICATIONS_RESOURCE = "/itspaces/tpm/tradingpartners/%s/systems/%s/channels";
-    protected static final String SIGNATURE_VERIFICATION_CONFIGURATIONS_RESOURCE = "/itspaces/tpm/tradingpartners/%s/config.signval";
+
+    protected static final String TRADING_PARTNER_CONFIGURATION_RESOURCE = "/itspaces/tpm/tradingpartners/%s::profileConfiguration";
+    protected static final String TRADING_PARTNER_CONFIG_SIGNVAL_RESOURCE = "/itspaces/tpm/tradingpartners/%s/config.signval";
+    protected static final String COMPANY_PROFILE_CONFIGURATION_RESOURCE = "/itspaces/tpm/company/%s::profileConfiguration";
+    protected static final String COMPANY_CONFIG_DECRYPT_RESOURCE = "/itspaces/tpm/company/%s/config.decrypt";
+    protected static final String SUBSIDIARY_PROFILE_CONFIGURATION_RESOURCE = "/itspaces/tpm/company/%s/subsidiaries/%s::profileConfiguration";
+    protected static final String SUBSIDIARY_CONFIG_DECRYPT_RESOURCE = "/itspaces/tpm/company/%s/subsidiaries/%s/config.decrypt";
 
     protected static final String CROSS_ACTIONS_UPLOAD_ARCHIVE_RESOURCE = "/itspaces/tpm/resourcefile";
     protected static final String CROSS_ACTIONS_EXECUTE_IMPORT_RESOURCE = "/itspaces/tpm/api/2.0/tasks.bulk";
