@@ -10,8 +10,8 @@ public class Address {
     private String countryCode;
     private String countrySubdivisionCode;
     private String houseNumber;
-    private String pOBox;
-    private String pOBoxPostalCode;
+    private String poBox;
+    private String poBoxPostalCode;
     private String streetName;
     private String streetPostalCode;
 }
