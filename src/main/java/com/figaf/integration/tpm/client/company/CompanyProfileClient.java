@@ -110,7 +110,7 @@ public class CompanyProfileClient extends TpmBaseClient {
     public List<System> getCompanySystems(RequestContext requestContext, String companyId) {
         log.debug("#getCompanySystems: requestContext = {}, companyId = {}", requestContext, companyId);
         return executeGet(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             format(COMPANY_SYSTEMS_RESOURCE, companyId),
             response -> {
                 System[] systems = jsonMapper.readValue(response, System[].class);
@@ -122,7 +122,7 @@ public class CompanyProfileClient extends TpmBaseClient {
     public List<System> getSubsidiarySystems(RequestContext requestContext, String parentCompanyId, String subsidiaryId) {
         log.debug("#getSubsidiarySystems: requestContext = {}, parentCompanyId = {}, subsidiaryId = {}", requestContext, parentCompanyId, subsidiaryId);
         return executeGet(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             format(SUBSIDIARY_SYSTEMS_RESOURCE, parentCompanyId, subsidiaryId),
             response -> {
                 System[] systems = jsonMapper.readValue(response, System[].class);
@@ -134,7 +134,7 @@ public class CompanyProfileClient extends TpmBaseClient {
     public List<Identifier> getCompanyIdentifiers(RequestContext requestContext, String companyId) {
         log.debug("#getCompanyIdentifiers: requestContext = {}, companyId = {}", requestContext, companyId);
         return executeGet(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             format(COMPANY_IDENTIFIERS_RESOURCE, companyId),
             response -> {
                 Identifier[] identifiers = jsonMapper.readValue(response, Identifier[].class);
@@ -146,7 +146,7 @@ public class CompanyProfileClient extends TpmBaseClient {
     public List<Identifier> getSubsidiaryIdentifiers(RequestContext requestContext, String parentCompanyId, String subsidiaryId) {
         log.debug("#getSubsidiaryIdentifiers: requestContext = {}, parentCompanyId = {}, subsidiaryId = {}", requestContext, parentCompanyId, subsidiaryId);
         return executeGet(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             format(SUBSIDIARY_IDENTIFIERS_RESOURCE, parentCompanyId, subsidiaryId),
             response -> {
                 Identifier[] identifiers = jsonMapper.readValue(response, Identifier[].class);
@@ -158,7 +158,7 @@ public class CompanyProfileClient extends TpmBaseClient {
     public List<Channel> getCompanyChannels(RequestContext requestContext, String companyId, String systemId) {
         log.debug("#getCompanyChannels: requestContext = {}, companyId = {}, systemId = {}", requestContext, companyId, systemId);
         return executeGet(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             format(COMPANY_CHANNELS_RESOURCE, companyId, systemId),
             response -> {
                 Channel[] channels = jsonMapper.readValue(response, Channel[].class);
@@ -170,7 +170,7 @@ public class CompanyProfileClient extends TpmBaseClient {
     public List<Channel> getSubsidiaryChannels(RequestContext requestContext, String parentCompanyId, String subsidiaryId, String systemId) {
         log.debug("#getSubsidiaryChannels: requestContext = {}, parentCompanyId = {}, subsidiaryId = {}, systemId = {}", requestContext, parentCompanyId, subsidiaryId, systemId);
         return executeGet(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             format(SUBSIDIARY_CHANNELS_RESOURCE, parentCompanyId, subsidiaryId, systemId),
             response -> {
                 Channel[] channels = jsonMapper.readValue(response, Channel[].class);

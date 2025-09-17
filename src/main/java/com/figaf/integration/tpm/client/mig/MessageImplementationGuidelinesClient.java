@@ -36,7 +36,7 @@ public class MessageImplementationGuidelinesClient extends TpmBaseClient {
     public List<TpmObjectMetadata> getAllLatestMetadata(RequestContext requestContext) {
         log.debug("#getAllLatestMetadata: requestContext={}", requestContext);
         return executeGet(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             MIG_RESOURCE,
             (response) -> new MigResponseParser().parseJsonToTpmObjectMetadata(response)
         );
@@ -44,9 +44,8 @@ public class MessageImplementationGuidelinesClient extends TpmBaseClient {
 
     public String getRawById(String migVersionId, RequestContext requestContext) {
         log.debug("#getRawById: migVersionId={}, requestContext={}", migVersionId, requestContext);
-
         return executeGet(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             String.format(MIG_RESOURCE_BY_ID, migVersionId),
             (response) -> response
         );
@@ -56,7 +55,7 @@ public class MessageImplementationGuidelinesClient extends TpmBaseClient {
     public void saveAllSegmentsAndFields(RequestContext requestContext, String migVersionId) {
         log.debug("#saveAllSegmentsAndFields: requestContext={}, migVersionId={}", requestContext, migVersionId);
         executeMethod(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             PATH_FOR_TOKEN,
             format(MIG_RESOURCE_BY_ID, migVersionId),
             (url, token, restTemplateWrapper) -> {
@@ -102,7 +101,7 @@ public class MessageImplementationGuidelinesClient extends TpmBaseClient {
     public DraftCreationResponse createDraftWithAllSegmentsAndFieldsSelected(RequestContext requestContext, String name, String sourceMigVersionId) {
         log.debug("#createDraftWithAllSegmentsAndFieldsSelected: requestContext={}, name={}, sourceMigVersionId={}", requestContext, name, sourceMigVersionId);
         return executeMethod(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             PATH_FOR_TOKEN,
             format(MIG_CREATE_DRAFT_RESOURCE, name, sourceMigVersionId),
             (url, token, restTemplateWrapper) -> createDraftWithAllSegmentsAndFieldsSelected(
@@ -113,6 +112,24 @@ public class MessageImplementationGuidelinesClient extends TpmBaseClient {
                 restTemplateWrapper.getRestTemplate()
             )
         );
+    }
+
+    private static void updateAllIsSelected(JsonNode node) {
+        if (node.isObject()) {
+            ObjectNode objectNode = (ObjectNode) node;
+            JsonNode isSelectedNode = objectNode.get("IsSelected");
+            if (isSelectedNode != null && isSelectedNode.isBoolean() && !isSelectedNode.booleanValue()) {
+                objectNode.put("IsSelected", true);
+            }
+
+            for (JsonNode childNode : objectNode) {
+                updateAllIsSelected(childNode);
+            }
+        } else if (node.isArray()) {
+            for (JsonNode childNode : node) {
+                updateAllIsSelected(childNode);
+            }
+        }
     }
 
     private void saveAllSegmentsAndFields(
@@ -260,24 +277,6 @@ public class MessageImplementationGuidelinesClient extends TpmBaseClient {
         updateAllIsSelected(rootNode);
 
         return jsonMapper.writeValueAsString(rootNode);
-    }
-
-    private static void updateAllIsSelected(JsonNode node) {
-        if (node.isObject()) {
-            ObjectNode objectNode = (ObjectNode) node;
-            JsonNode isSelectedNode = objectNode.get("IsSelected");
-            if (isSelectedNode != null && isSelectedNode.isBoolean() && !isSelectedNode.booleanValue()) {
-                objectNode.put("IsSelected", true);
-            }
-
-            for (JsonNode childNode : objectNode) {
-                updateAllIsSelected(childNode);
-            }
-        } else if (node.isArray()) {
-            for (JsonNode childNode : node) {
-                updateAllIsSelected(childNode);
-            }
-        }
     }
 }
 
