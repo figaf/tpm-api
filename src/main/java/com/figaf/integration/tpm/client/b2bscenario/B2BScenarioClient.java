@@ -8,6 +8,10 @@ import com.figaf.integration.tpm.entity.B2BScenarioMetadata;
 import com.figaf.integration.tpm.entity.TpmObjectMetadata;
 import com.figaf.integration.tpm.parser.B2BScenarioResponseParser;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.springframework.http.*;
 
 import java.util.List;
@@ -31,12 +35,21 @@ public class B2BScenarioClient extends TpmBaseClient {
         );
     }
 
-    public String getB2BScenariosForAgreementAsJsonResponse(RequestContext requestContext, String agreementId) {
+    public JSONObject getB2BScenariosForAgreementAsJsonObject(RequestContext requestContext, String agreementId) {
         log.debug("#getB2BScenariosForAgreementAsJsonResponse: requestContext = {}, agreementId = {}", requestContext, agreementId);
         return executeGet(
             requestContext.withPreservingIntegrationSuiteUrl(),
             format(B2B_SCENARIOS_RESOURCE, agreementId),
-            response -> response
+            response -> {
+                Object object = new JSONTokener(response).nextValue();
+                if (object instanceof JSONArray jsonArray) {
+                    return jsonArray.getJSONObject(0);
+                } else if (object instanceof JSONObject jsonObject) {
+                   return jsonObject;
+                } else {
+                    throw new JSONException("Unexpected JSON type: " + object.getClass());
+                }
+            }
         );
     }
 

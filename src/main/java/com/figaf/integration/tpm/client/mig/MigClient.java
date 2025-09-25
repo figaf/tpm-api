@@ -25,11 +25,11 @@ import java.util.zip.*;
 import static java.lang.String.format;
 
 @Slf4j
-public class MessageImplementationGuidelinesClient extends TpmBaseClient {
+public class MigClient extends TpmBaseClient {
 
     private static final String PATH_FOR_TOKEN = "/api/1.0/user";
 
-    public MessageImplementationGuidelinesClient(HttpClientsFactory httpClientsFactory) {
+    public MigClient(HttpClientsFactory httpClientsFactory) {
         super(httpClientsFactory);
     }
 
@@ -48,6 +48,15 @@ public class MessageImplementationGuidelinesClient extends TpmBaseClient {
             requestContext.withPreservingIntegrationSuiteUrl(),
             String.format(MIG_RESOURCE_BY_ID, migVersionId),
             (response) -> response
+        );
+    }
+
+    public String getMigVersionInfoById(String migVersionId, RequestContext requestContext) {
+        log.debug("#getRawById: getMigVersionInfoById={}, requestContext={}", migVersionId, requestContext);
+
+        return executeGet(
+            requestContext,
+            String.format(MIG_VERSION_INFO_RESOURCE, migVersionId)
         );
     }
 

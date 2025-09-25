@@ -23,4 +23,11 @@ public class AgentTestDataProvider extends AbstractAgentTestDataProvider {
         String integrationSuiteHost = System.getProperty("agent-test-data.cpi-cf-integration-suite.integrationSuiteHost");
         return new CustomHostAgentTestData(agentTestData, integrationSuiteHost);
     }
+
+    public static CustomHostAgentTestData buildAgentTestDataForTestSystem() {
+        AgentTestData agentTestData = buildAgentTestData(Paths.get("src/test/resources/agent-test-data/cpi-cf-test-system"));
+        String integrationSuiteHost = System.getProperty("agent-test-data.cpi-cf-test-system.integrationSuiteHost");
+        return new CustomHostAgentTestData(agentTestData, integrationSuiteHost);
+    }
+
 }

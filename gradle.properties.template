@@ -9,3 +9,17 @@ agent-test-data.cpi-cf-integration-suite.password=
 agent-test-data.cpi-cf-integration-suite.ssoUrl=
 agent-test-data.cpi-cf-integration-suite.useCustomIdp=
 agent-test-data.cpi-cf-integration-suite.integrationSuiteHost=
+
+agent-test-data.cpi-cf-test-system.host=
+agent-test-data.cpi-cf-test-system.username=
+agent-test-data.cpi-cf-test-system.password=
+agent-test-data.cpi-cf-test-system.authenticationType=
+agent-test-data.cpi-cf-test-system.username=
+agent-test-data.cpi-cf-test-system.password=
+agent-test-data.cpi-cf-test-system.webApiAccessMode=
+
+agent-test-data.cpi-cf-test-system.clientId=
+agent-test-data.cpi-cf-test-system.clientSecret=
+agent-test-data.cpi-cf-test-system.tokenUrl=
+agent-test-data.cpi-cf-test-system.useCustomIdp=
+agent-test-data.cpi-cf-test-system.integrationSuiteHost=

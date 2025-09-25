@@ -2,26 +2,27 @@ package com.figaf.integration.tpm.client.company;
 
 import com.figaf.integration.common.entity.RequestContext;
 import com.figaf.integration.common.factory.HttpClientsFactory;
-import com.figaf.integration.tpm.client.TpmBaseClient;
+import com.figaf.integration.tpm.client.TpmBaseClientForTradingPartnerOrCompanyOrSubsidiary;
 import com.figaf.integration.tpm.entity.*;
-import com.figaf.integration.tpm.entity.trading.Channel;
-import com.figaf.integration.tpm.entity.trading.Identifier;
+import com.figaf.integration.tpm.entity.trading.*;
 import com.figaf.integration.tpm.entity.trading.System;
+import com.figaf.integration.tpm.entity.trading.verbose.TpmObjectDetails;
 import com.figaf.integration.tpm.enumtypes.TpmObjectType;
 import lombok.extern.slf4j.Slf4j;
-import com.figaf.integration.tpm.parser.GenericTpmResponseParser;
+import org.apache.commons.collections4.IterableUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.figaf.integration.common.utils.Utils.optString;
 import static java.lang.String.format;
 
 @Slf4j
-public class CompanyProfileClient extends TpmBaseClient {
+public class CompanyProfileClient extends TpmBaseClientForTradingPartnerOrCompanyOrSubsidiary {
 
     public CompanyProfileClient(HttpClientsFactory httpClientsFactory) {
         super(httpClientsFactory);
@@ -107,15 +108,74 @@ public class CompanyProfileClient extends TpmBaseClient {
         );
     }
 
+    public TpmObjectDetails getCompanyDetails(RequestContext requestContext) {
+        log.debug("#getCompanyDetails: requestContext={}", requestContext);
+
+        return executeGetAndReturnNullIfNotFoundErrorOccurs(
+            requestContext,
+            format(COMPANY_PROFILE_RESOURCE),
+            this::buildTpmObjectDetails
+        );
+    }
+
+    public TpmObjectDetails getSubsidiaryDetails(RequestContext requestContext, String parentCompanyId, String subsidiaryId) {
+        log.debug("#getSubsidiaryDetails: requestContext = {}", requestContext);
+
+        return executeGet(
+            requestContext,
+            format(SUBSIDIARY_RESOURCE, parentCompanyId, subsidiaryId),
+            this::buildTpmObjectDetails
+        );
+    }
+
+    public AggregatedTpmObject getAggregatedCompany(RequestContext requestContext) {
+        log.debug("#getAggregatedCompany: requestContext = {}", requestContext);
+
+        TpmObjectDetails tpmObjectDetails = getCompanyDetails(requestContext);
+        if (tpmObjectDetails == null) {
+            return null;
+        }
+
+        List<System> systems = getCompanySystems(requestContext, tpmObjectDetails.getId());
+        List<Identifier> identifiers = getCompanyIdentifiers(requestContext, tpmObjectDetails.getId());
+        Map<String, List<Channel>> systemIdToChannels = new LinkedHashMap<>();
+        for (System system : systems) {
+            List<Channel> channels = getCompanyChannels(requestContext, tpmObjectDetails.getId(), system.getId());
+            systemIdToChannels.put(system.getId(), channels);
+        }
+
+        ProfileConfiguration profileConfiguration = resolveCompanyProfileConfiguration(tpmObjectDetails.getId(), requestContext);
+
+        return new AggregatedTpmObject(tpmObjectDetails, systems, identifiers, systemIdToChannels, profileConfiguration);
+    }
+
+    public AggregatedTpmObject getAggregatedSubsidiary(RequestContext requestContext, String parentCompanyId, String subsidiaryId) {
+        log.debug("#getAggregatedSubsidiary: requestContext = {}, parentCompanyId = {}, subsidiaryId = {}", requestContext, parentCompanyId, subsidiaryId);
+
+        TpmObjectDetails tpmObjectDetails = getSubsidiaryDetails(requestContext, parentCompanyId, subsidiaryId);
+        if (tpmObjectDetails == null) {
+            return null;
+        }
+
+        List<System> systems = getSubsidiarySystems(requestContext, parentCompanyId, subsidiaryId);
+        List<Identifier> identifiers = getSubsidiaryIdentifiers(requestContext, parentCompanyId, subsidiaryId);
+        Map<String, List<Channel>> systemIdToChannels = new LinkedHashMap<>();
+        for (System system : systems) {
+            List<Channel> channels = getSubsidiaryChannels(requestContext, parentCompanyId, subsidiaryId, system.getId());
+            systemIdToChannels.put(system.getId(), channels);
+        }
+
+        ProfileConfiguration profileConfiguration = resolveSubsidiaryProfileConfiguration(requestContext, parentCompanyId, subsidiaryId);
+
+        return new AggregatedTpmObject(tpmObjectDetails, systems, identifiers, systemIdToChannels, profileConfiguration);
+    }
+
     public List<System> getCompanySystems(RequestContext requestContext, String companyId) {
         log.debug("#getCompanySystems: requestContext = {}, companyId = {}", requestContext, companyId);
         return executeGet(
             requestContext.withPreservingIntegrationSuiteUrl(),
             format(COMPANY_SYSTEMS_RESOURCE, companyId),
-            response -> {
-                System[] systems = jsonMapper.readValue(response, System[].class);
-                return Arrays.asList(systems);
-            }
+            this::parseSystemsList
         );
     }
 
@@ -124,10 +184,7 @@ public class CompanyProfileClient extends TpmBaseClient {
         return executeGet(
             requestContext.withPreservingIntegrationSuiteUrl(),
             format(SUBSIDIARY_SYSTEMS_RESOURCE, parentCompanyId, subsidiaryId),
-            response -> {
-                System[] systems = jsonMapper.readValue(response, System[].class);
-                return Arrays.asList(systems);
-            }
+            this::parseSystemsList
         );
     }
 
@@ -136,10 +193,7 @@ public class CompanyProfileClient extends TpmBaseClient {
         return executeGet(
             requestContext.withPreservingIntegrationSuiteUrl(),
             format(COMPANY_IDENTIFIERS_RESOURCE, companyId),
-            response -> {
-                Identifier[] identifiers = jsonMapper.readValue(response, Identifier[].class);
-                return Arrays.asList(identifiers);
-            }
+            this::parseIdentifiersList
         );
     }
 
@@ -148,10 +202,7 @@ public class CompanyProfileClient extends TpmBaseClient {
         return executeGet(
             requestContext.withPreservingIntegrationSuiteUrl(),
             format(SUBSIDIARY_IDENTIFIERS_RESOURCE, parentCompanyId, subsidiaryId),
-            response -> {
-                Identifier[] identifiers = jsonMapper.readValue(response, Identifier[].class);
-                return Arrays.asList(identifiers);
-            }
+            this::parseIdentifiersList
         );
     }
 
@@ -160,10 +211,7 @@ public class CompanyProfileClient extends TpmBaseClient {
         return executeGet(
             requestContext.withPreservingIntegrationSuiteUrl(),
             format(COMPANY_CHANNELS_RESOURCE, companyId, systemId),
-            response -> {
-                Channel[] channels = jsonMapper.readValue(response, Channel[].class);
-                return Arrays.asList(channels);
-            }
+            this::parseChannelsList
         );
     }
 
@@ -172,11 +220,69 @@ public class CompanyProfileClient extends TpmBaseClient {
         return executeGet(
             requestContext.withPreservingIntegrationSuiteUrl(),
             format(SUBSIDIARY_CHANNELS_RESOURCE, parentCompanyId, subsidiaryId, systemId),
-            response -> {
-                Channel[] channels = jsonMapper.readValue(response, Channel[].class);
-                return Arrays.asList(channels);
-            }
+            this::parseChannelsList
         );
+    }
+
+    private ProfileConfiguration resolveCompanyProfileConfiguration(String companyId, RequestContext requestContext) {
+        JSONObject profileConfigurationJsonObject = executeGetAndReturnNullIfNotFoundErrorOccurs(
+            requestContext,
+            format(COMPANY_PROFILE_CONFIGURATION_RESOURCE, companyId),
+            JSONObject::new
+        );
+        if (profileConfigurationJsonObject == null) {
+            return null;
+        }
+
+        JSONArray decryptionConfigJsonArray = executeGetAndReturnNullIfNotFoundErrorOccurs(
+            requestContext,
+            format(COMPANY_CONFIG_DECRYPT_RESOURCE, companyId),
+            JSONArray::new
+        );
+        if (IterableUtils.isEmpty(decryptionConfigJsonArray)) {
+            return null;
+        }
+
+        return mergeProfileConfigurationParts(decryptionConfigJsonArray, profileConfigurationJsonObject);
+    }
+
+    private ProfileConfiguration resolveSubsidiaryProfileConfiguration(RequestContext requestContext, String parentCompanyId, String subsidiaryId) {
+        JSONObject profileConfigurationJsonObject = executeGetAndReturnNullIfNotFoundErrorOccurs(
+            requestContext,
+            format(SUBSIDIARY_PROFILE_CONFIGURATION_RESOURCE, parentCompanyId, subsidiaryId),
+            JSONObject::new
+        );
+        if (profileConfigurationJsonObject == null) {
+            return null;
+        }
+
+        JSONArray decryptionConfigJsonArray = executeGetAndReturnNullIfNotFoundErrorOccurs(
+            requestContext,
+            format(SUBSIDIARY_CONFIG_DECRYPT_RESOURCE, parentCompanyId, subsidiaryId),
+            JSONArray::new
+        );
+        if (IterableUtils.isEmpty(decryptionConfigJsonArray)) {
+            return null;
+        }
+
+        return mergeProfileConfigurationParts(decryptionConfigJsonArray, profileConfigurationJsonObject);
+    }
+
+    private ProfileConfiguration mergeProfileConfigurationParts(JSONArray decryptionConfigJsonArray, JSONObject profileConfigurationJsonObject) {
+        JSONObject signatureValidationConfig = new JSONObject();
+        JSONObject configurationEntries = new JSONObject();
+
+        signatureValidationConfig.put("ConfigurationType", "DECRYPTION_CONFIG");
+        signatureValidationConfig.put("ConfigurationEntries", configurationEntries);
+
+        for (int i = 0; i < decryptionConfigJsonArray.length(); i++) {
+            JSONObject signatureVerificationConfigurationsJSONObject = decryptionConfigJsonArray.getJSONObject(i);
+            configurationEntries.put(signatureVerificationConfigurationsJSONObject.getString("Alias"), signatureVerificationConfigurationsJSONObject);
+        }
+
+        profileConfigurationJsonObject.put("DecryptionConfigurations", signatureValidationConfig);
+
+        return parseProfileConfiguration(profileConfigurationJsonObject);
     }
 
 }

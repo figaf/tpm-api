@@ -2,7 +2,7 @@ package com.figaf.integration.tpm.client.integration;
 
 import com.figaf.integration.common.entity.RequestContext;
 import com.figaf.integration.common.factory.HttpClientsFactory;
-import com.figaf.integration.tpm.client.mig.MessageImplementationGuidelinesClient;
+import com.figaf.integration.tpm.client.mig.MigClient;
 import com.figaf.integration.tpm.data_provider.AgentTestDataProvider;
 import com.figaf.integration.tpm.data_provider.CustomHostAgentTestData;
 import com.figaf.integration.tpm.entity.TpmObjectMetadata;
@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
-public class MessageImplementationGuidelinesClientTest {
+public class MigClientTest {
 
     private static Map<String, String> properties;
     private static final String MIG_OBJECT_FOR_DRAFT_CREATION = "mig-object-for-draft-creation";
@@ -36,13 +36,13 @@ public class MessageImplementationGuidelinesClientTest {
     private static final String EXPECTED_MIG_FOR_DRAFT_VERSION_CREATION_NOT_PRESENT = "Mig with name %s should exist with status active.";
     private static final String EXPECTED_DRAFT_VERSION_AFTER_CREATION_NOT_PRESENT = "Mig with name %s should exist with status draft.";
     private static final String OBJECT_NAME_CANNOT_BE_EMPTY = "Mig object name for draft creation cannot be empty";
-    private static MessageImplementationGuidelinesClient messageImplementationGuidelinesClient;
+    private static MigClient migClient;
 
     @BeforeAll
     static void setUp() throws TpmException {
-        messageImplementationGuidelinesClient = new MessageImplementationGuidelinesClient(new HttpClientsFactory());
+        migClient = new MigClient(new HttpClientsFactory());
         Yaml yaml = new Yaml();
-        try (InputStream inputStream = MessageImplementationGuidelinesClientTest.class.getClassLoader().getResourceAsStream("application-test.yml")) {
+        try (InputStream inputStream = MigClientTest.class.getClassLoader().getResourceAsStream("application-test.yml")) {
             if (inputStream == null) {
                 throw new IllegalArgumentException("File not found: application-test.yml");
             }
@@ -59,7 +59,7 @@ public class MessageImplementationGuidelinesClientTest {
         RequestContext requestContext = customHostAgentTestData.createRequestContext(customHostAgentTestData.getTitle());
         requestContext.getConnectionProperties().setHost(customHostAgentTestData.getIntegrationSuiteHost());
 
-        List<TpmObjectMetadata> messageImplementationGuides = messageImplementationGuidelinesClient.getAllLatestMetadata(requestContext);
+        List<TpmObjectMetadata> messageImplementationGuides = migClient.getAllLatestMetadata(requestContext);
 
         assertThat(messageImplementationGuides).as(METADATA_NOT_NULL_MSG).isNotNull();
     }
@@ -71,13 +71,13 @@ public class MessageImplementationGuidelinesClientTest {
         RequestContext requestContext = customHostAgentTestData.createRequestContext(customHostAgentTestData.getTitle());
         requestContext.getConnectionProperties().setHost(customHostAgentTestData.getIntegrationSuiteHost());
 
-        List<TpmObjectMetadata> migs = messageImplementationGuidelinesClient.getAllLatestMetadata(requestContext);
+        List<TpmObjectMetadata> migs = migClient.getAllLatestMetadata(requestContext);
 
         assertFalse(CollectionUtils.isEmpty(migs), METADATA_NOT_NULL_MSG);
 
         //its too heavy test to trigger getRawById for all migs
         TpmObjectMetadata migFirstMetadata = migs.get(0);
-        String migRawResponse = messageImplementationGuidelinesClient.getRawById(migFirstMetadata.getVersionId(), requestContext);
+        String migRawResponse = migClient.getRawById(migFirstMetadata.getVersionId(), requestContext);
         assertThat(migRawResponse).as(EXPECTED_NOT_NULL_RAW_MSG).isNotEmpty();
     }
 
@@ -92,21 +92,21 @@ public class MessageImplementationGuidelinesClientTest {
 
         assertTrue(Optional.ofNullable(properties).isPresent() && StringUtils.isNotBlank(migObjectNameForDraftCreation), OBJECT_NAME_CANNOT_BE_EMPTY);
 
-        List<TpmObjectMetadata> migs = messageImplementationGuidelinesClient.getAllLatestMetadata(requestContext);
+        List<TpmObjectMetadata> migs = migClient.getAllLatestMetadata(requestContext);
         Optional<TpmObjectMetadata> tpmObjectMetadataForDraftCreation = migs
             .stream()
             .filter(mig -> mig.getDisplayedName().equals(migObjectNameForDraftCreation) && mig.getStatus().equals("Active"))
             .findAny();
         assertTrue(tpmObjectMetadataForDraftCreation.isPresent(), String.format(EXPECTED_MIG_FOR_DRAFT_VERSION_CREATION_NOT_PRESENT, migObjectNameForDraftCreation));
 
-        DraftCreationResponse draftCreationResponse = messageImplementationGuidelinesClient.createDraftWithAllSegmentsAndFieldsSelected(
+        DraftCreationResponse draftCreationResponse = migClient.createDraftWithAllSegmentsAndFieldsSelected(
             requestContext,
             tpmObjectMetadataForDraftCreation.get().getObjectId(),
             tpmObjectMetadataForDraftCreation.get().getVersionId()
         );
 
         assertTrue(Optional.ofNullable(draftCreationResponse).isPresent(), String.format(EXPECTED_DRAFT_VERSION_AFTER_CREATION_NOT_PRESENT, migObjectNameForDraftCreation));
-        messageImplementationGuidelinesClient.deleteDraftMig(
+        migClient.deleteDraftMig(
             requestContext,
             draftCreationResponse.getMigguid(),
             draftCreationResponse.getId()

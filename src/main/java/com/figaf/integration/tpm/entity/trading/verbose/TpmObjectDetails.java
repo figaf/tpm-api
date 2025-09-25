@@ -11,7 +11,7 @@ import java.util.Map;
 @Getter
 @Setter
 @NoArgsConstructor
-public class TradingPartnerVerboseDto {
+public class TpmObjectDetails {
 
     private String name;
     private String shortName;
@@ -33,5 +33,6 @@ public class TradingPartnerVerboseDto {
     private String id;
     private String displayedName;
 
-    private String payload;
+    private String rawPayload;
+
 }

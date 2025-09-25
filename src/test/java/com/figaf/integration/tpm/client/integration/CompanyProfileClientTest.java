@@ -10,7 +10,10 @@ import com.figaf.integration.tpm.entity.Subsidiary;
 import com.figaf.integration.tpm.entity.trading.Channel;
 import com.figaf.integration.tpm.entity.trading.Identifier;
 import com.figaf.integration.tpm.entity.trading.System;
+import com.figaf.integration.tpm.entity.trading.AggregatedTpmObject;
+import com.figaf.integration.tpm.entity.trading.verbose.TpmObjectDetails;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
@@ -43,6 +46,64 @@ public class CompanyProfileClientTest {
         List<Company> companyProfiles = companyProfileClient.getAllMetadata(requestContext);
 
         assertThat(companyProfiles).as(METADATA_NOT_NULL_MSG).isNotNull();
+    }
+
+    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
+    @ArgumentsSource(AgentTestDataProvider.class)
+    void test_getCompanyDetails(AgentTestData agentTestData) {
+        log.debug("#test_getCompanyDetails: agentTestData={}", agentTestData);
+        RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
+
+        TpmObjectDetails tpmObjectDetails = companyProfileClient.getCompanyDetails(requestContext);
+
+        assertThat(tpmObjectDetails).isNotNull();
+    }
+
+    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
+    @ArgumentsSource(AgentTestDataProvider.class)
+    void test_getSubsidiaryDetails(AgentTestData agentTestData) {
+        log.debug("#test_getSubsidiaryDetails: agentTestData={}", agentTestData);
+        RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
+
+        List<Subsidiary> subsidiaries = companyProfileClient.getSubsidiaries(requestContext, COMPANY_ID);
+        for (Subsidiary subsidiary : subsidiaries) {
+            TpmObjectDetails subsidiaryDetails = companyProfileClient.getSubsidiaryDetails(requestContext, COMPANY_ID, subsidiary.getObjectId());
+            assertThat(subsidiaryDetails).isNotNull();
+        }
+    }
+
+    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
+    @ArgumentsSource(AgentTestDataProvider.class)
+    void test_getAggregatedCompany(AgentTestData agentTestData) {
+        log.debug("#test_getAggregatedCompany: agentTestData={}", agentTestData);
+        RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
+
+        AggregatedTpmObject aggregatedCompany = companyProfileClient.getAggregatedCompany(requestContext);
+        assertThat(aggregatedCompany).isNotNull();
+        assertThat(aggregatedCompany.getTpmObjectDetails()).isNotNull();
+        assertThat(aggregatedCompany.getSystems()).isNotEmpty();
+        assertThat(aggregatedCompany.getIdentifiers()).isNotEmpty();
+        assertThat(aggregatedCompany.getSystemIdToChannels()).isNotEmpty();
+    }
+
+    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
+    @ArgumentsSource(AgentTestDataProvider.class)
+    void test_getAggregatedSubsidiary(AgentTestData agentTestData) {
+        log.debug("#test_getAggregatedSubsidiary: agentTestData={}", agentTestData);
+        RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
+
+        List<Subsidiary> subsidiaries = companyProfileClient.getSubsidiaries(requestContext, COMPANY_ID);
+        for (Subsidiary subsidiary : subsidiaries) {
+            if (StringUtils.containsAnyIgnoreCase(subsidiary.getDisplayedName(), "test", "ZZ")) {
+                continue;
+            }
+            AggregatedTpmObject aggregatedSubsidiary = companyProfileClient.getAggregatedSubsidiary(requestContext, COMPANY_ID, subsidiary.getObjectId());
+            assertThat(aggregatedSubsidiary).isNotNull();
+            assertThat(aggregatedSubsidiary.getTpmObjectDetails()).isNotNull();
+            assertThat(aggregatedSubsidiary.getSystems()).isNotEmpty();
+            assertThat(aggregatedSubsidiary.getIdentifiers()).isNotEmpty();
+            assertThat(aggregatedSubsidiary.getSystemIdToChannels()).isNotEmpty();
+        }
     }
 
     @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
