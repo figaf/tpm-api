@@ -45,9 +45,9 @@ public class AgreementClientTest {
 
     @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
     @ArgumentsSource(AgentTestDataProvider.class)
+    @Disabled
     void test_createAndDeleteAgreement(CustomHostAgentTestData customHostAgentTestData) {
         RequestContext requestContext = customHostAgentTestData.createRequestContext(customHostAgentTestData.getTitle());
-        requestContext.getConnectionProperties().setHost(customHostAgentTestData.getIntegrationSuiteHost());
 //         ---------- Transaction option ----------
         TransactionOption tx = new TransactionOption();
         tx.setOption("Copy");

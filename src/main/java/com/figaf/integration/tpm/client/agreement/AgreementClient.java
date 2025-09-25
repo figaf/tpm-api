@@ -83,7 +83,7 @@ public class AgreementClient extends TpmBaseClient {
     public void deleteAgreement(RequestContext requestContext, String agreementId) {
         log.debug("#deleteAgreement: requestContext = {}, agreementId = {}", requestContext, agreementId);
         executeMethod(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             PATH_FOR_TOKEN,
             format(AGREEMENT_RESOURCE, agreementId),
             (url, token, restTemplateWrapper) -> {
