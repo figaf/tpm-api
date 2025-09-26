@@ -27,9 +27,8 @@ public class AgreementClient extends TpmBaseClient {
 
     public List<TpmObjectMetadata> getAllMetadata(RequestContext requestContext) {
         log.debug("#getAll: requestContext={}", requestContext);
-
         return executeGet(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             AGREEMENTS_RESOURCE,
             (response) -> new GenericTpmResponseParser().parseResponse(response, TpmObjectType.CLOUD_AGREEMENT)
         );
@@ -38,7 +37,7 @@ public class AgreementClient extends TpmBaseClient {
     public String createAgreement(RequestContext requestContext, AgreementCreationRequest agreementCreationRequest) {
         log.debug("#createAgreement: requestContext = {}, agreementCreationRequest = {}", requestContext, agreementCreationRequest);
         return executeMethod(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             PATH_FOR_TOKEN,
             AGREEMENTS_RESOURCE,
             (url, token, restTemplateWrapper) -> {
@@ -61,7 +60,7 @@ public class AgreementClient extends TpmBaseClient {
     public void updateAgreement(RequestContext requestContext, String agreementId, AgreementUpdateRequest agreementUpdateRequest) {
         log.debug("#updateAgreement: requestContext = {}, agreementId = {}, agreementUpdateRequest = {}", requestContext, agreementId, agreementUpdateRequest);
         executeMethod(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             PATH_FOR_TOKEN,
             format(AGREEMENT_RESOURCE, agreementId),
             (url, token, restTemplateWrapper) -> {
@@ -84,7 +83,7 @@ public class AgreementClient extends TpmBaseClient {
     public void deleteAgreement(RequestContext requestContext, String agreementId) {
         log.debug("#deleteAgreement: requestContext = {}, agreementId = {}", requestContext, agreementId);
         executeMethod(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             PATH_FOR_TOKEN,
             format(AGREEMENT_RESOURCE, agreementId),
             (url, token, restTemplateWrapper) -> {

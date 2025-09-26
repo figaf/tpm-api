@@ -26,7 +26,7 @@ public class BusinessDocumentsClient extends TpmBaseClient {
         String filter = interchangeRequest.buildFilter();
         String path = String.format("/odata/api/v1/BusinessDocuments?$orderby=EndedAt+desc&$filter=%s&$format=json", URLEncoder.encode(filter, StandardCharsets.UTF_8));
         List<Interchange> interchanges = executeGet(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             path,
             (response) -> new BusinessDocumentsParser().parseResponse(response)
         );
@@ -56,7 +56,7 @@ public class BusinessDocumentsClient extends TpmBaseClient {
         log.debug("#getLastErrorDetailsByInterchangeId: requestContext = {}, interchangeId = {}", requestContext, interchangeId);
         String path = String.format("/odata/api/v1/BusinessDocuments('%s')/LastErrorDetails?$format=json", interchangeId);
         return executeGet(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             path,
             (response) -> new BusinessDocumentsParser().parseErrorDetails(response)
         );
