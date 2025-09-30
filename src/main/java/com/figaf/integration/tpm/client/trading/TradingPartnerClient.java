@@ -440,8 +440,8 @@ public class TradingPartnerClient extends TpmBaseClientForTradingPartnerOrCompan
         );
     }
 
-    public void createSignatureVerificationConfigurationsRequest(String tradingPartnerId, CreateSignatureVerificationConfigurationsRequest createSignatureVerificationConfigurationsRequest, RequestContext requestContext) {
-        log.debug("#createSignatureVerificationConfigurationsRequest: tradingPartnerId = {}, createSignatureVerificationConfigurationsRequest = {}, requestContext = {}", tradingPartnerId, createSignatureVerificationConfigurationsRequest, requestContext);
+    public void createSignatureVerificationConfiguration(String tradingPartnerId, CreateSignatureVerificationConfigurationRequest createSignatureVerificationConfigurationRequest, RequestContext requestContext) {
+        log.debug("#createSignatureVerificationConfigurationRequest: tradingPartnerId = {}, createSignatureVerificationConfigurationRequest = {}, requestContext = {}", tradingPartnerId, createSignatureVerificationConfigurationRequest, requestContext);
 
         executeMethod(
             requestContext,
@@ -450,7 +450,7 @@ public class TradingPartnerClient extends TpmBaseClientForTradingPartnerOrCompan
             (url, token, restTemplateWrapper) -> {
                 HttpHeaders httpHeaders = createHttpHeadersWithCSRFToken(token);
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                HttpEntity<CreateSignatureVerificationConfigurationsRequest> requestEntity = new HttpEntity<>(createSignatureVerificationConfigurationsRequest, httpHeaders);
+                HttpEntity<CreateSignatureVerificationConfigurationRequest> requestEntity = new HttpEntity<>(createSignatureVerificationConfigurationRequest, httpHeaders);
                 ResponseEntity<String> responseEntity = restTemplateWrapper.getRestTemplate().exchange(url, HttpMethod.POST, requestEntity, String.class);
                 if (!responseEntity.getStatusCode().is2xxSuccessful()) {
                     throw new ClientIntegrationException(format(

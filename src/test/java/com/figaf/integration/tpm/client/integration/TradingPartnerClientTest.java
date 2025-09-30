@@ -334,15 +334,15 @@ public class TradingPartnerClientTest {
     @Disabled
     @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
     @ArgumentsSource(AgentTestDataProvider.class)
-    void test_createSignatureVerificationConfigurationsRequest(CustomHostAgentTestData customHostAgentTestData) {
+    void test_createSignatureVerificationConfiguration(CustomHostAgentTestData customHostAgentTestData) {
         RequestContext requestContext = customHostAgentTestData.createRequestContext(customHostAgentTestData.getTitle());
         requestContext.getConnectionProperties().setHost(customHostAgentTestData.getIntegrationSuiteHost());
 
-        CreateSignatureVerificationConfigurationsRequest request = new CreateSignatureVerificationConfigurationsRequest();
+        CreateSignatureVerificationConfigurationRequest request = new CreateSignatureVerificationConfigurationRequest();
         request.setAs2PartnerId("dummy_Arsenii70");
         request.setAlias("dummy_Arsenii70");
 
-        tradingPartnerClient.createSignatureVerificationConfigurationsRequest("82bf48ca067645d08c94b0e8cd7fbd19", request, requestContext);
+        tradingPartnerClient.createSignatureVerificationConfiguration("82bf48ca067645d08c94b0e8cd7fbd19", request, requestContext);
     }
 
 }
