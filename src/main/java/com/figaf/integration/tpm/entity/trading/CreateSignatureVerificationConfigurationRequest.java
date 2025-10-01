@@ -8,7 +8,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class CreateSignatureVerificationConfigurationsRequest {
+public class CreateSignatureVerificationConfigurationRequest {
 
     @JsonProperty("artifactType")
     private String artifactType = "TRADING_PARTNER";
