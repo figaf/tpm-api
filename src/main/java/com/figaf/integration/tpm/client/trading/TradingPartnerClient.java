@@ -126,7 +126,7 @@ public class TradingPartnerClient extends TpmBaseClientForTradingPartnerOrCompan
         log.debug("#getAllSystemTypesAsRawPayload: requestContext = {}", requestContext);
 
         return executeGet(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             SYSTEM_TYPES_RESOURCE
         );
     }
@@ -396,7 +396,7 @@ public class TradingPartnerClient extends TpmBaseClientForTradingPartnerOrCompan
         log.debug("#createCommunication: tradingPartnerId = {}, systemId = {}, createCommunicationRequest = {}, requestContext = {}", tradingPartnerId, systemId, createCommunicationRequest, requestContext);
 
         executeMethod(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             PATH_FOR_TOKEN,
             format(COMMUNICATIONS_RESOURCE, tradingPartnerId, systemId),
             (url, token, restTemplateWrapper) -> {
@@ -420,7 +420,7 @@ public class TradingPartnerClient extends TpmBaseClientForTradingPartnerOrCompan
         log.debug("#createIdentifier: tradingPartnerId = {}, createIdentifierRequest = {}, requestContext = {}", tradingPartnerId, createIdentifierRequest, requestContext);
 
         executeMethod(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             PATH_FOR_TOKEN,
             format(TRADING_PARTNER_IDENTIFIERS_RESOURCE, tradingPartnerId),
             (url, token, restTemplateWrapper) -> {
