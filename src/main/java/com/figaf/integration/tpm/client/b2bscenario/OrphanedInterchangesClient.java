@@ -28,7 +28,7 @@ public class OrphanedInterchangesClient extends TpmBaseClient {
         String filter = orphanedInterchangeRequest.buildFilter();
         String path = String.format("/odata/api/v1/OrphanedInterchanges?$orderby=Date+desc&$filter=%s&$format=json", URLEncoder.encode(filter, StandardCharsets.UTF_8));
         return executeGet(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             path,
             response -> {
                 List<OrphanedInterchange> orphanedInterchanges = new ArrayList<>();

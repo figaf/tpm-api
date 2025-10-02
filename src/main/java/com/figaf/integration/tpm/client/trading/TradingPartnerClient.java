@@ -36,7 +36,7 @@ public class TradingPartnerClient extends TpmBaseClientForTradingPartnerOrCompan
         log.debug("#getAllMetadata: requestContext={}", requestContext);
 
         return executeGet(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             TRADING_PARTNER_RESOURCE,
             (response) -> new GenericTpmResponseParser().parseResponse(response, TpmObjectType.CLOUD_TRADING_PARTNER)
         );
@@ -46,7 +46,7 @@ public class TradingPartnerClient extends TpmBaseClientForTradingPartnerOrCompan
         log.debug("#getById: requestContext={}, tradingPartnerId={}", requestContext, tradingPartnerId);
 
         return executeGetAndReturnNullIfNotFoundErrorOccurs(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             format(TRADING_PARTNER_RESOURCE_BY_ID, tradingPartnerId),
             this::buildTpmObjectDetails
         );
@@ -76,7 +76,7 @@ public class TradingPartnerClient extends TpmBaseClientForTradingPartnerOrCompan
         log.debug("#getRawById: tradingPartnerId={}, requestContext={}", tradingPartnerId, requestContext);
 
         return executeGet(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             format(TRADING_PARTNER_RESOURCE_BY_ID, tradingPartnerId),
             (response) -> response
         );
@@ -85,7 +85,7 @@ public class TradingPartnerClient extends TpmBaseClientForTradingPartnerOrCompan
     public List<System> getPartnerProfileSystems(String tradingPartnerId, RequestContext requestContext) {
         log.debug("#getPartnerProfileSystems: tradingPartnerId = {}, requestContext = {}", tradingPartnerId, requestContext);
         return executeGet(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             format(TRADING_PARTNER_SYSTEMS_RESOURCE, tradingPartnerId),
             this::parseSystemsList
         );
@@ -94,7 +94,7 @@ public class TradingPartnerClient extends TpmBaseClientForTradingPartnerOrCompan
     public List<Identifier> getPartnerProfileIdentifiers(String tradingPartnerId, RequestContext requestContext) {
         log.debug("#getPartnerProfileIdentifiers: tradingPartnerId = {}, requestContext = {}", tradingPartnerId, requestContext);
         return executeGet(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             format(TRADING_PARTNER_IDENTIFIERS_RESOURCE, tradingPartnerId),
             this::parseIdentifiersList
         );
@@ -103,7 +103,7 @@ public class TradingPartnerClient extends TpmBaseClientForTradingPartnerOrCompan
     public List<Channel> getPartnerProfileChannels(String tradingPartnerId, String systemId, RequestContext requestContext) {
         log.debug("#getPartnerProfileChannels: tradingPartnerId = {}, systemId = {}, requestContext = {}", tradingPartnerId, systemId, requestContext);
         return executeGet(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             format(COMMUNICATIONS_RESOURCE, tradingPartnerId, systemId),
             this::parseChannelsList
         );
@@ -113,7 +113,7 @@ public class TradingPartnerClient extends TpmBaseClientForTradingPartnerOrCompan
         log.debug("#getAllSystemTypes: requestContext = {}", requestContext);
 
         return executeGet(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             SYSTEM_TYPES_RESOURCE,
             response -> {
                 SystemType[] systemTypes = jsonMapper.readValue(response, SystemType[].class);
@@ -126,7 +126,7 @@ public class TradingPartnerClient extends TpmBaseClientForTradingPartnerOrCompan
         log.debug("#getAllSystemTypesAsRawPayload: requestContext = {}", requestContext);
 
         return executeGet(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             SYSTEM_TYPES_RESOURCE
         );
     }
@@ -135,7 +135,7 @@ public class TradingPartnerClient extends TpmBaseClientForTradingPartnerOrCompan
         log.debug("#getAllTypeSystems: requestContext = {}", requestContext);
 
         return executeGet(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             TYPE_SYSTEMS_RESOURCE,
             response -> {
                 JSONArray jsonArray = new JSONArray(response);
@@ -190,7 +190,7 @@ public class TradingPartnerClient extends TpmBaseClientForTradingPartnerOrCompan
         log.debug("#getTypeSystemVersions: typeSystem = {}, requestContext = {}", typeSystem, requestContext);
 
         return executeGet(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             format(TYPE_SYSTEM_VERSIONS_RESOURCE, typeSystem),
             response -> {
                 JSONObject jsonObject = new JSONObject(response);
@@ -212,7 +212,7 @@ public class TradingPartnerClient extends TpmBaseClientForTradingPartnerOrCompan
         log.debug("#getAllProducts: requestContext = {}", requestContext);
 
         return executeGet(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             PRODUCTS_RESOURCE,
             response -> {
                 JSONArray jsonArray = new JSONArray(response);
@@ -258,7 +258,7 @@ public class TradingPartnerClient extends TpmBaseClientForTradingPartnerOrCompan
         log.debug("#getSenderAdapters: requestContext = {}", requestContext);
 
         return executeGet(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             SENDER_ADAPTER_LIST_RESOURCE,
             response -> {
                 Adapter[] adapters = jsonMapper.readValue(response, Adapter[].class);
@@ -271,7 +271,7 @@ public class TradingPartnerClient extends TpmBaseClientForTradingPartnerOrCompan
         log.debug("#getReceiverAdapters: requestContext = {}", requestContext);
 
         return executeGet(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             RECEIVER_ADAPTER_LIST_RESOURCE,
             response -> {
                 Adapter[] adapters = jsonMapper.readValue(response, Adapter[].class);
@@ -282,7 +282,7 @@ public class TradingPartnerClient extends TpmBaseClientForTradingPartnerOrCompan
 
     public ProfileConfiguration resolveProfileConfiguration(String tradingPartnerId, RequestContext requestContext) {
         JSONObject partnerProfileConfig = executeGetAndReturnNullIfNotFoundErrorOccurs(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             format(TRADING_PARTNER_CONFIGURATION_RESOURCE, tradingPartnerId),
             JSONObject::new
         );
@@ -319,7 +319,7 @@ public class TradingPartnerClient extends TpmBaseClientForTradingPartnerOrCompan
         log.debug("#createTradingPartner: createTradingPartnerRequest = {}, requestContext = {}", createTradingPartnerRequest, requestContext);
 
         return executeMethod(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             PATH_FOR_TOKEN,
             TRADING_PARTNER_RESOURCE,
             (url, token, restTemplateWrapper) -> {
@@ -344,7 +344,7 @@ public class TradingPartnerClient extends TpmBaseClientForTradingPartnerOrCompan
         log.debug("#createSystem: createSystemTypeRequest = {}, requestContext = {}", createSystemTypeRequest, requestContext);
 
         return executeMethod(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             PATH_FOR_TOKEN,
             SYSTEM_TYPES_RESOURCE,
             (url, token, restTemplateWrapper) -> {
@@ -368,7 +368,7 @@ public class TradingPartnerClient extends TpmBaseClientForTradingPartnerOrCompan
         log.debug("#createSystem: tradingPartnerId = {}, createSystemRequest = {}, requestContext = {}", tradingPartnerId, createSystemRequest, requestContext);
 
         return executeMethod(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             PATH_FOR_TOKEN,
             format(TRADING_PARTNER_SYSTEMS_RESOURCE, tradingPartnerId),
             (url, token, restTemplateWrapper) -> {
@@ -396,7 +396,7 @@ public class TradingPartnerClient extends TpmBaseClientForTradingPartnerOrCompan
         log.debug("#createCommunication: tradingPartnerId = {}, systemId = {}, createCommunicationRequest = {}, requestContext = {}", tradingPartnerId, systemId, createCommunicationRequest, requestContext);
 
         executeMethod(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             PATH_FOR_TOKEN,
             format(COMMUNICATIONS_RESOURCE, tradingPartnerId, systemId),
             (url, token, restTemplateWrapper) -> {
@@ -420,7 +420,7 @@ public class TradingPartnerClient extends TpmBaseClientForTradingPartnerOrCompan
         log.debug("#createIdentifier: tradingPartnerId = {}, createIdentifierRequest = {}, requestContext = {}", tradingPartnerId, createIdentifierRequest, requestContext);
 
         executeMethod(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             PATH_FOR_TOKEN,
             format(TRADING_PARTNER_IDENTIFIERS_RESOURCE, tradingPartnerId),
             (url, token, restTemplateWrapper) -> {
@@ -444,7 +444,7 @@ public class TradingPartnerClient extends TpmBaseClientForTradingPartnerOrCompan
         log.debug("#createSignatureVerificationConfigurationRequest: tradingPartnerId = {}, createSignatureVerificationConfigurationRequest = {}, requestContext = {}", tradingPartnerId, createSignatureVerificationConfigurationRequest, requestContext);
 
         executeMethod(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             PATH_FOR_TOKEN,
             format(TRADING_PARTNER_CONFIG_SIGNVAL_RESOURCE, tradingPartnerId),
             (url, token, restTemplateWrapper) -> {
