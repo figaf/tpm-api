@@ -29,7 +29,7 @@ public class B2BScenarioClient extends TpmBaseClient {
     public List<B2BScenarioMetadata> getB2BScenariosForAgreement(RequestContext requestContext, TpmObjectMetadata agreementMetadata) {
         log.debug("#getB2BScenariosForAgreement: requestContext = {}, agreementMetadata = {}", requestContext, agreementMetadata);
         return executeGet(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             format(B2B_SCENARIOS_RESOURCE, agreementMetadata.getObjectId()),
             (response) -> new B2BScenarioResponseParser().parseResponse(response, agreementMetadata)
         );
