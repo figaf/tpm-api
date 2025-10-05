@@ -57,7 +57,6 @@ public class MigClientTest {
     void test_getAllLatestMetadata(CustomHostAgentTestData customHostAgentTestData) {
         log.debug("#test_getAllLatestMetadata: customHostAgentTestData={}", customHostAgentTestData);
         RequestContext requestContext = customHostAgentTestData.createRequestContext(customHostAgentTestData.getTitle());
-        requestContext.getConnectionProperties().setHost(customHostAgentTestData.getIntegrationSuiteHost());
 
         List<TpmObjectMetadata> messageImplementationGuides = migClient.getAllLatestMetadata(requestContext);
 
@@ -69,7 +68,6 @@ public class MigClientTest {
     void test_getRawById(CustomHostAgentTestData customHostAgentTestData) {
         log.debug("#test_getRawById: customHostAgentTestData={}", customHostAgentTestData);
         RequestContext requestContext = customHostAgentTestData.createRequestContext(customHostAgentTestData.getTitle());
-        requestContext.getConnectionProperties().setHost(customHostAgentTestData.getIntegrationSuiteHost());
 
         List<TpmObjectMetadata> migs = migClient.getAllLatestMetadata(requestContext);
 
@@ -81,13 +79,28 @@ public class MigClientTest {
         assertThat(migRawResponse).as(EXPECTED_NOT_NULL_RAW_MSG).isNotEmpty();
     }
 
+    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
+    @ArgumentsSource(AgentTestDataProvider.class)
+    void test_getMigVersionInfoById(CustomHostAgentTestData customHostAgentTestData) {
+        log.debug("#getMigVersionInfoById: customHostAgentTestData={}", customHostAgentTestData);
+        RequestContext requestContext = customHostAgentTestData.createRequestContext(customHostAgentTestData.getTitle());
+        requestContext.getConnectionProperties().setHost(customHostAgentTestData.getIntegrationSuiteHost());
+
+        List<TpmObjectMetadata> migs = migClient.getAllLatestMetadata(requestContext);
+
+        assertFalse(CollectionUtils.isEmpty(migs), METADATA_NOT_NULL_MSG);
+
+        TpmObjectMetadata migFirstMetadata = migs.get(0);
+        String migRawResponse = migClient.getMigVersionInfoById(migFirstMetadata.getVersionId(), requestContext);
+        assertThat(migRawResponse).as(EXPECTED_NOT_NULL_RAW_MSG).isNotEmpty();
+    }
+
 
     @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
     @ArgumentsSource(AgentTestDataProvider.class)
     void test_createDraftWithAllSegmentsAndFieldsSelected(CustomHostAgentTestData customHostAgentTestData) {
         log.debug("#test_createDraftWithAllSegmentsAndFieldsSelected: customHostAgentTestData={}", customHostAgentTestData);
         RequestContext requestContext = customHostAgentTestData.createRequestContext(customHostAgentTestData.getTitle());
-        requestContext.getConnectionProperties().setHost(customHostAgentTestData.getIntegrationSuiteHost());
         String migObjectNameForDraftCreation = properties.get(MIG_OBJECT_FOR_DRAFT_CREATION);
 
         assertTrue(Optional.ofNullable(properties).isPresent() && StringUtils.isNotBlank(migObjectNameForDraftCreation), OBJECT_NAME_CANNOT_BE_EMPTY);
