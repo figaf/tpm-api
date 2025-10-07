@@ -31,8 +31,6 @@ class OrphanedInterchangesClientTest {
     @ArgumentsSource(AgentTestDataProvider.class)
     void test_searchOrphanedInterchanges(CustomHostAgentTestData agentTestData) {
         RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
-        requestContext.getConnectionProperties().setHost(agentTestData.getIntegrationSuiteHost());
-
         Date leftBoundDate = DateUtils.addDays(new Date(), -7);
         Date rightBoundDate = new Date();
 

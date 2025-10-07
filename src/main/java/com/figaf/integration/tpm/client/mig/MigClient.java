@@ -36,7 +36,7 @@ public class MigClient extends TpmBaseClient {
     public List<TpmObjectMetadata> getAllLatestMetadata(RequestContext requestContext) {
         log.debug("#getAllLatestMetadata: requestContext={}", requestContext);
         return executeGet(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             MIG_RESOURCE,
             (response) -> new MigResponseParser().parseJsonToTpmObjectMetadata(response)
         );
@@ -44,9 +44,8 @@ public class MigClient extends TpmBaseClient {
 
     public String getRawById(String migVersionId, RequestContext requestContext) {
         log.debug("#getRawById: migVersionId={}, requestContext={}", migVersionId, requestContext);
-
         return executeGet(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             String.format(MIG_RESOURCE_BY_ID, migVersionId),
             (response) -> response
         );
@@ -56,7 +55,7 @@ public class MigClient extends TpmBaseClient {
         log.debug("#getRawById: getMigVersionInfoById={}, requestContext={}", migVersionId, requestContext);
 
         return executeGet(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             String.format(MIG_VERSION_INFO_RESOURCE, migVersionId)
         );
     }
@@ -64,14 +63,15 @@ public class MigClient extends TpmBaseClient {
     //TODO see comments on method createDraftWithAllSegmentsAndFieldsSelected
     public void saveAllSegmentsAndFields(RequestContext requestContext, String migVersionId) {
         log.debug("#saveAllSegmentsAndFields: requestContext={}, migVersionId={}", requestContext, migVersionId);
+        RequestContext finalizedRequestContext = requestContext.withPreservingIntegrationSuiteUrl();
         executeMethod(
-            requestContext,
+            finalizedRequestContext,
             PATH_FOR_TOKEN,
             format(MIG_RESOURCE_BY_ID, migVersionId),
             (url, token, restTemplateWrapper) -> {
                 try {
                     saveAllSegmentsAndFields(
-                        requestContext,
+                        finalizedRequestContext,
                         url,
                         token,
                         migVersionId,
@@ -110,18 +110,37 @@ public class MigClient extends TpmBaseClient {
     // Also review a need to have payload transformation logic at API client level, like all segments selection
     public DraftCreationResponse createDraftWithAllSegmentsAndFieldsSelected(RequestContext requestContext, String name, String sourceMigVersionId) {
         log.debug("#createDraftWithAllSegmentsAndFieldsSelected: requestContext={}, name={}, sourceMigVersionId={}", requestContext, name, sourceMigVersionId);
+        RequestContext finalizedRequestContext = requestContext.withPreservingIntegrationSuiteUrl();
         return executeMethod(
-            requestContext,
+            finalizedRequestContext,
             PATH_FOR_TOKEN,
             format(MIG_CREATE_DRAFT_RESOURCE, name, sourceMigVersionId),
             (url, token, restTemplateWrapper) -> createDraftWithAllSegmentsAndFieldsSelected(
-                requestContext,
+                finalizedRequestContext,
                 url,
                 token,
                 sourceMigVersionId,
                 restTemplateWrapper.getRestTemplate()
             )
         );
+    }
+
+    private static void updateAllIsSelected(JsonNode node) {
+        if (node.isObject()) {
+            ObjectNode objectNode = (ObjectNode) node;
+            JsonNode isSelectedNode = objectNode.get("IsSelected");
+            if (isSelectedNode != null && isSelectedNode.isBoolean() && !isSelectedNode.booleanValue()) {
+                objectNode.put("IsSelected", true);
+            }
+
+            for (JsonNode childNode : objectNode) {
+                updateAllIsSelected(childNode);
+            }
+        } else if (node.isArray()) {
+            for (JsonNode childNode : node) {
+                updateAllIsSelected(childNode);
+            }
+        }
     }
 
     private void saveAllSegmentsAndFields(
@@ -269,24 +288,6 @@ public class MigClient extends TpmBaseClient {
         updateAllIsSelected(rootNode);
 
         return jsonMapper.writeValueAsString(rootNode);
-    }
-
-    private static void updateAllIsSelected(JsonNode node) {
-        if (node.isObject()) {
-            ObjectNode objectNode = (ObjectNode) node;
-            JsonNode isSelectedNode = objectNode.get("IsSelected");
-            if (isSelectedNode != null && isSelectedNode.isBoolean() && !isSelectedNode.booleanValue()) {
-                objectNode.put("IsSelected", true);
-            }
-
-            for (JsonNode childNode : objectNode) {
-                updateAllIsSelected(childNode);
-            }
-        } else if (node.isArray()) {
-            for (JsonNode childNode : node) {
-                updateAllIsSelected(childNode);
-            }
-        }
     }
 }
 

@@ -34,7 +34,7 @@ public class CrossActionsClient extends TpmBaseClient {
     public String uploadAgreementsArchive(RequestContext requestContext, byte[] zipFile) {
         log.debug("#uploadAgreementsArchive: requestContext = {}", requestContext);
         return executeMethod(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             PATH_FOR_TOKEN,
             CROSS_ACTIONS_UPLOAD_ARCHIVE_RESOURCE,
             (url, token, restTemplateWrapper) -> {
@@ -71,7 +71,7 @@ public class CrossActionsClient extends TpmBaseClient {
     public String executeAgreementsArchiveImport(RequestContext requestContext, ImportRequest importRequest) {
         log.debug("#executeAgreementsArchiveImport: requestContext = {}, importRequest = {}", requestContext, importRequest);
         return executeMethod(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             PATH_FOR_TOKEN,
             CROSS_ACTIONS_EXECUTE_IMPORT_RESOURCE,
             (url, token, restTemplateWrapper) -> {
@@ -96,7 +96,7 @@ public class CrossActionsClient extends TpmBaseClient {
     public ImportTaskResult getTaskStatus(RequestContext requestContext, String taskId) {
         log.debug("#getTaskStatus: requestContext = {}, taskId = {}", requestContext, taskId);
         return executeGet(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             format(CROSS_ACTIONS_TASK_STATUS_RESOURCE, taskId),
             response -> jsonMapper.readValue(response, ImportTaskResult.class)
         );
