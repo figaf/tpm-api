@@ -97,16 +97,13 @@ public class AgreementClientTest {
         agreementCreationRequest.setCompanyData(company);
         agreementCreationRequest.setTradingPartnerData(tpData);
         agreementCreationRequest.setTradingPartnerDetails(tpDetails);
-        agreementCreationRequest.setParentId("81a36697276f4695860705388ad6b262");
+        agreementCreationRequest.setParentId("a351e33a94b64cd8b273d9236fee4b1f");
 
-        String agreementId = agreementClient.createAgreement(requestContext, agreementCreationRequest);
-        assertThat(agreementId).isNotEmpty();
+        TpmObjectMetadata createdAgreement = agreementClient.createAgreement(requestContext, agreementCreationRequest);
+        assertThat(createdAgreement).isNotNull();
 
-        List<TpmObjectMetadata> agreements = agreementClient.getAllMetadata(requestContext);
-        TpmObjectMetadata createdAgreement = agreements.stream()
-            .filter(agreement -> agreement.getObjectId().equals(agreementId))
-            .findFirst()
-            .get();
+        String agreementId = createdAgreement.getObjectId();
+        assertThat(agreementId).isNotNull();
 
         AgreementUpdateRequest agreementUpdateRequest = AgreementRequestMapper.INSTANCE.toUpdateRequest(agreementCreationRequest);
         agreementUpdateRequest.setB2bScenarioDetailsId(createdAgreement.getB2bScenarioDetailsId());

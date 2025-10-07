@@ -121,6 +121,7 @@ public class B2BScenarioResponseParser extends GenericTpmResponseParser {
         }
 
         b2BScenarioMetadata.setActivated(businessTransactionLifeCycleStatus.get("Activated").asBoolean());
+        b2BScenarioMetadata.setUpdateStatus(businessTransactionLifeCycleStatus.get("UpdateStatus").asText());
     }
 
 
