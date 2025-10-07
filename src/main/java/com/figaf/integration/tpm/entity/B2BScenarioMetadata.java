@@ -22,6 +22,7 @@ public class B2BScenarioMetadata extends TpmObjectMetadata {
     private String initiator;
     private String reactor;
     private boolean activated;
+    private String updateStatus;
 
     public enum Direction {
 

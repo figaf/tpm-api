@@ -1,5 +1,6 @@
 package com.figaf.integration.tpm.parser;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.figaf.integration.tpm.entity.AdministrativeData;
@@ -26,29 +27,39 @@ public class GenericTpmResponseParser {
         List<TpmObjectMetadata> tpmObjects = new ArrayList<>();
 
         for (JsonNode node : rootNode) {
-            TpmObjectMetadata tpmObject = new TpmObjectMetadata();
-
-            tpmObject.setObjectId(node.path("id").asText());
-            tpmObject.setDisplayedName(node.path("displayName").asText());
-            tpmObject.setVersion(node.path("Version").asText(null)); //not null only for Agreements and Agreement Templates
-            tpmObject.setStatus(node.path("artifactStatus").asText());
-            tpmObject.setTpmObjectType(tpmObjectType);
-
-            initAdministrativeData(tpmObject, node);
-            initArtifactProperties(tpmObject, node);
-            setTpmObjectReferences(
-                node,
-                tpmObject
-            );
-
-            if (tpmObjectType == TpmObjectType.CLOUD_AGREEMENT) {
-                tpmObject.setB2bScenarioDetailsId(node.path("B2BScenarioDetailsId").asText(null));
-            }
-
-            tpmObject.setPayload(node.toString());
+            TpmObjectMetadata tpmObject = parseSingleObject(node, tpmObjectType);
             tpmObjects.add(tpmObject);
         }
         return tpmObjects;
+    }
+
+    public TpmObjectMetadata parseSingleObject(String response, TpmObjectType tpmObjectType) throws JsonProcessingException {
+        JsonNode rootNode = objectMapper.readTree(response);
+        return parseSingleObject(rootNode, tpmObjectType);
+    }
+
+    private TpmObjectMetadata parseSingleObject(JsonNode node, TpmObjectType tpmObjectType) {
+        TpmObjectMetadata tpmObject = new TpmObjectMetadata();
+
+        tpmObject.setObjectId(node.path("id").asText());
+        tpmObject.setDisplayedName(node.path("displayName").asText());
+        tpmObject.setVersion(node.path("Version").asText(null)); //not null only for Agreements and Agreement Templates
+        tpmObject.setStatus(node.path("artifactStatus").asText());
+        tpmObject.setTpmObjectType(tpmObjectType);
+
+        initAdministrativeData(tpmObject, node);
+        initArtifactProperties(tpmObject, node);
+        setTpmObjectReferences(
+            node,
+            tpmObject
+        );
+
+        if (tpmObjectType == TpmObjectType.CLOUD_AGREEMENT) {
+            tpmObject.setB2bScenarioDetailsId(node.path("B2BScenarioDetailsId").asText(null));
+        }
+
+        tpmObject.setPayload(node.toString());
+        return tpmObject;
     }
 
     protected void initAdministrativeData(TpmObjectMetadata tpmObject, JsonNode node) {
