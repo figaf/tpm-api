@@ -33,8 +33,6 @@ class BusinessDocumentsClientTest {
     @ArgumentsSource(AgentTestDataProvider.class)
     void test_searchInterchanges(CustomHostAgentTestData agentTestData) {
         RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
-        requestContext.getConnectionProperties().setHost(agentTestData.getIntegrationSuiteHost());
-
         Date leftBoundDate = DateUtils.addDays(new Date(), -10);
         Date rightBoundDate = new Date();
 
