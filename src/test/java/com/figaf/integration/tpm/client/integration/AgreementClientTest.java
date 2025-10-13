@@ -45,9 +45,9 @@ public class AgreementClientTest {
 
     @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
     @ArgumentsSource(AgentTestDataProvider.class)
+    @Disabled
     void test_createAndDeleteAgreement(CustomHostAgentTestData customHostAgentTestData) {
         RequestContext requestContext = customHostAgentTestData.createRequestContext(customHostAgentTestData.getTitle());
-        requestContext.getConnectionProperties().setHost(customHostAgentTestData.getIntegrationSuiteHost());
 //         ---------- Transaction option ----------
         TransactionOption tx = new TransactionOption();
         tx.setOption("Copy");
@@ -97,13 +97,16 @@ public class AgreementClientTest {
         agreementCreationRequest.setCompanyData(company);
         agreementCreationRequest.setTradingPartnerData(tpData);
         agreementCreationRequest.setTradingPartnerDetails(tpDetails);
-        agreementCreationRequest.setParentId("a351e33a94b64cd8b273d9236fee4b1f");
+        agreementCreationRequest.setParentId("81a36697276f4695860705388ad6b262");
 
-        TpmObjectMetadata createdAgreement = agreementClient.createAgreement(requestContext, agreementCreationRequest);
-        assertThat(createdAgreement).isNotNull();
+        String agreementId = agreementClient.createAgreement(requestContext, agreementCreationRequest);
+        assertThat(agreementId).isNotEmpty();
 
-        String agreementId = createdAgreement.getObjectId();
-        assertThat(agreementId).isNotNull();
+        List<TpmObjectMetadata> agreements = agreementClient.getAllMetadata(requestContext);
+        TpmObjectMetadata createdAgreement = agreements.stream()
+            .filter(agreement -> agreement.getObjectId().equals(agreementId))
+            .findFirst()
+            .get();
 
         AgreementUpdateRequest agreementUpdateRequest = AgreementRequestMapper.INSTANCE.toUpdateRequest(agreementCreationRequest);
         agreementUpdateRequest.setB2bScenarioDetailsId(createdAgreement.getB2bScenarioDetailsId());

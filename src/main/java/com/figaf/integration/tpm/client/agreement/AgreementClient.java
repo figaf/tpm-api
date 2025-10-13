@@ -1,6 +1,5 @@
 package com.figaf.integration.tpm.client.agreement;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.figaf.integration.common.entity.RequestContext;
 import com.figaf.integration.common.exception.ClientIntegrationException;
 import com.figaf.integration.common.factory.HttpClientsFactory;
@@ -28,30 +27,23 @@ public class AgreementClient extends TpmBaseClient {
 
     public List<TpmObjectMetadata> getAllMetadata(RequestContext requestContext) {
         log.debug("#getAll: requestContext={}", requestContext);
-
         return executeGet(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             AGREEMENTS_RESOURCE,
             (response) -> new GenericTpmResponseParser().parseResponse(response, TpmObjectType.CLOUD_AGREEMENT)
         );
     }
 
-    public TpmObjectMetadata createAgreement(RequestContext requestContext, AgreementCreationRequest agreementCreationRequest) {
+    public String createAgreement(RequestContext requestContext, AgreementCreationRequest agreementCreationRequest) {
         log.debug("#createAgreement: requestContext = {}, agreementCreationRequest = {}", requestContext, agreementCreationRequest);
-        String payload = serializeToJson(agreementCreationRequest);
-        return createAgreement(requestContext, payload);
-    }
-
-    public TpmObjectMetadata createAgreement(RequestContext requestContext, String agreementCreationRequestPayload) {
-        log.debug("#createAgreement: requestContext = {}, agreementCreationRequestPayload = {}", requestContext, agreementCreationRequestPayload);
         return executeMethod(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             PATH_FOR_TOKEN,
             AGREEMENTS_RESOURCE,
             (url, token, restTemplateWrapper) -> {
                 HttpHeaders httpHeaders = createHttpHeadersWithCSRFToken(token);
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                HttpEntity<String> requestEntity = new HttpEntity<>(agreementCreationRequestPayload, httpHeaders);
+                HttpEntity<AgreementCreationRequest> requestEntity = new HttpEntity<>(agreementCreationRequest, httpHeaders);
                 ResponseEntity<String> responseEntity = restTemplateWrapper.getRestTemplate().exchange(url, HttpMethod.POST, requestEntity, String.class);
                 if (!responseEntity.getStatusCode().is2xxSuccessful()) {
                     throw new ClientIntegrationException(format(
@@ -60,32 +52,21 @@ public class AgreementClient extends TpmBaseClient {
                         requestEntity.getBody())
                     );
                 }
-                try {
-                    return new GenericTpmResponseParser().parseSingleObject(responseEntity.getBody(), TpmObjectType.CLOUD_AGREEMENT);
-                } catch (JsonProcessingException e) {
-                    throw new ClientIntegrationException("Can't parse response: ", e);
-                }
-
+                return new JSONObject(responseEntity.getBody()).getString("id");
             }
         );
     }
 
     public void updateAgreement(RequestContext requestContext, String agreementId, AgreementUpdateRequest agreementUpdateRequest) {
         log.debug("#updateAgreement: requestContext = {}, agreementId = {}, agreementUpdateRequest = {}", requestContext, agreementId, agreementUpdateRequest);
-        String payload = serializeToJson(agreementUpdateRequest);
-        updateAgreement(requestContext, agreementId, payload);
-    }
-
-    public void updateAgreement(RequestContext requestContext, String agreementId, String agreementUpdateRequestPayload) {
-        log.debug("#updateAgreement: requestContext = {}, agreementId = {}, agreementUpdateRequestPayload = {}", requestContext, agreementId, agreementUpdateRequestPayload);
         executeMethod(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             PATH_FOR_TOKEN,
             format(AGREEMENT_RESOURCE, agreementId),
             (url, token, restTemplateWrapper) -> {
                 HttpHeaders httpHeaders = createHttpHeadersWithCSRFToken(token);
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                HttpEntity<String> requestEntity = new HttpEntity<>(agreementUpdateRequestPayload, httpHeaders);
+                HttpEntity<AgreementCreationRequest> requestEntity = new HttpEntity<>(agreementUpdateRequest, httpHeaders);
                 ResponseEntity<String> responseEntity = restTemplateWrapper.getRestTemplate().exchange(url, HttpMethod.PUT, requestEntity, String.class);
                 if (!responseEntity.getStatusCode().is2xxSuccessful()) {
                     throw new ClientIntegrationException(format(
@@ -102,7 +83,7 @@ public class AgreementClient extends TpmBaseClient {
     public void deleteAgreement(RequestContext requestContext, String agreementId) {
         log.debug("#deleteAgreement: requestContext = {}, agreementId = {}", requestContext, agreementId);
         executeMethod(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             PATH_FOR_TOKEN,
             format(AGREEMENT_RESOURCE, agreementId),
             (url, token, restTemplateWrapper) -> {
@@ -120,16 +101,6 @@ public class AgreementClient extends TpmBaseClient {
                 return null;
             }
         );
-    }
-
-    private String serializeToJson(AgreementCreationRequest agreementCreationRequest) {
-        String payload;
-        try {
-            payload = jsonMapper.writeValueAsString(agreementCreationRequest);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Can't serialize payload", e);
-        }
-        return payload;
     }
 
 }
