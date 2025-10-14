@@ -160,6 +160,9 @@ public class B2BScenarioResponseParser extends GenericTpmResponseParser {
                             tpmObjectReferences.add(createTpmObjectReference(migMetadata));
                         }
                     }
+                    case "SENDER_ADAPTER" -> {
+                        b2bScenarioMetadata.setSenderCommunicationChannelMetadata(buildCommunicationChannelTemplateMetadata(propertiesInnerNode));
+                    }
                     case "RECEIVER_INTERCHANGE" -> {
                         b2bScenarioMetadata.setPostIFlowUrl(propertiesInnerNode.path("CUSTOM_POST_PROC").asText());
                         MigMetadata migMetadata = buildMigMetadata(propertiesInnerNode);
@@ -171,10 +174,15 @@ public class B2BScenarioResponseParser extends GenericTpmResponseParser {
                     case "SENDER_SYSTEM" -> {
                         senderSystemId = propertiesInnerNode.path("Id").asText();
                         b2bScenarioMetadata.setInitiator(format("%s|%s", propertiesInnerNode.path("Label_Name").asText(), propertiesInnerNode.path("Label_SystemInstanceName").asText()));
+                        b2bScenarioMetadata.setSenderSystemPurpose(propertiesInnerNode.path("Label_Purpose").asText());
                     }
                     case "RECEIVER_SYSTEM" -> {
                         receiverSystemId = propertiesInnerNode.path("Id").asText();
                         b2bScenarioMetadata.setReactor(format("%s|%s", propertiesInnerNode.path("Label_Name").asText(), propertiesInnerNode.path("Label_SystemInstanceName").asText()));
+                        b2bScenarioMetadata.setReceiverSystemPurpose(propertiesInnerNode.path("Label_Purpose").asText());
+                    }
+                    case "RECEIVER_ADAPTER" -> {
+                        b2bScenarioMetadata.setReceiverCommunicationChannelMetadata(buildCommunicationChannelTemplateMetadata(propertiesInnerNode));
                     }
                 }
             }
@@ -206,6 +214,16 @@ public class B2BScenarioResponseParser extends GenericTpmResponseParser {
         }
 
         return new MagMetadata(magGuid, magVersionId, magName, objectGuid);
+    }
+
+    private CommunicationChannelTemplateMetadata buildCommunicationChannelTemplateMetadata(JsonNode propertiesInnerNode) {
+        String id = propertiesInnerNode.path("CommunicationChannelTemplateId").asText();
+        String alias = propertiesInnerNode.path("CommunicationChannelTemplateAlias").asText();
+        String name = propertiesInnerNode.path("Label_CommunicationChannelTemplateName").asText();
+        if (StringUtils.isEmpty(id) || StringUtils.isEmpty(alias) || StringUtils.isEmpty(name)) {
+            return null;
+        }
+        return new CommunicationChannelTemplateMetadata(id, alias, name);
     }
 
     private TpmObjectReference createTpmObjectReference(MigMetadata migMetadata) {

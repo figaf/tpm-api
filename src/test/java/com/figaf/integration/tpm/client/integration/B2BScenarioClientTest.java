@@ -49,6 +49,8 @@ class B2BScenarioClientTest {
         List<MigMetadata> senderMigMetadataList = new ArrayList<>();
         List<MigMetadata> receiverMigMetadataList = new ArrayList<>();
         List<MagMetadata> magMetadataList = new ArrayList<>();
+        List<CommunicationChannelTemplateMetadata> senderCommunicationMetadataList = new ArrayList<>();
+        List<CommunicationChannelTemplateMetadata> receiverCommunicationMetadataList = new ArrayList<>();
         for (B2BScenarioMetadata b2BScenario : b2BScenarios) {
             tpmObjectReferences.addAll(b2BScenario.getTpmObjectReferences());
             if (b2BScenario.getSenderMigMetadata() != null) {
@@ -60,6 +62,12 @@ class B2BScenarioClientTest {
             if (b2BScenario.getMagMetadata() != null) {
                 magMetadataList.add(b2BScenario.getMagMetadata());
             }
+            if (b2BScenario.getSenderCommunicationChannelMetadata() != null) {
+                senderCommunicationMetadataList.add(b2BScenario.getSenderCommunicationChannelMetadata());
+            }
+            if (b2BScenario.getReceiverCommunicationChannelMetadata() != null) {
+                receiverCommunicationMetadataList.add(b2BScenario.getReceiverCommunicationChannelMetadata());
+            }
         }
 
 
@@ -67,6 +75,8 @@ class B2BScenarioClientTest {
         assertThat(senderMigMetadataList).isNotEmpty();
         assertThat(receiverMigMetadataList).isNotEmpty();
         assertThat(magMetadataList).isNotEmpty();
+        assertThat(senderCommunicationMetadataList).isNotEmpty();
+        assertThat(receiverCommunicationMetadataList).isNotEmpty();
     }
 
     @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
