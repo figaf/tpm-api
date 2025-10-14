@@ -33,8 +33,6 @@ class CrossActionsClientTest {
     void testCrossActions() throws InterruptedException, IOException {
         CustomHostAgentTestData customHostAgentTestData = AgentTestDataProvider.buildAgentTestDataForTestSystem();
         RequestContext requestContext = customHostAgentTestData.createRequestContext(customHostAgentTestData.getTitle());
-        requestContext.getConnectionProperties().setHost(customHostAgentTestData.getIntegrationSuiteHost());
-
         File file = new File("src/test/resources/import-archive.zip");
 
         String importRequestId = crossActionsClient.uploadAgreementsArchive(requestContext, FileUtils.readFileToByteArray(file));

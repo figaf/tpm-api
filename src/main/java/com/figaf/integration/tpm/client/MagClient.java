@@ -15,7 +15,7 @@ public class MagClient extends TpmBaseClient {
         log.debug("#getMagVersionInfoById: magVersionId={}, requestContext={}", magVersionId, requestContext);
 
         return executeGet(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             String.format(MAG_VERSION_INFO_RESOURCE, magVersionId)
         );
     }

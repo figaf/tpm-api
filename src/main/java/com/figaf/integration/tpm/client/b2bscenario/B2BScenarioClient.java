@@ -29,7 +29,7 @@ public class B2BScenarioClient extends TpmBaseClient {
     public List<B2BScenarioMetadata> getB2BScenariosForAgreement(RequestContext requestContext, TpmObjectMetadata agreementMetadata) {
         log.debug("#getB2BScenariosForAgreement: requestContext = {}, agreementMetadata = {}", requestContext, agreementMetadata);
         return executeGet(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             format(B2B_SCENARIOS_RESOURCE, agreementMetadata.getObjectId()),
             (response) -> new B2BScenarioResponseParser().parseResponse(response, agreementMetadata)
         );
@@ -38,7 +38,7 @@ public class B2BScenarioClient extends TpmBaseClient {
     public JSONObject getB2BScenariosForAgreementAsJsonObject(RequestContext requestContext, String agreementId) {
         log.debug("#getB2BScenariosForAgreementAsJsonResponse: requestContext = {}, agreementId = {}", requestContext, agreementId);
         return executeGet(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             format(B2B_SCENARIOS_RESOURCE, agreementId),
             response -> {
                 Object object = new JSONTokener(response).nextValue();
@@ -56,7 +56,7 @@ public class B2BScenarioClient extends TpmBaseClient {
     public void updateB2BScenario(RequestContext requestContext, String agreementId, String b2BScenarioDetailsId, String requestBody) {
         log.debug("#updateB2BScenario: requestContext = {}, agreementId  = {}, b2BScenarioDetailsId = {}, requestBody = {}", requestContext, agreementId, b2BScenarioDetailsId, requestBody);
         executeMethod(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             PATH_FOR_TOKEN,
             format(B2B_SCENARIO_RESOURCE, agreementId, b2BScenarioDetailsId),
             (url, token, restTemplateWrapper) -> {
