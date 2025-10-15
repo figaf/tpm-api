@@ -18,9 +18,13 @@ public class B2BScenarioMetadata extends TpmObjectMetadata {
     private MigMetadata senderMigMetadata;
     private MigMetadata receiverMigMetadata;
     private MagMetadata magMetadata;
+    private CommunicationChannelTemplateMetadata senderCommunicationChannelMetadata;
+    private CommunicationChannelTemplateMetadata receiverCommunicationChannelMetadata;
     private Direction direction;
     private String initiator;
     private String reactor;
+    private String senderSystemPurpose;
+    private String receiverSystemPurpose;
     private boolean activated;
     private String updateStatus;
 
