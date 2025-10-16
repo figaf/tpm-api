@@ -3,7 +3,7 @@ package com.figaf.integration.tpm.client.integration;
 import com.figaf.integration.common.data_provider.AgentTestData;
 import com.figaf.integration.common.entity.RequestContext;
 import com.figaf.integration.common.factory.HttpClientsFactory;
-import com.figaf.integration.tpm.client.agreement.AgreementTemplateClient;
+import com.figaf.integration.tpm.client.AgreementTemplateClient;
 import com.figaf.integration.tpm.data_provider.AgentTestDataProvider;
 import com.figaf.integration.tpm.entity.AgreementTemplateMetadata;
 import com.figaf.integration.tpm.entity.B2BScenarioInAgreementTemplate;
@@ -48,7 +48,7 @@ public class AgreementTemplateClientTest {
 
         List<B2BScenarioInAgreementTemplate> allB2bScenarios = new ArrayList<>();
         for (AgreementTemplateMetadata agreementTemplate : agreementTemplates) {
-            allB2bScenarios.addAll(agreementTemplateClient.getB2BScenariosForAgreementTemplate(agreementTemplate.getObjectId(), agreementTemplate.getB2bScenarioDetailsId(), requestContext));
+            allB2bScenarios.addAll(agreementTemplateClient.getB2BScenariosForAgreementTemplate(requestContext, agreementTemplate.getObjectId(), agreementTemplate.getB2bScenarioDetailsId()));
         }
 
         assertThat(allB2bScenarios).isNotEmpty();

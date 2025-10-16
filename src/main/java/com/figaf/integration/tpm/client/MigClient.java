@@ -1,11 +1,10 @@
-package com.figaf.integration.tpm.client.mig;
+package com.figaf.integration.tpm.client;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.figaf.integration.common.entity.RequestContext;
 import com.figaf.integration.common.exception.ClientIntegrationException;
 import com.figaf.integration.common.factory.HttpClientsFactory;
-import com.figaf.integration.tpm.client.TpmBaseClient;
 import com.figaf.integration.tpm.entity.TpmObjectMetadata;
 import com.figaf.integration.tpm.entity.lock.MigLocker;
 import com.figaf.integration.tpm.entity.mig.DraftCreationResponse;
@@ -28,13 +27,18 @@ import static java.lang.String.format;
 public class MigClient extends TpmBaseClient {
 
     private static final String PATH_FOR_TOKEN = "/api/1.0/user";
+    private static final String MIG_RESOURCE = "/api/1.0/migs";
+    public static final String MIG_RESOURCE_BY_ID = "/api/1.0/migs/%s";
+    private static final String MIG_VERSION_INFO_RESOURCE = "/externalApi/1.0/migs/%s";
+    private static final String MIG_CREATE_DRAFT_RESOURCE = "/api/1.0/migs/%s/migVersions?source=%s&status=draft";
+    public static final String MIG_DELETE_DRAFT_RESOURCE = "/api/1.0/migs/%s/migVersions/%s";
 
     public MigClient(HttpClientsFactory httpClientsFactory) {
         super(httpClientsFactory);
     }
 
     public List<TpmObjectMetadata> getAllLatestMetadata(RequestContext requestContext) {
-        log.debug("#getAllLatestMetadata: requestContext={}", requestContext);
+        log.debug("#getAllLatestMetadata: requestContext = {}", requestContext);
         return executeGet(
             requestContext.withPreservingIntegrationSuiteUrl(),
             MIG_RESOURCE,
@@ -42,8 +46,8 @@ public class MigClient extends TpmBaseClient {
         );
     }
 
-    public String getRawById(String migVersionId, RequestContext requestContext) {
-        log.debug("#getRawById: migVersionId={}, requestContext={}", migVersionId, requestContext);
+    public String getRawById(RequestContext requestContext, String migVersionId) {
+        log.debug("#getRawById: requestContext = {}, migVersionId = {}", requestContext, migVersionId);
         return executeGet(
             requestContext.withPreservingIntegrationSuiteUrl(),
             String.format(MIG_RESOURCE_BY_ID, migVersionId),
@@ -51,8 +55,8 @@ public class MigClient extends TpmBaseClient {
         );
     }
 
-    public String getMigVersionInfoById(String migVersionId, RequestContext requestContext) {
-        log.debug("#getRawById: getMigVersionInfoById={}, requestContext={}", migVersionId, requestContext);
+    public String getMigVersionInfoById(RequestContext requestContext, String migVersionId) {
+        log.debug("#getRawById: requestContext = {}, getMigVersionInfoById = {}", requestContext, migVersionId);
 
         return executeGet(
             requestContext.withPreservingIntegrationSuiteUrl(),
@@ -151,7 +155,7 @@ public class MigClient extends TpmBaseClient {
         RestTemplate restTemplate
     ) throws IOException {
         boolean locked = false;
-        String rawMigWithAllSegmentsAndFields = getRawById(migVersionId, requestContext);
+        String rawMigWithAllSegmentsAndFields = getRawById(requestContext, migVersionId);
         String rawMigWithAllFieldsSelectedToTrue = createRequestWithSelectedTrueToAllFields(rawMigWithAllSegmentsAndFields);
         try {
             MigLocker.lockMigObject(requestContext, userApiCsrfToken, restTemplate, migVersionId);

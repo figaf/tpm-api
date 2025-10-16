@@ -1,8 +1,9 @@
-package com.figaf.integration.tpm.client.company;
+package com.figaf.integration.tpm.client;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.figaf.integration.common.entity.RequestContext;
+import com.figaf.integration.common.exception.ClientIntegrationException;
 import com.figaf.integration.common.factory.HttpClientsFactory;
-import com.figaf.integration.tpm.client.TpmBaseClientForTradingPartnerOrCompanyOrSubsidiary;
 import com.figaf.integration.tpm.entity.*;
 import com.figaf.integration.tpm.entity.trading.*;
 import com.figaf.integration.tpm.entity.trading.System;
@@ -12,23 +13,38 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.IterableUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.http.*;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.figaf.integration.common.utils.Utils.optString;
+import static com.figaf.integration.tpm.utils.TpmUtils.PATH_FOR_TOKEN;
 import static java.lang.String.format;
 
 @Slf4j
-public class CompanyProfileClient extends TpmBaseClientForTradingPartnerOrCompanyOrSubsidiary {
+public class CompanyProfileClient extends BusinessEntityAbstractClient {
+
+    private static final String COMPANY_PROFILE_RESOURCE = "/itspaces/tpm/company";
+    private static final String COMPANY_SUBSIDIARIES_RESOURCE = "/itspaces/tpm/company/%s/subsidiaries";
+    private static final String SUBSIDIARY_RESOURCE = "/itspaces/tpm/company/%s/subsidiaries/%s";
+    private static final String COMPANY_SYSTEMS_RESOURCE = "/itspaces/tpm/company/%s/systems";
+    private static final String SUBSIDIARY_SYSTEMS_RESOURCE = "/itspaces/tpm/company/%s/subsidiaries/%s/systems";
+    private static final String COMPANY_IDENTIFIERS_RESOURCE = "/itspaces/tpm/company/%s/identifiers";
+    private static final String SUBSIDIARY_IDENTIFIERS_RESOURCE = "/itspaces/tpm/company/%s/subsidiaries/%s/identifiers";
+    private static final String COMPANY_CHANNELS_RESOURCE = "/itspaces/tpm/company/%s/systems/%s/channels";
+    private static final String SUBSIDIARY_CHANNELS_RESOURCE = "/itspaces/tpm/company/%s/subsidiaries/%s/systems/%s/channels";
+    private static final String COMPANY_PROFILE_CONFIGURATION_RESOURCE = "/itspaces/tpm/company/%s::profileConfiguration";
+    private static final String COMPANY_CONFIG_DECRYPT_RESOURCE = "/itspaces/tpm/company/%s/config.decrypt";
+    private static final String SUBSIDIARY_PROFILE_CONFIGURATION_RESOURCE = "/itspaces/tpm/company/%s/subsidiaries/%s::profileConfiguration";
+    private static final String SUBSIDIARY_CONFIG_DECRYPT_RESOURCE = "/itspaces/tpm/company/%s/subsidiaries/%s/config.decrypt";
 
     public CompanyProfileClient(HttpClientsFactory httpClientsFactory) {
         super(httpClientsFactory);
     }
 
-    public List<Company> getAllMetadata(RequestContext requestContext) {
+    public List<TpmBusinessEntity> getAllMetadata(RequestContext requestContext) {
         log.debug("#getAllMetadata: requestContext={}", requestContext);
 
         return executeGet(
@@ -36,29 +52,17 @@ public class CompanyProfileClient extends TpmBaseClientForTradingPartnerOrCompan
             COMPANY_PROFILE_RESOURCE,
             response -> {
                 JSONArray companiesJsonArray = new JSONArray(response);
-                List<Company> companies = new ArrayList<>();
+                List<TpmBusinessEntity> companies = new ArrayList<>();
                 for (int i = 0; i < companiesJsonArray.length(); i++) {
                     JSONObject companyJsonObject = companiesJsonArray.getJSONObject(i);
-                    Company company = new Company();
-                    company.setObjectId(companyJsonObject.getString("id"));
-                    company.setTpmObjectType(TpmObjectType.CLOUD_COMPANY_PROFILE);
-                    company.setDisplayedName(companyJsonObject.getString("displayName"));
-
-                    JSONObject administrativeDataJsonObject = companyJsonObject.getJSONObject("administrativeData");
-                    company.setAdministrativeData(buildAdministrativeDataObject(administrativeDataJsonObject));
-
-                    JSONObject profileJsonObject = companyJsonObject.getJSONObject("Profile");
-                    company.setProfile(parseProfileDto(profileJsonObject));
-
-                    company.setPayload(companyJsonObject.toString());
-
-                    companies.add(company);
+                    TpmBusinessEntity tpmBusinessEntity = buildTpmBusinessEntity(companyJsonObject, TpmObjectType.CLOUD_COMPANY_PROFILE);
+                    companies.add(tpmBusinessEntity);
                 }
 
                 for (TpmObjectMetadata company : companies) {
-                    List<Subsidiary> subsidiaries = getSubsidiaries(requestContext, company.getObjectId());
+                    List<TpmBusinessEntity> subsidiaries = getSubsidiaries(requestContext, company.getObjectId());
                     List<TpmObjectReference> tpmObjectReferences = new ArrayList<>();
-                    for (Subsidiary subsidiary : subsidiaries) {
+                    for (TpmBusinessEntity subsidiary : subsidiaries) {
                         TpmObjectReference tpmObjectReference = new TpmObjectReference();
                         tpmObjectReference.setObjectId(subsidiary.getObjectId());
                         tpmObjectReference.setTpmObjectType(TpmObjectType.CLOUD_SUBSIDIARY);
@@ -71,34 +75,17 @@ public class CompanyProfileClient extends TpmBaseClientForTradingPartnerOrCompan
         );
     }
 
-    public List<Subsidiary> getSubsidiaries(RequestContext requestContext, String companyId) {
+    public List<TpmBusinessEntity> getSubsidiaries(RequestContext requestContext, String companyId) {
         log.debug("#getSubsidiaries: requestContext = {}, companyId = {}", requestContext, companyId);
         return executeGet(
             requestContext,
             format(COMPANY_SUBSIDIARIES_RESOURCE, companyId),
             response -> {
                 JSONArray subsidiariesJsonArray = new JSONArray(response);
-                List<Subsidiary> subsidiaries = new ArrayList<>();
+                List<TpmBusinessEntity> subsidiaries = new ArrayList<>();
                 for (int i = 0; i < subsidiariesJsonArray.length(); i++) {
                     JSONObject subsidiaryJsonObject = subsidiariesJsonArray.getJSONObject(i);
-                    Subsidiary subsidiary = new Subsidiary();
-                    subsidiary.setObjectId(subsidiaryJsonObject.getString("id"));
-                    subsidiary.setTpmObjectType(TpmObjectType.CLOUD_SUBSIDIARY);
-                    subsidiary.setDisplayedName(subsidiaryJsonObject.getString("displayName"));
-                    JSONObject administrativeDataJsonObject = subsidiaryJsonObject.getJSONObject("administrativeData");
-                    AdministrativeData administrativeData = buildAdministrativeDataObject(administrativeDataJsonObject);
-                    subsidiary.setAdministrativeData(administrativeData);
-                    subsidiary.setPayload(subsidiaryJsonObject.toString());
-
-                    subsidiary.setShortName(optString(subsidiaryJsonObject, "ShortName"));
-                    subsidiary.setWebUrl(optString(subsidiaryJsonObject, "WebURL"));
-                    subsidiary.setLogoId(optString(subsidiaryJsonObject, "LogoId"));
-                    subsidiary.setEmailAddress(optString(subsidiaryJsonObject, "EmailAddress"));
-                    subsidiary.setPhoneNumber(optString(subsidiaryJsonObject, "PhoneNumber"));
-
-                    JSONObject profileJsonObject = subsidiaryJsonObject.getJSONObject("Profile");
-                    subsidiary.setProfile(parseProfileDto(profileJsonObject));
-
+                    TpmBusinessEntity subsidiary = buildTpmBusinessEntity(subsidiaryJsonObject, TpmObjectType.CLOUD_SUBSIDIARY);
                     subsidiary.setParentId(companyId);
 
                     subsidiaries.add(subsidiary);
@@ -124,7 +111,11 @@ public class CompanyProfileClient extends TpmBaseClientForTradingPartnerOrCompan
         return executeGet(
             requestContext,
             format(SUBSIDIARY_RESOURCE, parentCompanyId, subsidiaryId),
-            this::buildTpmObjectDetails
+                responseEntityBody -> {
+                    TpmObjectDetails tpmObjectDetails = buildTpmObjectDetails(responseEntityBody);
+                    tpmObjectDetails.setParentCompanyId(parentCompanyId);
+                    return tpmObjectDetails;
+                }
         );
     }
 
@@ -144,7 +135,7 @@ public class CompanyProfileClient extends TpmBaseClientForTradingPartnerOrCompan
             systemIdToChannels.put(system.getId(), channels);
         }
 
-        ProfileConfiguration profileConfiguration = resolveCompanyProfileConfiguration(tpmObjectDetails.getId(), requestContext);
+        ProfileConfiguration profileConfiguration = resolveCompanyProfileConfiguration(requestContext, tpmObjectDetails.getId());
 
         return new AggregatedTpmObject(tpmObjectDetails, systems, identifiers, systemIdToChannels, profileConfiguration);
     }
@@ -224,7 +215,133 @@ public class CompanyProfileClient extends TpmBaseClientForTradingPartnerOrCompan
         );
     }
 
-    private ProfileConfiguration resolveCompanyProfileConfiguration(String companyId, RequestContext requestContext) {
+    public TpmObjectDetails createSubsidiary(RequestContext requestContext, String parentCompanyId, CreateBusinessEntityRequest createBusinessEntityRequest) {
+        log.debug("#createSubsidiary: requestContext = {}, createBusinessEntityRequest = {}", requestContext, createBusinessEntityRequest);
+
+        return executeMethod(
+            requestContext,
+            PATH_FOR_TOKEN,
+            format(COMPANY_SUBSIDIARIES_RESOURCE,parentCompanyId),
+            (url, token, restTemplateWrapper) -> {
+                HttpHeaders httpHeaders = createHttpHeadersWithCSRFToken(token);
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                HttpEntity<CreateBusinessEntityRequest> requestEntity = new HttpEntity<>(createBusinessEntityRequest, httpHeaders);
+                ResponseEntity<String> responseEntity = restTemplateWrapper.getRestTemplate().exchange(url, HttpMethod.POST, requestEntity, String.class);
+                if (!responseEntity.getStatusCode().is2xxSuccessful()) {
+                    throw new ClientIntegrationException(format(
+                        "Couldn't create trading partner. Code: %d, Message: %s",
+                        responseEntity.getStatusCode().value(),
+                        requestEntity.getBody())
+                    );
+                }
+
+                TpmObjectDetails tpmObjectDetails = buildTpmObjectDetails(responseEntity.getBody());
+                tpmObjectDetails.setParentCompanyId(parentCompanyId);
+                return tpmObjectDetails;
+            }
+        );
+    }
+
+    public System createSystem(RequestContext requestContext, String parentCompanyId, String subsidiaryId, CreateSystemRequest createSystemRequest) {
+        log.debug("#createSystem: requestContext = {}, parentCompanyId = {}, subsidiaryId = {}, createSystemRequest = {}", requestContext, parentCompanyId, subsidiaryId, createSystemRequest);
+
+        return executeMethod(
+            requestContext,
+            PATH_FOR_TOKEN,
+            format(SUBSIDIARY_SYSTEMS_RESOURCE, parentCompanyId, subsidiaryId),
+            (url, token, restTemplateWrapper) -> {
+                HttpHeaders httpHeaders = createHttpHeadersWithCSRFToken(token);
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                HttpEntity<CreateSystemRequest> requestEntity = new HttpEntity<>(createSystemRequest, httpHeaders);
+                ResponseEntity<String> responseEntity = restTemplateWrapper.getRestTemplate().exchange(url, HttpMethod.POST, requestEntity, String.class);
+                if (!responseEntity.getStatusCode().is2xxSuccessful()) {
+                    throw new ClientIntegrationException(format(
+                        "Couldn't create system. Code: %d, Message: %s",
+                        responseEntity.getStatusCode().value(),
+                        requestEntity.getBody())
+                    );
+                }
+                try {
+                    return jsonMapper.readValue(responseEntity.getBody(), System.class);
+                } catch (JsonProcessingException ex) {
+                    throw new ClientIntegrationException("Can't parse System creation response: ", ex);
+                }
+            }
+        );
+    }
+
+    public void createCommunication(RequestContext requestContext, String parentCompanyId, String subsidiaryId, String systemId, CreateCommunicationRequest createCommunicationRequest) {
+        log.debug("#createCommunication: requestContext = {}, parentCompanyId = {}, systemId = {}, createCommunicationRequest = {}", requestContext, parentCompanyId, systemId, createCommunicationRequest);
+
+        executeMethod(
+            requestContext,
+            PATH_FOR_TOKEN,
+            format(SUBSIDIARY_CHANNELS_RESOURCE, parentCompanyId, subsidiaryId, systemId),
+            (url, token, restTemplateWrapper) -> {
+                HttpHeaders httpHeaders = createHttpHeadersWithCSRFToken(token);
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                HttpEntity<CreateCommunicationRequest> requestEntity = new HttpEntity<>(createCommunicationRequest, httpHeaders);
+                ResponseEntity<String> responseEntity = restTemplateWrapper.getRestTemplate().exchange(url, HttpMethod.POST, requestEntity, String.class);
+                if (!responseEntity.getStatusCode().is2xxSuccessful()) {
+                    throw new ClientIntegrationException(format(
+                        "Couldn't create communication. Code: %d, Message: %s",
+                        responseEntity.getStatusCode().value(),
+                        requestEntity.getBody())
+                    );
+                }
+                return null;
+            }
+        );
+    }
+
+    public void createIdentifier(RequestContext requestContext, String parentCompanyId, String subsidiaryId, CreateIdentifierRequest createIdentifierRequest) {
+        log.debug("#createIdentifier: requestContext = {}, parentCompanyId = {}, subsidiaryId = {}, createIdentifierRequest = {}", requestContext, parentCompanyId, subsidiaryId, createIdentifierRequest);
+
+        executeMethod(
+            requestContext,
+            PATH_FOR_TOKEN,
+            format(SUBSIDIARY_IDENTIFIERS_RESOURCE, parentCompanyId, subsidiaryId),
+            (url, token, restTemplateWrapper) -> {
+                HttpHeaders httpHeaders = createHttpHeadersWithCSRFToken(token);
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                HttpEntity<CreateIdentifierRequest> requestEntity = new HttpEntity<>(createIdentifierRequest, httpHeaders);
+                ResponseEntity<String> responseEntity = restTemplateWrapper.getRestTemplate().exchange(url, HttpMethod.POST, requestEntity, String.class);
+                if (!responseEntity.getStatusCode().is2xxSuccessful()) {
+                    throw new ClientIntegrationException(format(
+                        "Couldn't create identifier. Code: %d, Message: %s",
+                        responseEntity.getStatusCode().value(),
+                        requestEntity.getBody())
+                    );
+                }
+                return null;
+            }
+        );
+    }
+
+    public void createAs2InboundDecryptionConfiguration(RequestContext requestContext, String parentCompanyId, String subsidiaryId, CreateAs2InboundDecryptionConfigurationRequest createSignatureVerificationConfigurationRequest) {
+
+        executeMethod(
+            requestContext,
+            PATH_FOR_TOKEN,
+            format(SUBSIDIARY_CONFIG_DECRYPT_RESOURCE, parentCompanyId, subsidiaryId),
+            (url, token, restTemplateWrapper) -> {
+                HttpHeaders httpHeaders = createHttpHeadersWithCSRFToken(token);
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                HttpEntity<CreateAs2InboundDecryptionConfigurationRequest> requestEntity = new HttpEntity<>(createSignatureVerificationConfigurationRequest, httpHeaders);
+                ResponseEntity<String> responseEntity = restTemplateWrapper.getRestTemplate().exchange(url, HttpMethod.POST, requestEntity, String.class);
+                if (!responseEntity.getStatusCode().is2xxSuccessful()) {
+                    throw new ClientIntegrationException(format(
+                        "Couldn't create signature verification configurations. Code: %d, Message: %s",
+                        responseEntity.getStatusCode().value(),
+                        requestEntity.getBody())
+                    );
+                }
+                return null;
+            }
+        );
+    }
+
+    private ProfileConfiguration resolveCompanyProfileConfiguration(RequestContext requestContext, String companyId) {
         JSONObject profileConfigurationJsonObject = executeGetAndReturnNullIfNotFoundErrorOccurs(
             requestContext,
             format(COMPANY_PROFILE_CONFIGURATION_RESOURCE, companyId),

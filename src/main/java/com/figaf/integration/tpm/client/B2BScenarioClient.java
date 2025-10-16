@@ -1,9 +1,8 @@
-package com.figaf.integration.tpm.client.b2bscenario;
+package com.figaf.integration.tpm.client;
 
 import com.figaf.integration.common.entity.RequestContext;
 import com.figaf.integration.common.exception.ClientIntegrationException;
 import com.figaf.integration.common.factory.HttpClientsFactory;
-import com.figaf.integration.tpm.client.TpmBaseClient;
 import com.figaf.integration.tpm.entity.B2BScenarioMetadata;
 import com.figaf.integration.tpm.entity.TpmObjectMetadata;
 import com.figaf.integration.tpm.parser.B2BScenarioResponseParser;
@@ -21,6 +20,9 @@ import static java.lang.String.format;
 
 @Slf4j
 public class B2BScenarioClient extends TpmBaseClient {
+
+    private static final String B2B_SCENARIOS_RESOURCE = "/itspaces/tpm/api/2.0/tradingpartneragreements/%s/b2bscenario";
+    private static final String B2B_SCENARIO_RESOURCE = "/itspaces/tpm/api/2.0/tradingpartneragreements/%s/b2bscenario/%s";
 
     public B2BScenarioClient(HttpClientsFactory httpClientsFactory) {
         super(httpClientsFactory);

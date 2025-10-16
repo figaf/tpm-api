@@ -1,8 +1,7 @@
-package com.figaf.integration.tpm.client.agreement;
+package com.figaf.integration.tpm.client;
 
 import com.figaf.integration.common.entity.RequestContext;
 import com.figaf.integration.common.factory.HttpClientsFactory;
-import com.figaf.integration.tpm.client.TpmBaseClient;
 import com.figaf.integration.tpm.entity.*;
 import com.figaf.integration.tpm.enumtypes.TpmObjectType;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +17,9 @@ import static com.figaf.integration.common.utils.Utils.optString;
 
 @Slf4j
 public class AgreementTemplateClient extends TpmBaseClient {
+
+    private static final String AGREEMENT_TEMPLATE_RESOURCE = "/itspaces/tpm/api/2.0/agreementtemplates";
+    private static final String AGREEMENT_TEMPLATE_B2B_SCENARIOS_RESOURCE = "/itspaces/tpm/api/2.0/agreementtemplates/%s/b2bscenario/%s";
 
     public AgreementTemplateClient(HttpClientsFactory httpClientsFactory) {
         super(httpClientsFactory);
@@ -64,8 +66,8 @@ public class AgreementTemplateClient extends TpmBaseClient {
         );
     }
 
-    public List<B2BScenarioInAgreementTemplate> getB2BScenariosForAgreementTemplate(String agreementTemplateId, String b2BScenarioDetailsId, RequestContext requestContext) {
-        log.debug("#getB2BScenariosForAgreementTemplate: agreementTemplateId = {}, b2BScenarioDetailsId = {}, requestContext = {}", agreementTemplateId, b2BScenarioDetailsId, requestContext);
+    public List<B2BScenarioInAgreementTemplate> getB2BScenariosForAgreementTemplate(RequestContext requestContext, String agreementTemplateId, String b2BScenarioDetailsId) {
+        log.debug("#getB2BScenariosForAgreementTemplate: requestContext = {}, agreementTemplateId = {}, b2BScenarioDetailsId = {}", requestContext, agreementTemplateId, b2BScenarioDetailsId);
         return executeGet(
             requestContext.withPreservingIntegrationSuiteUrl(),
             String.format(AGREEMENT_TEMPLATE_B2B_SCENARIOS_RESOURCE, agreementTemplateId, b2BScenarioDetailsId),
@@ -94,8 +96,8 @@ public class AgreementTemplateClient extends TpmBaseClient {
         );
     }
 
-    public String getB2BScenariosForAgreementTemplateAsRawPayload(String agreementTemplateId, String b2BScenarioDetailsId, RequestContext requestContext) {
-        log.debug("#getB2BScenariosForAgreementTemplateAsRawPayload: agreementTemplateId = {}, b2BScenarioDetailsId = {}, requestContext = {}", agreementTemplateId, b2BScenarioDetailsId, requestContext);
+    public String getB2BScenariosForAgreementTemplateAsRawPayload(RequestContext requestContext, String agreementTemplateId, String b2BScenarioDetailsId) {
+        log.debug("#getB2BScenariosForAgreementTemplateAsRawPayload: requestContext = {}, agreementTemplateId = {}, b2BScenarioDetailsId = {}", requestContext, agreementTemplateId, b2BScenarioDetailsId);
         return executeGet(
             requestContext.withPreservingIntegrationSuiteUrl(),
             String.format(AGREEMENT_TEMPLATE_B2B_SCENARIOS_RESOURCE, agreementTemplateId, b2BScenarioDetailsId)

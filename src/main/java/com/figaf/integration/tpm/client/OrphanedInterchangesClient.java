@@ -1,8 +1,7 @@
-package com.figaf.integration.tpm.client.b2bscenario;
+package com.figaf.integration.tpm.client;
 
 import com.figaf.integration.common.entity.RequestContext;
 import com.figaf.integration.common.factory.HttpClientsFactory;
-import com.figaf.integration.tpm.client.TpmBaseClient;
 import com.figaf.integration.tpm.entity.*;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
