@@ -84,6 +84,11 @@ public class GenericTpmResponseParser {
             tpmObjectReferences.add(createTpmObjectReference(tradingPartnerDetailsNode.asText(), TpmObjectType.CLOUD_TRADING_PARTNER));
         }
 
+        JsonNode communicationPartnerDataNode = node.path("CommunicationPartnerData").path("IdForTradingPartner").path("Properties").path("Id");
+        if (!communicationPartnerDataNode.isMissingNode()) {
+            tpmObjectReferences.add(createTpmObjectReference(communicationPartnerDataNode.asText(), TpmObjectType.CLOUD_COMMUNICATION_PARTNER));
+        }
+
         boolean isParentIdNodePresent = !node.path("ParentId").isMissingNode();
         if (isParentIdNodePresent) {
             tpmObjectReferences.add(createTpmObjectReference(node.path("ParentId").asText(), TpmObjectType.CLOUD_AGREEMENT_TEMPLATE));
