@@ -27,6 +27,10 @@ public class CrossActionsClient extends TpmBaseClient {
 
     private static final String X_CSRF_TOKEN = "X-CSRF-Token";
 
+    private static final String CROSS_ACTIONS_UPLOAD_ARCHIVE_RESOURCE = "/itspaces/tpm/resourcefile";
+    private static final String CROSS_ACTIONS_EXECUTE_IMPORT_RESOURCE = "/itspaces/tpm/api/2.0/tasks.bulk";
+    private static final String CROSS_ACTIONS_TASK_STATUS_RESOURCE = "/itspaces/tpm/api/2.0/task.logs/%s";
+
     public CrossActionsClient(HttpClientsFactory httpClientsFactory) {
         super(httpClientsFactory);
     }

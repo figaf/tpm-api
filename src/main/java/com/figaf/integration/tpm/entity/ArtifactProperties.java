@@ -1,4 +1,4 @@
-package com.figaf.integration.tpm.entity.trading.verbose;
+package com.figaf.integration.tpm.entity;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

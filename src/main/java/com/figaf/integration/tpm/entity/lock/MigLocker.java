@@ -14,7 +14,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 
-import static com.figaf.integration.tpm.client.TpmBaseClient.MIG_RESOURCE_BY_ID;
+import static com.figaf.integration.tpm.client.MigClient.MIG_RESOURCE_BY_ID;
 import static java.lang.String.format;
 import static org.springframework.http.HttpStatus.OK;
 

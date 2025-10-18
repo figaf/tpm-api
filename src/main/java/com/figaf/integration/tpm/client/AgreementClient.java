@@ -1,17 +1,15 @@
-package com.figaf.integration.tpm.client.agreement;
+package com.figaf.integration.tpm.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.figaf.integration.common.entity.RequestContext;
 import com.figaf.integration.common.exception.ClientIntegrationException;
 import com.figaf.integration.common.factory.HttpClientsFactory;
-import com.figaf.integration.tpm.client.TpmBaseClient;
 import com.figaf.integration.tpm.entity.TpmObjectMetadata;
 import com.figaf.integration.tpm.entity.agreement.AgreementCreationRequest;
 import com.figaf.integration.tpm.entity.agreement.AgreementUpdateRequest;
 import com.figaf.integration.tpm.enumtypes.TpmObjectType;
 import com.figaf.integration.tpm.parser.GenericTpmResponseParser;
 import lombok.extern.slf4j.Slf4j;
-import org.json.JSONObject;
 import org.springframework.http.*;
 
 import java.util.List;
@@ -21,6 +19,9 @@ import static java.lang.String.format;
 
 @Slf4j
 public class AgreementClient extends TpmBaseClient {
+
+    private static final String AGREEMENTS_RESOURCE = "/itspaces/tpm/api/2.0/tradingpartneragreements";
+    private static final String AGREEMENT_RESOURCE = "/itspaces/tpm/api/2.0/tradingpartneragreements/%s";
 
     public AgreementClient(HttpClientsFactory httpClientsFactory) {
         super(httpClientsFactory);

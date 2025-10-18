@@ -3,10 +3,11 @@ package com.figaf.integration.tpm.client.integration;
 import com.figaf.integration.common.data_provider.AgentTestData;
 import com.figaf.integration.common.entity.RequestContext;
 import com.figaf.integration.common.factory.HttpClientsFactory;
-import com.figaf.integration.tpm.client.trading.TradingPartnerClient;
+import com.figaf.integration.tpm.client.TradingPartnerClient;
 import com.figaf.integration.tpm.data_provider.AgentTestDataProvider;
 import com.figaf.integration.tpm.data_provider.CustomHostAgentTestData;
-import com.figaf.integration.tpm.entity.TpmObjectMetadata;
+import com.figaf.integration.tpm.entity.CreateBusinessEntityRequest;
+import com.figaf.integration.tpm.entity.TpmBusinessEntity;
 import com.figaf.integration.tpm.entity.trading.*;
 import com.figaf.integration.tpm.entity.trading.System;
 import com.figaf.integration.tpm.entity.trading.verbose.TpmObjectDetails;
@@ -45,7 +46,7 @@ public class TradingPartnerClientTest {
         log.debug("#test_getAll: agentTestData={}", agentTestData);
         RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
 
-        List<TpmObjectMetadata> tradingPartners = tradingPartnerClient.getAllMetadata(requestContext);
+        List<TpmBusinessEntity> tradingPartners = tradingPartnerClient.getAllMetadata(requestContext);
 
         assertThat(tradingPartners).as(METADATA_NOT_NULL_MSG).isNotNull();
     }
@@ -56,10 +57,10 @@ public class TradingPartnerClientTest {
         log.debug("#test_getById: agentTestData={}", agentTestData);
         RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
 
-        List<TpmObjectMetadata> tradingPartners = tradingPartnerClient.getAllMetadata(requestContext);
+        List<TpmBusinessEntity> tradingPartners = tradingPartnerClient.getAllMetadata(requestContext);
 
         tradingPartners.forEach(tradingPartner -> {
-            TpmObjectDetails tpmObjectDetails = tradingPartnerClient.getById(tradingPartner.getObjectId(), requestContext);
+            TpmObjectDetails tpmObjectDetails = tradingPartnerClient.getById(requestContext, tradingPartner.getObjectId());
             assertThat(tpmObjectDetails).as(EXPECTED_NOT_NULL_VERBOSE_MSG).isNotNull();
         });
     }
@@ -70,10 +71,10 @@ public class TradingPartnerClientTest {
         log.debug("#test_getById: agentTestData={}", agentTestData);
         RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
 
-        List<TpmObjectMetadata> tradingPartners = tradingPartnerClient.getAllMetadata(requestContext);
+        List<TpmBusinessEntity> tradingPartners = tradingPartnerClient.getAllMetadata(requestContext);
 
         tradingPartners.forEach(tradingPartner -> {
-            String tradingPartnerRawResponse = tradingPartnerClient.getRawById(tradingPartner.getObjectId(), requestContext);
+            String tradingPartnerRawResponse = tradingPartnerClient.getRawById(requestContext, tradingPartner.getObjectId());
             assertThat(tradingPartnerRawResponse).as(EXPECTED_NOT_NULL_RAW_MSG).isNotEmpty();
         });
     }
@@ -84,14 +85,14 @@ public class TradingPartnerClientTest {
         log.debug("#test_getAggregatedTradingPartner: agentTestData={}", agentTestData);
         RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
 
-        List<TpmObjectMetadata> tradingPartners = tradingPartnerClient.getAllMetadata(requestContext);
+        List<TpmBusinessEntity> tradingPartners = tradingPartnerClient.getAllMetadata(requestContext);
 
         tradingPartners.forEach(tradingPartner -> {
             //skip test objects
             if (StringUtils.containsAnyIgnoreCase(tradingPartner.getDisplayedName(), "test", "ZZ")) {
                 return;
             }
-            AggregatedTpmObject aggregatedTradingPartner = tradingPartnerClient.getAggregatedTradingPartner(tradingPartner.getObjectId(), requestContext);
+            AggregatedTpmObject aggregatedTradingPartner = tradingPartnerClient.getAggregatedTradingPartner(requestContext, tradingPartner.getObjectId());
             assertThat(aggregatedTradingPartner).isNotNull();
             assertThat(aggregatedTradingPartner.getTpmObjectDetails()).isNotNull();
             assertThat(aggregatedTradingPartner.getSystems()).isNotEmpty();
@@ -105,11 +106,11 @@ public class TradingPartnerClientTest {
     void test_getPartnerProfileSystems(AgentTestData agentTestData) {
         RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
 
-        List<TpmObjectMetadata> tradingPartners = tradingPartnerClient.getAllMetadata(requestContext);
+        List<TpmBusinessEntity> tradingPartners = tradingPartnerClient.getAllMetadata(requestContext);
 
         List<System> allSystems = new ArrayList<>();
         tradingPartners.forEach(tradingPartner -> {
-            allSystems.addAll(tradingPartnerClient.getPartnerProfileSystems(tradingPartner.getObjectId(), requestContext));
+            allSystems.addAll(tradingPartnerClient.getPartnerProfileSystems(requestContext, tradingPartner.getObjectId()));
         });
 
         assertThat(allSystems).isNotEmpty();
@@ -121,11 +122,11 @@ public class TradingPartnerClientTest {
     void test_getPartnerProfileIdentifiers(AgentTestData agentTestData) {
         RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
 
-        List<TpmObjectMetadata> tradingPartners = tradingPartnerClient.getAllMetadata(requestContext);
+        List<TpmBusinessEntity> tradingPartners = tradingPartnerClient.getAllMetadata(requestContext);
 
         List<Identifier> allIdentifiers = new ArrayList<>();
         tradingPartners.forEach(tradingPartner -> {
-            allIdentifiers.addAll(tradingPartnerClient.getPartnerProfileIdentifiers(tradingPartner.getObjectId(), requestContext));
+            allIdentifiers.addAll(tradingPartnerClient.getPartnerProfileIdentifiers(requestContext, tradingPartner.getObjectId()));
         });
 
         assertThat(allIdentifiers).isNotEmpty();
@@ -138,84 +139,18 @@ public class TradingPartnerClientTest {
     void test_getPartnerProfileChannels(AgentTestData agentTestData) {
         RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
 
-        List<TpmObjectMetadata> tradingPartners = tradingPartnerClient.getAllMetadata(requestContext);
+        List<TpmBusinessEntity> tradingPartners = tradingPartnerClient.getAllMetadata(requestContext);
 
         List<Channel> allPartnerProfileChannels = new ArrayList<>();
         tradingPartners.forEach(tradingPartner -> {
-            List<System> partnerProfileSystems = tradingPartnerClient.getPartnerProfileSystems(tradingPartner.getObjectId(), requestContext);
+            List<System> partnerProfileSystems = tradingPartnerClient.getPartnerProfileSystems(requestContext, tradingPartner.getObjectId());
             for (System partnerProfileSystem : partnerProfileSystems) {
-                allPartnerProfileChannels.addAll(tradingPartnerClient.getPartnerProfileChannels(tradingPartner.getObjectId(), partnerProfileSystem.getId(), requestContext));
+                allPartnerProfileChannels.addAll(tradingPartnerClient.getPartnerProfileChannels(requestContext, tradingPartner.getObjectId(), partnerProfileSystem.getId()));
             }
         });
 
         assertThat(allPartnerProfileChannels).isNotEmpty();
         allPartnerProfileChannels.forEach(channel -> assertThat(channel).hasNoNullFieldsOrPropertiesExcept("securityConfigurationMode"));
-    }
-
-    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
-    @ArgumentsSource(AgentTestDataProvider.class)
-    void test_getAllSystemTypes(AgentTestData agentTestData) {
-        RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
-
-        List<SystemType> systemTypes = tradingPartnerClient.getAllSystemTypes(requestContext);
-
-        assertThat(systemTypes).isNotEmpty();
-        systemTypes.forEach(systemType -> assertThat(systemType.getName()).isNotNull());
-    }
-
-    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
-    @ArgumentsSource(AgentTestDataProvider.class)
-    void test_getAllTypeSystems(AgentTestData agentTestData) {
-        RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
-
-        List<TypeSystem> typeSystems = tradingPartnerClient.getAllTypeSystems(requestContext);
-
-        assertThat(typeSystems).isNotEmpty();
-        typeSystems.forEach(systemType -> assertThat(systemType).hasNoNullFieldsOrProperties());
-    }
-
-    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
-    @ArgumentsSource(AgentTestDataProvider.class)
-    void test_getTypeSystemVersions(AgentTestData agentTestData) {
-        RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
-
-        List<TypeSystemVersion> typeSystemVersions = tradingPartnerClient.getTypeSystemVersions("ASC_X12", requestContext);
-
-        assertThat(typeSystemVersions).isNotEmpty();
-        typeSystemVersions.forEach(typeSystemVersion -> assertThat(typeSystemVersion).hasNoNullFieldsOrProperties());
-    }
-
-    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
-    @ArgumentsSource(AgentTestDataProvider.class)
-    void test_getProducts(AgentTestData agentTestData) {
-        RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
-
-        List<Product> products = tradingPartnerClient.getAllProducts(requestContext);
-
-        assertThat(products).isNotEmpty();
-        products.forEach(product -> assertThat(product).hasNoNullFieldsOrPropertiesExcept("parent"));
-    }
-
-    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
-    @ArgumentsSource(AgentTestDataProvider.class)
-    void test_getSenderAdapters(AgentTestData agentTestData) {
-        RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
-
-        List<Adapter> senderAdapters = tradingPartnerClient.getSenderAdapters(requestContext);
-
-        assertThat(senderAdapters).isNotEmpty();
-        senderAdapters.forEach(senderAdapter -> assertThat(senderAdapter).hasNoNullFieldsOrProperties());
-    }
-
-    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
-    @ArgumentsSource(AgentTestDataProvider.class)
-    void test_getReceiverAdapters(AgentTestData agentTestData) {
-        RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
-
-        List<Adapter> receiverAdapters = tradingPartnerClient.getReceiverAdapters(requestContext);
-
-        assertThat(receiverAdapters).isNotEmpty();
-        receiverAdapters.forEach(receiverAdapter -> assertThat(receiverAdapter).hasNoNullFieldsOrProperties());
     }
 
     @Disabled
@@ -225,7 +160,7 @@ public class TradingPartnerClientTest {
         RequestContext requestContext = customHostAgentTestData.createRequestContext(customHostAgentTestData.getTitle());
         requestContext.getConnectionProperties().setHost(customHostAgentTestData.getIntegrationSuiteHost());
 
-        CreateTradingPartnerRequest request = new CreateTradingPartnerRequest();
+        CreateBusinessEntityRequest request = new CreateBusinessEntityRequest("TRADING_PARTNER");
         request.setName("Arsenii 6");
         request.setShortName("Ars6");
         request.setWebURL("http://example.com");
@@ -237,7 +172,7 @@ public class TradingPartnerClientTest {
         request.getProfile().getAddress().setStreetName("My Street");
         request.getProfile().getAddress().setStreetPostalCode("567");
 
-        TpmObjectDetails tradingPartner = tradingPartnerClient.createTradingPartner(request, requestContext);
+        TpmObjectDetails tradingPartner = tradingPartnerClient.createTradingPartner(requestContext, request);
 
         assertThat(tradingPartner).as(METADATA_NOT_NULL_MSG).isNotNull();
     }
@@ -262,29 +197,9 @@ public class TradingPartnerClientTest {
         typeSystem.getVersions().add(new TypeSystemWithVersions.TypeSystemVersion("3.2", "3.2"));
         request.getTypeSystems().add(typeSystem);
 
-        System system = tradingPartnerClient.createSystem("82bf48ca067645d08c94b0e8cd7fbd19", request, requestContext);
+        System system = tradingPartnerClient.createSystem(requestContext, "82bf48ca067645d08c94b0e8cd7fbd19", request);
         assertThat(system).isNotNull();
         assertThat(system).hasNoNullFieldsOrProperties();
-    }
-
-    @Disabled
-    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
-    @ArgumentsSource(AgentTestDataProvider.class)
-    void test_createSystemType(CustomHostAgentTestData customHostAgentTestData) {
-        RequestContext requestContext = customHostAgentTestData.createRequestContext(customHostAgentTestData.getTitle());
-        requestContext.getConnectionProperties().setHost(customHostAgentTestData.getIntegrationSuiteHost());
-
-        List<Product> allProducts = tradingPartnerClient.getAllProducts(requestContext);
-        String metadataId = allProducts.get(0).getMetadataId();
-
-        CreateSystemTypeRequest request = new CreateSystemTypeRequest();
-        request.setDeploymentType("Cloud");
-        request.setDescription("This is Arsenii's System Type");
-        request.setName("Arsenii System Type 2");
-        request.setSapProduct(metadataId);
-
-        tradingPartnerClient.createSystemType(request, requestContext);
-
     }
 
     @Disabled
@@ -300,7 +215,7 @@ public class TradingPartnerClientTest {
         senderCommunicationRequest.setName("SOAP Sender 5");
         senderCommunicationRequest.setAlias("SOAP_SENDER_5");
         senderCommunicationRequest.setDescription("This is SOAP Sender");
-        tradingPartnerClient.createCommunication("82bf48ca067645d08c94b0e8cd7fbd19", "477c1eb61e9a498d82a3fc695c06f8f4", senderCommunicationRequest, requestContext);
+        tradingPartnerClient.createCommunication(requestContext, "82bf48ca067645d08c94b0e8cd7fbd19", "477c1eb61e9a498d82a3fc695c06f8f4", senderCommunicationRequest);
 
         CreateCommunicationRequest receiverCommunicationRequest = new CreateCommunicationRequest();
         receiverCommunicationRequest.setDirection("Receiver");
@@ -309,7 +224,7 @@ public class TradingPartnerClientTest {
         receiverCommunicationRequest.setAlias("AS2 Receiver 2");
         receiverCommunicationRequest.setDescription("This is AS2 Receiver 2 Receiver");
         receiverCommunicationRequest.getConfigurationProperties().getAllAttributes().put("address", new CreateCommunicationRequest.Attribute("", "http://example.com", true));
-        tradingPartnerClient.createCommunication("82bf48ca067645d08c94b0e8cd7fbd19", "477c1eb61e9a498d82a3fc695c06f8f4", receiverCommunicationRequest, requestContext);
+        tradingPartnerClient.createCommunication(requestContext, "82bf48ca067645d08c94b0e8cd7fbd19", "477c1eb61e9a498d82a3fc695c06f8f4", receiverCommunicationRequest);
 
     }
 
@@ -328,7 +243,7 @@ public class TradingPartnerClientTest {
         request.setAlias("Arsenii Alias Test 100");
         request.setAlias("ZZ");
 
-        tradingPartnerClient.createIdentifier("82bf48ca067645d08c94b0e8cd7fbd19", request, requestContext);
+        tradingPartnerClient.createIdentifier(requestContext, "82bf48ca067645d08c94b0e8cd7fbd19", request);
     }
 
     @Disabled
@@ -342,7 +257,7 @@ public class TradingPartnerClientTest {
         request.setAs2PartnerId("dummy_Arsenii70");
         request.setAlias("dummy_Arsenii70");
 
-        tradingPartnerClient.createSignatureVerificationConfiguration("82bf48ca067645d08c94b0e8cd7fbd19", request, requestContext);
+        tradingPartnerClient.createSignatureVerificationConfiguration(requestContext, "82bf48ca067645d08c94b0e8cd7fbd19", request);
     }
 
 }
