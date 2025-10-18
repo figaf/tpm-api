@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.figaf.integration.tpm.entity.AdministrativeData;
 import com.figaf.integration.tpm.entity.TpmObjectMetadata;
 import com.figaf.integration.tpm.entity.TpmObjectReference;
-import com.figaf.integration.tpm.entity.trading.verbose.ArtifactProperties;
 import com.figaf.integration.tpm.enumtypes.TpmObjectType;
 
 import java.io.IOException;
@@ -48,7 +47,6 @@ public class GenericTpmResponseParser {
         tpmObject.setTpmObjectType(tpmObjectType);
 
         initAdministrativeData(tpmObject, node);
-        initArtifactProperties(tpmObject, node);
         setTpmObjectReferences(
             node,
             tpmObject
@@ -84,6 +82,11 @@ public class GenericTpmResponseParser {
         JsonNode tradingPartnerDetailsNode = node.path("TradingPartnerDetails").path("IdForTradingPartner").path("Properties").path("Id");
         if (!tradingPartnerDetailsNode.isMissingNode()) {
             tpmObjectReferences.add(createTpmObjectReference(tradingPartnerDetailsNode.asText(), TpmObjectType.CLOUD_TRADING_PARTNER));
+        }
+
+        JsonNode communicationPartnerDataNode = node.path("CommunicationPartnerData").path("IdForTradingPartner").path("Properties").path("Id");
+        if (!communicationPartnerDataNode.isMissingNode()) {
+            tpmObjectReferences.add(createTpmObjectReference(communicationPartnerDataNode.asText(), TpmObjectType.CLOUD_COMMUNICATION_PARTNER));
         }
 
         boolean isParentIdNodePresent = !node.path("ParentId").isMissingNode();
@@ -166,14 +169,4 @@ public class GenericTpmResponseParser {
         return tpmObjectReference;
     }
 
-    private void initArtifactProperties(TpmObjectMetadata tpmObject, JsonNode node) {
-        JsonNode artifactPropertiesNode = node.path("artifactProperties");
-        if (!artifactPropertiesNode.isMissingNode()) {
-            ArtifactProperties artifactProperties = new ArtifactProperties();
-            artifactProperties.setWebURL(artifactPropertiesNode.path("webURL").asText());
-            artifactProperties.setShortName(artifactPropertiesNode.path("shortName").asText());
-            artifactProperties.setLogoID(artifactPropertiesNode.path("logoID").asText());
-            tpmObject.setArtifactProperties(artifactProperties);
-        }
-    }
 }

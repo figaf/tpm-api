@@ -22,7 +22,6 @@ public class TpmObjectDetails {
     private ProfileDto profile;
     private String documentSchemaVersion;
     private Map<String, List<String>> searchableAttributes;
-    private ArtifactProperties artifactProperties;
     private List<Object> relations;
     private AdministrativeData administrativeData;
     private Map<String, Object> artifactRelations;
@@ -32,6 +31,8 @@ public class TpmObjectDetails {
     private String uniqueId;
     private String id;
     private String displayedName;
+
+    private String parentCompanyId; //only for subsidiary
 
     private String rawPayload;
 

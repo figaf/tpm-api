@@ -2,7 +2,7 @@ package com.figaf.integration.tpm.client.integration;
 
 import com.figaf.integration.common.entity.RequestContext;
 import com.figaf.integration.common.factory.HttpClientsFactory;
-import com.figaf.integration.tpm.client.mig.MigClient;
+import com.figaf.integration.tpm.client.MigClient;
 import com.figaf.integration.tpm.data_provider.AgentTestDataProvider;
 import com.figaf.integration.tpm.data_provider.CustomHostAgentTestData;
 import com.figaf.integration.tpm.entity.TpmObjectMetadata;
@@ -75,7 +75,7 @@ public class MigClientTest {
 
         //its too heavy test to trigger getRawById for all migs
         TpmObjectMetadata migFirstMetadata = migs.get(0);
-        String migRawResponse = migClient.getRawById(migFirstMetadata.getVersionId(), requestContext);
+        String migRawResponse = migClient.getRawById(requestContext, migFirstMetadata.getVersionId());
         assertThat(migRawResponse).as(EXPECTED_NOT_NULL_RAW_MSG).isNotEmpty();
     }
 
@@ -91,7 +91,7 @@ public class MigClientTest {
         assertFalse(CollectionUtils.isEmpty(migs), METADATA_NOT_NULL_MSG);
 
         TpmObjectMetadata migFirstMetadata = migs.get(0);
-        String migRawResponse = migClient.getMigVersionInfoById(migFirstMetadata.getVersionId(), requestContext);
+        String migRawResponse = migClient.getMigVersionInfoById(requestContext, migFirstMetadata.getVersionId());
         assertThat(migRawResponse).as(EXPECTED_NOT_NULL_RAW_MSG).isNotEmpty();
     }
 

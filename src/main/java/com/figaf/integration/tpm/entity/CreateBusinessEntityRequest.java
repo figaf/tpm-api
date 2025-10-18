@@ -1,17 +1,22 @@
-package com.figaf.integration.tpm.entity.trading;
+package com.figaf.integration.tpm.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@RequiredArgsConstructor
 @Getter
 @Setter
 @ToString
-public class CreateTradingPartnerRequest {
+public class CreateBusinessEntityRequest {
+
+    @JsonProperty("artifactType")
+    private final String artifactType;
 
     @JsonProperty("Name")
     private String name;
@@ -34,9 +39,6 @@ public class CreateTradingPartnerRequest {
     @JsonProperty("Profile")
     private Profile profile = new Profile();
 
-    @JsonProperty("artifactType")
-    private String artifactType = "TRADING_PARTNER";
-
     @Getter
     @Setter
     @ToString
@@ -56,6 +58,10 @@ public class CreateTradingPartnerRequest {
 
         @JsonProperty("BusinessContext")
         private BusinessContext businessContext = new BusinessContext();
+
+        @JsonProperty("PartnerType")
+        private String partnerType;
+
     }
 
     @Getter
