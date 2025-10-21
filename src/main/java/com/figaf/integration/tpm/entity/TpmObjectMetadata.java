@@ -1,11 +1,7 @@
 package com.figaf.integration.tpm.entity;
 
-import com.figaf.integration.tpm.entity.trading.verbose.ArtifactProperties;
 import com.figaf.integration.tpm.enumtypes.TpmObjectType;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.io.Serializable;
 import java.util.List;
@@ -25,9 +21,6 @@ public class TpmObjectMetadata implements Serializable {
     private List<TpmObjectReference> tpmObjectReferences;
     private AdministrativeData administrativeData;
     private String payload;
-
-    //only for trading partner
-    private ArtifactProperties artifactProperties;
 
     //only for agreement
     private String b2bScenarioDetailsId; //TODO it's better to create a separate class for the AgreementMetadata (as it's done for AgreementTemplateMetadata and others)

@@ -2,7 +2,7 @@ package com.figaf.integration.tpm.client.integration;
 
 import com.figaf.integration.common.entity.RequestContext;
 import com.figaf.integration.common.factory.HttpClientsFactory;
-import com.figaf.integration.tpm.client.b2bscenario.OrphanedInterchangesClient;
+import com.figaf.integration.tpm.client.OrphanedInterchangesClient;
 import com.figaf.integration.tpm.data_provider.AgentTestDataProvider;
 import com.figaf.integration.tpm.data_provider.CustomHostAgentTestData;
 import com.figaf.integration.tpm.entity.OrphanedInterchange;

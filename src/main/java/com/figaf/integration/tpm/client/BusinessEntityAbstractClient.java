@@ -2,11 +2,14 @@ package com.figaf.integration.tpm.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.figaf.integration.common.factory.HttpClientsFactory;
+import com.figaf.integration.tpm.entity.ArtifactProperties;
+import com.figaf.integration.tpm.entity.TpmBusinessEntity;
 import com.figaf.integration.tpm.entity.trading.Channel;
 import com.figaf.integration.tpm.entity.trading.Identifier;
 import com.figaf.integration.tpm.entity.trading.ProfileConfiguration;
 import com.figaf.integration.tpm.entity.trading.System;
 import com.figaf.integration.tpm.entity.trading.verbose.*;
+import com.figaf.integration.tpm.enumtypes.TpmObjectType;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -16,10 +19,26 @@ import java.util.*;
 
 import static com.figaf.integration.common.utils.Utils.optString;
 
-public class TpmBaseClientForTradingPartnerOrCompanyOrSubsidiary extends TpmBaseClient {
+public abstract class BusinessEntityAbstractClient extends TpmBaseClient {
 
-    public TpmBaseClientForTradingPartnerOrCompanyOrSubsidiary(HttpClientsFactory httpClientsFactory) {
+    public BusinessEntityAbstractClient(HttpClientsFactory httpClientsFactory) {
         super(httpClientsFactory);
+    }
+
+    protected TpmBusinessEntity buildTpmBusinessEntity(JSONObject jsonObject, TpmObjectType tpmObjectType) {
+        TpmBusinessEntity tpmBusinessEntity = new TpmBusinessEntity();
+        tpmBusinessEntity.setObjectId(jsonObject.getString("id"));
+        tpmBusinessEntity.setTpmObjectType(tpmObjectType);
+        tpmBusinessEntity.setDisplayedName(jsonObject.getString("displayName"));
+
+        JSONObject administrativeDataJsonObject = jsonObject.getJSONObject("administrativeData");
+        tpmBusinessEntity.setAdministrativeData(buildAdministrativeDataObject(administrativeDataJsonObject));
+
+        JSONObject artifactPropertiesJsonObject = jsonObject.getJSONObject("artifactProperties");
+        tpmBusinessEntity.setArtifactProperties(buildArtifactProperties(artifactPropertiesJsonObject));
+
+        tpmBusinessEntity.setPayload(jsonObject.toString());
+        return tpmBusinessEntity;
     }
 
     protected List<System> parseSystemsList(String response) throws JsonProcessingException {
@@ -81,23 +100,12 @@ public class TpmBaseClientForTradingPartnerOrCompanyOrSubsidiary extends TpmBase
 
         setTpmObjectDetailsProperties(tpmObjectDetailsJsonObject, tpmObjectDetails);
 
-        JSONObject jsonArtifactProperties = tpmObjectDetailsJsonObject.getJSONObject("artifactProperties");
-        tpmObjectDetails.setArtifactProperties(parseArtifactProperties(jsonArtifactProperties));
-
         JSONObject profileJsonObject = tpmObjectDetailsJsonObject.getJSONObject("Profile");
         tpmObjectDetails.setProfile(parseProfileDto(profileJsonObject));
 
         tpmObjectDetails.setRawPayload(tpmObjectDetailsJsonObject.toString());
 
         return tpmObjectDetails;
-    }
-
-    protected ArtifactProperties parseArtifactProperties(final JSONObject jsonArtifactProperties) {
-        ArtifactProperties artifactProperties = new ArtifactProperties();
-        artifactProperties.setWebURL(optString(jsonArtifactProperties, "webURL"));
-        artifactProperties.setShortName(optString(jsonArtifactProperties, "shortName"));
-        artifactProperties.setLogoID(optString(jsonArtifactProperties, "logoID"));
-        return artifactProperties;
     }
 
     protected ProfileDto parseProfileDto(JSONObject profileJsonObject) {
@@ -289,4 +297,13 @@ public class TpmBaseClientForTradingPartnerOrCompanyOrSubsidiary extends TpmBase
         contactPersonAddressDTO.setCountryCode(optString(jsonAddress, "CountryCode"));
         return contactPersonAddressDTO;
     }
+
+    protected ArtifactProperties buildArtifactProperties(JSONObject jsonObject) {
+        ArtifactProperties artifactProperties = new ArtifactProperties();
+        artifactProperties.setWebURL(jsonObject.optString("webURL"));
+        artifactProperties.setShortName(jsonObject.optString("shortName"));
+        artifactProperties.setLogoID(jsonObject.optString("logoID"));
+        return artifactProperties;
+    }
+
 }
