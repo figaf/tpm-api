@@ -58,6 +58,10 @@ public class CreateBusinessEntityRequest {
 
         @JsonProperty("BusinessContext")
         private BusinessContext businessContext = new BusinessContext();
+
+        @JsonProperty("PartnerType")
+        private String partnerType;
+
     }
 
     @Getter
