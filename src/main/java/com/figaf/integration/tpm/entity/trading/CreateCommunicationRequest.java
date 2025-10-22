@@ -20,6 +20,9 @@ public class CreateCommunicationRequest {
     @JsonProperty("as2PartnerId")
     private String as2PartnerId;
 
+    @JsonProperty("UserAccount")
+    private String userAccount;
+
     @JsonProperty("SecurityConfigurationMode")
     private String securityConfigurationMode;
 
