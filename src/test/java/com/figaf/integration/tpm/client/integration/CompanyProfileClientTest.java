@@ -248,7 +248,7 @@ public class CompanyProfileClientTest {
         typeSystem.getVersions().add(new TypeSystemWithVersions.TypeSystemVersion("3.2", "3.2"));
         request.getTypeSystems().add(typeSystem);
 
-        System system = companyProfileClient.createSystem(requestContext, "myCompany", "94bd5bd99e394728a8363de9c2b692eb", request);
+        System system = companyProfileClient.createSubsidiarySystem(requestContext, "myCompany", "94bd5bd99e394728a8363de9c2b692eb", request);
         assertThat(system).isNotNull();
         assertThat(system).hasNoNullFieldsOrProperties();
     }
@@ -268,7 +268,7 @@ public class CompanyProfileClientTest {
         request.setAlias("Arsenii Alias Test 100");
         request.setAlias("ZZ");
 
-        companyProfileClient.createIdentifier(requestContext, "myCompany", "94bd5bd99e394728a8363de9c2b692eb", request);
+        companyProfileClient.createSubsidiaryIdentifier(requestContext, "myCompany", "94bd5bd99e394728a8363de9c2b692eb", request);
     }
 
     @Disabled
@@ -284,7 +284,7 @@ public class CompanyProfileClientTest {
         senderCommunicationRequest.setName("SOAP Sender 5");
         senderCommunicationRequest.setAlias("SOAP_SENDER_5");
         senderCommunicationRequest.setDescription("This is SOAP Sender");
-        companyProfileClient.createCommunication(requestContext, "myCompany", "94bd5bd99e394728a8363de9c2b692eb", "8ae91791cfe7487a9da65d8616baddab", senderCommunicationRequest);
+        companyProfileClient.createSubsidiaryCommunication(requestContext, "myCompany", "94bd5bd99e394728a8363de9c2b692eb", "8ae91791cfe7487a9da65d8616baddab", senderCommunicationRequest);
 
         CreateCommunicationRequest receiverCommunicationRequest = new CreateCommunicationRequest();
         receiverCommunicationRequest.setDirection("Receiver");
@@ -293,7 +293,7 @@ public class CompanyProfileClientTest {
         receiverCommunicationRequest.setAlias("AS2 Receiver 2");
         receiverCommunicationRequest.setDescription("This is AS2 Receiver 2 Receiver");
         receiverCommunicationRequest.getConfigurationProperties().getAllAttributes().put("address", new CreateCommunicationRequest.Attribute("", "http://example.com", true));
-        companyProfileClient.createCommunication(requestContext, "myCompany", "94bd5bd99e394728a8363de9c2b692eb", "8ae91791cfe7487a9da65d8616baddab", receiverCommunicationRequest);
+        companyProfileClient.createSubsidiaryCommunication(requestContext, "myCompany", "94bd5bd99e394728a8363de9c2b692eb", "8ae91791cfe7487a9da65d8616baddab", receiverCommunicationRequest);
     }
 
     @Disabled
@@ -307,7 +307,7 @@ public class CompanyProfileClientTest {
         request.setUserAccount("dummy_Arsenii70");
         request.setAlias("dummy_Arsenii70");
 
-        companyProfileClient.createAs2InboundDecryptionConfiguration(requestContext, "myCompany","94bd5bd99e394728a8363de9c2b692eb", request);
+        companyProfileClient.createSubsidiaryAs2InboundDecryptionConfiguration(requestContext, "myCompany","94bd5bd99e394728a8363de9c2b692eb", request);
     }
 
 }

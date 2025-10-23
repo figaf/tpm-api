@@ -242,13 +242,29 @@ public class CompanyProfileClient extends BusinessEntityAbstractClient {
         );
     }
 
-    public System createSystem(RequestContext requestContext, String parentCompanyId, String subsidiaryId, CreateSystemRequest createSystemRequest) {
-        log.debug("#createSystem: requestContext = {}, parentCompanyId = {}, subsidiaryId = {}, createSystemRequest = {}", requestContext, parentCompanyId, subsidiaryId, createSystemRequest);
+    public System createCompanySystem(RequestContext requestContext, String companyId, CreateSystemRequest createSystemRequest) {
+        log.debug("#createCompanySystem: requestContext = {}, companyId = {}, createSystemRequest = {}", requestContext, companyId, createSystemRequest);
+        return createSystem(
+            requestContext,
+            format(COMPANY_SYSTEMS_RESOURCE, companyId),
+            createSystemRequest
+        );
+    }
 
+    public System createSubsidiarySystem(RequestContext requestContext, String parentCompanyId, String subsidiaryId, CreateSystemRequest createSystemRequest) {
+        log.debug("#createSubsidiarySystem: requestContext = {}, parentCompanyId = {}, subsidiaryId = {}, createSystemRequest = {}", requestContext, parentCompanyId, subsidiaryId, createSystemRequest);
+        return createSystem(
+            requestContext,
+            format(SUBSIDIARY_SYSTEMS_RESOURCE, parentCompanyId, subsidiaryId),
+            createSystemRequest
+        );
+    }
+
+    private System createSystem(RequestContext requestContext, String path, CreateSystemRequest createSystemRequest) {
         return executeMethod(
             requestContext,
             PATH_FOR_TOKEN,
-            format(SUBSIDIARY_SYSTEMS_RESOURCE, parentCompanyId, subsidiaryId),
+            path,
             (url, token, restTemplateWrapper) -> {
                 HttpHeaders httpHeaders = createHttpHeadersWithCSRFToken(token);
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
@@ -270,13 +286,21 @@ public class CompanyProfileClient extends BusinessEntityAbstractClient {
         );
     }
 
-    public void createCommunication(RequestContext requestContext, String parentCompanyId, String subsidiaryId, String systemId, CreateCommunicationRequest createCommunicationRequest) {
-        log.debug("#createCommunication: requestContext = {}, parentCompanyId = {}, systemId = {}, createCommunicationRequest = {}", requestContext, parentCompanyId, systemId, createCommunicationRequest);
+    public void createCompanyCommunication(RequestContext requestContext, String companyId, String systemId, CreateCommunicationRequest createCommunicationRequest) {
+        log.debug("#createCompanyCommunication: requestContext = {}, companyId = {}, createCommunicationRequest = {}", requestContext, companyId, createCommunicationRequest);
+        createCommunication(requestContext, format(COMPANY_CHANNELS_RESOURCE, companyId, systemId), createCommunicationRequest);
+    }
 
-        executeMethod(
+    public void createSubsidiaryCommunication(RequestContext requestContext, String parentCompanyId, String subsidiaryId, String systemId, CreateCommunicationRequest createCommunicationRequest) {
+        log.debug("#createSubsidiaryCommunication: requestContext = {}, parentCompanyId = {}, systemId = {}, createCommunicationRequest = {}", requestContext, parentCompanyId, systemId, createCommunicationRequest);
+        createCommunication(requestContext, format(SUBSIDIARY_CHANNELS_RESOURCE, parentCompanyId, subsidiaryId, systemId), createCommunicationRequest);
+    }
+
+    private void createCommunication(RequestContext requestContext, String path, CreateCommunicationRequest createCommunicationRequest) {
+         executeMethod(
             requestContext,
             PATH_FOR_TOKEN,
-            format(SUBSIDIARY_CHANNELS_RESOURCE, parentCompanyId, subsidiaryId, systemId),
+            path,
             (url, token, restTemplateWrapper) -> {
                 HttpHeaders httpHeaders = createHttpHeadersWithCSRFToken(token);
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
@@ -294,13 +318,21 @@ public class CompanyProfileClient extends BusinessEntityAbstractClient {
         );
     }
 
-    public void createIdentifier(RequestContext requestContext, String parentCompanyId, String subsidiaryId, CreateIdentifierRequest createIdentifierRequest) {
-        log.debug("#createIdentifier: requestContext = {}, parentCompanyId = {}, subsidiaryId = {}, createIdentifierRequest = {}", requestContext, parentCompanyId, subsidiaryId, createIdentifierRequest);
+    public void createCompanyIdentifier(RequestContext requestContext, String companyId, CreateIdentifierRequest createIdentifierRequest) {
+        log.debug("#createCompanyIdentifier: requestContext = {}, companyId = {}, createIdentifierRequest = {}", requestContext, companyId, createIdentifierRequest);
+        createIdentifier(requestContext, format(COMPANY_IDENTIFIERS_RESOURCE, companyId), createIdentifierRequest);
+    }
 
+    public void createSubsidiaryIdentifier(RequestContext requestContext, String parentCompanyId, String subsidiaryId, CreateIdentifierRequest createIdentifierRequest) {
+        log.debug("#createSubsidiaryIdentifier: requestContext = {}, parentCompanyId = {}, subsidiaryId = {}, createIdentifierRequest = {}", requestContext, parentCompanyId, subsidiaryId, createIdentifierRequest);
+        createIdentifier(requestContext, format(SUBSIDIARY_IDENTIFIERS_RESOURCE, parentCompanyId, subsidiaryId), createIdentifierRequest);
+    }
+
+    private void createIdentifier(RequestContext requestContext, String path, CreateIdentifierRequest createIdentifierRequest) {
         executeMethod(
             requestContext,
             PATH_FOR_TOKEN,
-            format(SUBSIDIARY_IDENTIFIERS_RESOURCE, parentCompanyId, subsidiaryId),
+            path,
             (url, token, restTemplateWrapper) -> {
                 HttpHeaders httpHeaders = createHttpHeadersWithCSRFToken(token);
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
@@ -318,12 +350,31 @@ public class CompanyProfileClient extends BusinessEntityAbstractClient {
         );
     }
 
-    public void createAs2InboundDecryptionConfiguration(RequestContext requestContext, String parentCompanyId, String subsidiaryId, CreateAs2InboundDecryptionConfigurationRequest createSignatureVerificationConfigurationRequest) {
+    public void createCompanyAs2InboundDecryptionConfiguration(
+            RequestContext requestContext,
+            String companyId,
+            CreateAs2InboundDecryptionConfigurationRequest createSignatureVerificationConfigurationRequest
+    ) {
+        log.debug("createCompanyAs2InboundDecryptionConfiguration: requestContext = {}, companyId = {}, createSignatureVerificationConfigurationRequest = {}", requestContext, companyId, createSignatureVerificationConfigurationRequest);
+        createAs2InboundDecryptionConfiguration(requestContext, format(COMPANY_CONFIG_DECRYPT_RESOURCE, companyId), createSignatureVerificationConfigurationRequest);
+    }
+
+    public void createSubsidiaryAs2InboundDecryptionConfiguration(
+            RequestContext requestContext,
+            String parentCompanyId,
+            String subsidiaryId,
+            CreateAs2InboundDecryptionConfigurationRequest createSignatureVerificationConfigurationRequest
+    ) {
+        log.debug("createSubsidiaryAs2InboundDecryptionConfiguration: requestContext = {}, parentCompanyId = {}, subsidiaryId = {}, createSignatureVerificationConfigurationRequest = {}", requestContext, parentCompanyId, subsidiaryId, createSignatureVerificationConfigurationRequest);
+        createAs2InboundDecryptionConfiguration(requestContext, format(SUBSIDIARY_CONFIG_DECRYPT_RESOURCE, parentCompanyId, subsidiaryId), createSignatureVerificationConfigurationRequest);
+    }
+
+    private void createAs2InboundDecryptionConfiguration(RequestContext requestContext, String path, CreateAs2InboundDecryptionConfigurationRequest createSignatureVerificationConfigurationRequest) {
 
         executeMethod(
             requestContext,
             PATH_FOR_TOKEN,
-            format(SUBSIDIARY_CONFIG_DECRYPT_RESOURCE, parentCompanyId, subsidiaryId),
+            path,
             (url, token, restTemplateWrapper) -> {
                 HttpHeaders httpHeaders = createHttpHeadersWithCSRFToken(token);
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
