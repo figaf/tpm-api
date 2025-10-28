@@ -113,7 +113,7 @@ public abstract class PartnerProfileAbstractClient extends BusinessEntityAbstrac
         }
 
         JSONArray signatureVerificationConfigurations = executeGetAndReturnNullIfNotFoundErrorOccurs(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             format(getPartnerProfileConfigSignvalResource(), partnerProfileId),
             JSONArray::new
         );

@@ -48,7 +48,7 @@ public class CompanyProfileClient extends BusinessEntityAbstractClient {
         log.debug("#getAllMetadata: requestContext={}", requestContext);
 
         return executeGet(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             COMPANY_PROFILE_RESOURCE,
             response -> {
                 JSONArray companiesJsonArray = new JSONArray(response);
@@ -78,7 +78,7 @@ public class CompanyProfileClient extends BusinessEntityAbstractClient {
     public List<TpmBusinessEntity> getSubsidiaries(RequestContext requestContext, String companyId) {
         log.debug("#getSubsidiaries: requestContext = {}, companyId = {}", requestContext, companyId);
         return executeGet(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             format(COMPANY_SUBSIDIARIES_RESOURCE, companyId),
             response -> {
                 JSONArray subsidiariesJsonArray = new JSONArray(response);
@@ -99,7 +99,7 @@ public class CompanyProfileClient extends BusinessEntityAbstractClient {
         log.debug("#getCompanyDetails: requestContext={}", requestContext);
 
         return executeGetAndReturnNullIfNotFoundErrorOccurs(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             format(COMPANY_PROFILE_RESOURCE),
             this::buildTpmObjectDetails
         );
@@ -109,7 +109,7 @@ public class CompanyProfileClient extends BusinessEntityAbstractClient {
         log.debug("#getSubsidiaryDetails: requestContext = {}", requestContext);
 
         return executeGet(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             format(SUBSIDIARY_RESOURCE, parentCompanyId, subsidiaryId),
                 responseEntityBody -> {
                     TpmObjectDetails tpmObjectDetails = buildTpmObjectDetails(responseEntityBody);
@@ -219,7 +219,7 @@ public class CompanyProfileClient extends BusinessEntityAbstractClient {
         log.debug("#createSubsidiary: requestContext = {}, createBusinessEntityRequest = {}", requestContext, createBusinessEntityRequest);
 
         return executeMethod(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             PATH_FOR_TOKEN,
             format(COMPANY_SUBSIDIARIES_RESOURCE,parentCompanyId),
             (url, token, restTemplateWrapper) -> {
@@ -262,7 +262,7 @@ public class CompanyProfileClient extends BusinessEntityAbstractClient {
 
     private System createSystem(RequestContext requestContext, String path, CreateSystemRequest createSystemRequest) {
         return executeMethod(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             PATH_FOR_TOKEN,
             path,
             (url, token, restTemplateWrapper) -> {
@@ -298,7 +298,7 @@ public class CompanyProfileClient extends BusinessEntityAbstractClient {
 
     private void createCommunication(RequestContext requestContext, String path, CreateCommunicationRequest createCommunicationRequest) {
          executeMethod(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             PATH_FOR_TOKEN,
             path,
             (url, token, restTemplateWrapper) -> {
@@ -330,7 +330,7 @@ public class CompanyProfileClient extends BusinessEntityAbstractClient {
 
     private void createIdentifier(RequestContext requestContext, String path, CreateIdentifierRequest createIdentifierRequest) {
         executeMethod(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             PATH_FOR_TOKEN,
             path,
             (url, token, restTemplateWrapper) -> {
@@ -372,7 +372,7 @@ public class CompanyProfileClient extends BusinessEntityAbstractClient {
     private void createAs2InboundDecryptionConfiguration(RequestContext requestContext, String path, CreateAs2InboundDecryptionConfigurationRequest createSignatureVerificationConfigurationRequest) {
 
         executeMethod(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             PATH_FOR_TOKEN,
             path,
             (url, token, restTemplateWrapper) -> {

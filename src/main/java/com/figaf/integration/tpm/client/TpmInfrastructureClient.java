@@ -25,6 +25,7 @@ public class TpmInfrastructureClient extends TpmBaseClient {
 
     private static final String SYSTEM_TYPES_RESOURCE = "/itspaces/tpm/systemtypes";
     private static final String TYPE_SYSTEMS_RESOURCE = "/itspaces/tpm/bootstrap/?type=typesystems";
+    private static final String IDENTIFIER_SCHEMA_RESOURCE = "/itspaces/tpm/bootstrap?type=identifierScheme&typeSystem=%s";
     private static final String TYPE_SYSTEM_VERSIONS_RESOURCE = "/itspaces/tpm/api/2.0/typesystems/%s?artifacttype=TypeSystemVersion";
     private static final String SENDER_ADAPTER_LIST_RESOURCE = "/itspaces/tpm/bootstrap?type=adapterlist&direction=Sender";
     private static final String RECEIVER_ADAPTER_LIST_RESOURCE = "/itspaces/tpm/bootstrap?type=adapterlist&direction=Receiver";
@@ -51,7 +52,7 @@ public class TpmInfrastructureClient extends TpmBaseClient {
         log.debug("#getAllSystemTypesAsRawPayload: requestContext = {}", requestContext);
 
         return executeGet(
-            requestContext,
+            requestContext.withPreservingIntegrationSuiteUrl(),
             SYSTEM_TYPES_RESOURCE
         );
     }
@@ -108,6 +109,16 @@ public class TpmInfrastructureClient extends TpmBaseClient {
                 }
                 return typeSystems;
             }
+        );
+    }
+
+    public String getIdentifierSchema(RequestContext requestContext, String typeSystemId) {
+        log.debug("#getIdentifierSchema: requestContext = {}, typeSystemId = {}", requestContext, typeSystemId);
+
+        return executeGet(
+            requestContext.withPreservingIntegrationSuiteUrl(),
+            format(IDENTIFIER_SCHEMA_RESOURCE, typeSystemId),
+            response -> response
         );
     }
 

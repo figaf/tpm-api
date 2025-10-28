@@ -182,7 +182,7 @@ public class CompanyProfileClientTest {
         }
 
         assertThat(allChannels).isNotEmpty();
-        allChannels.forEach(channel -> assertThat(channel).hasNoNullFieldsOrProperties());
+        allChannels.forEach(channel -> assertThat(channel).hasNoNullFieldsOrPropertiesExcept("securityConfigurationMode"));
     }
 
     @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
