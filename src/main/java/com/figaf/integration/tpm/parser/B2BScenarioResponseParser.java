@@ -150,7 +150,11 @@ public class B2BScenarioResponseParser extends GenericTpmResponseParser {
                 switch (propertyKey) {
                     case "MAPPING" -> {
                         b2bScenarioMetadata.setCustomMappingIFlowUrl(propertiesInnerNode.path("CUSTOM_MAPPING").asText());
-                        b2bScenarioMetadata.setMagMetadata(buildMagMetadata(propertiesInnerNode));
+                        MagMetadata magMetadata = buildMagMetadata(propertiesInnerNode);
+                        if (magMetadata != null) {
+                            b2bScenarioMetadata.setMagMetadata(magMetadata);
+                            tpmObjectReferences.add(createTpmObjectReference(magMetadata));
+                        }
                     }
                     case "SENDER_INTERCHANGE" -> {
                         b2bScenarioMetadata.setPreIFlowUrl(propertiesInnerNode.path("CUSTOM_PRE_PROC").asText());
@@ -232,6 +236,15 @@ public class B2BScenarioResponseParser extends GenericTpmResponseParser {
         tpmObjectReference.setObjectVersion(migMetadata.getMigVersion());
         tpmObjectReference.setObjectVersionId(migMetadata.getObjectGuid());
         tpmObjectReference.setTpmObjectType(TpmObjectType.CLOUD_MIG);
+        return tpmObjectReference;
+    }
+
+    private TpmObjectReference createTpmObjectReference(MagMetadata migMetadata) {
+        TpmObjectReference tpmObjectReference = new TpmObjectReference();
+        tpmObjectReference.setObjectId(migMetadata.getMagGuid());
+        tpmObjectReference.setObjectVersion(migMetadata.getMagVersion());
+        tpmObjectReference.setObjectVersionId(migMetadata.getObjectGuid());
+        tpmObjectReference.setTpmObjectType(TpmObjectType.CLOUD_MAG);
         return tpmObjectReference;
     }
 
