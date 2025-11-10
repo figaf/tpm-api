@@ -8,6 +8,7 @@ public enum TpmObjectType {
     CLOUD_AGREEMENT_TEMPLATE,
     CLOUD_AGREEMENT,
     CLOUD_MIG,
+    CLOUD_MAG,
     CLOUD_B2B_SCENARIO,
 
     PD_PARTNER
