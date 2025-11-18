@@ -5,6 +5,7 @@ import com.figaf.integration.common.factory.HttpClientsFactory;
 import com.figaf.integration.tpm.client.MigClient;
 import com.figaf.integration.tpm.data_provider.AgentTestDataProvider;
 import com.figaf.integration.tpm.data_provider.CustomHostAgentTestData;
+import com.figaf.integration.tpm.entity.integrationadvisory.MigVersion;
 import com.figaf.integration.tpm.entity.TpmObjectMetadata;
 import com.figaf.integration.tpm.entity.mig.DraftCreationResponse;
 import com.figaf.integration.tpm.exception.TpmException;
@@ -81,10 +82,22 @@ public class MigClientTest {
 
     @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
     @ArgumentsSource(AgentTestDataProvider.class)
+    void test_getMigVersions(CustomHostAgentTestData customHostAgentTestData) {
+        log.debug("#test_getMigVersions: customHostAgentTestData={}", customHostAgentTestData);
+        RequestContext requestContext = customHostAgentTestData.createRequestContext(customHostAgentTestData.getTitle());
+
+        List<TpmObjectMetadata> migs = migClient.getAllLatestMetadata(requestContext);
+        TpmObjectMetadata migFirstMetadata = migs.get(0);
+
+        List<MigVersion> migVersions = migClient.getMigVersions(requestContext, migFirstMetadata.getObjectId());
+        assertThat(migVersions).isNotEmpty();
+    }
+
+    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
+    @ArgumentsSource(AgentTestDataProvider.class)
     void test_getMigVersionInfoById(CustomHostAgentTestData customHostAgentTestData) {
         log.debug("#getMigVersionInfoById: customHostAgentTestData={}", customHostAgentTestData);
         RequestContext requestContext = customHostAgentTestData.createRequestContext(customHostAgentTestData.getTitle());
-        requestContext.getConnectionProperties().setHost(customHostAgentTestData.getIntegrationSuiteHost());
 
         List<TpmObjectMetadata> migs = migClient.getAllLatestMetadata(requestContext);
 

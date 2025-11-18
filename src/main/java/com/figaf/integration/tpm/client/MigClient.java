@@ -1,10 +1,12 @@
 package com.figaf.integration.tpm.client;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.figaf.integration.common.entity.RequestContext;
 import com.figaf.integration.common.exception.ClientIntegrationException;
 import com.figaf.integration.common.factory.HttpClientsFactory;
+import com.figaf.integration.tpm.entity.integrationadvisory.MigVersion;
 import com.figaf.integration.tpm.entity.TpmObjectMetadata;
 import com.figaf.integration.tpm.entity.lock.MigLocker;
 import com.figaf.integration.tpm.entity.mig.DraftCreationResponse;
@@ -30,6 +32,7 @@ public class MigClient extends TpmBaseClient {
     private static final String MIG_RESOURCE = "/api/1.0/migs";
     public static final String MIG_RESOURCE_BY_ID = "/api/1.0/migs/%s";
     private static final String MIG_VERSION_INFO_RESOURCE = "/externalApi/1.0/migs/%s";
+    private static final String MIG_VERSIONS_RESOURCE = "/api/1.0/migs/%s/migVersions";
     private static final String MIG_CREATE_DRAFT_RESOURCE = "/api/1.0/migs/%s/migVersions?source=%s&status=draft";
     public static final String MIG_DELETE_DRAFT_RESOURCE = "/api/1.0/migs/%s/migVersions/%s";
 
@@ -52,6 +55,16 @@ public class MigClient extends TpmBaseClient {
             requestContext.withPreservingIntegrationSuiteUrl(),
             String.format(MIG_RESOURCE_BY_ID, migVersionId),
             (response) -> response
+        );
+    }
+
+    public List<MigVersion> getMigVersions(RequestContext requestContext, String migId) {
+        log.debug("#getMigVersions: requestContext = {}, migId = {}", requestContext, migId);
+        return executeGet(
+            requestContext.withPreservingIntegrationSuiteUrl(),
+            String.format(MIG_VERSIONS_RESOURCE, migId),
+            response -> jsonMapper.readValue(response, new TypeReference<>() {
+            })
         );
     }
 
@@ -91,13 +104,14 @@ public class MigClient extends TpmBaseClient {
 
     public void deleteDraftMig(RequestContext requestContext, String name, String migVersionId) {
         log.debug("#deleteDraftMig: requestContext={}, name={}, migVersionId={}", requestContext, name, migVersionId);
+        RequestContext finalizedRequestContext = requestContext.withPreservingIntegrationSuiteUrl();
         executeMethod(
-            requestContext,
+            finalizedRequestContext,
             PATH_FOR_TOKEN,
             format(MIG_DELETE_DRAFT_RESOURCE, name, migVersionId),
             (url, token, restTemplateWrapper) -> {
                 deleteDraftVersion(
-                    requestContext,
+                    finalizedRequestContext,
                     url,
                     token,
                     migVersionId,
