@@ -29,6 +29,12 @@ public class MagVersion implements IntegrationAdvisoryObjectVersion {
     @JsonProperty("BaseMAGGUID")
     private String baseMagObjectId;
 
+    @JsonProperty("ImportCorrelationGroupId")
+    private String importCorrelationGroupId;
+
+    @JsonProperty("ImportCorrelationObjectId")
+    private String importCorrelationObjectId;
+
     @JsonProperty("Version")
     private String version;
 

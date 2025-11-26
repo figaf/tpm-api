@@ -50,6 +50,7 @@ public class MagClientTest {
         TpmObjectMetadata magFirstMetadata = mags.get(0);
         List<MagVersion> magVersions = magClient.getMagVersions(requestContext, magFirstMetadata.getObjectId());
         assertThat(magVersions).isNotEmpty();
+        magVersions.forEach(magVersion -> assertThat(magVersion).hasNoNullFieldsOrProperties());
     }
 
     @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
