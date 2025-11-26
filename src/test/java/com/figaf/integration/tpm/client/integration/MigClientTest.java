@@ -5,8 +5,8 @@ import com.figaf.integration.common.factory.HttpClientsFactory;
 import com.figaf.integration.tpm.client.MigClient;
 import com.figaf.integration.tpm.data_provider.AgentTestDataProvider;
 import com.figaf.integration.tpm.data_provider.CustomHostAgentTestData;
+import com.figaf.integration.tpm.entity.integrationadvisory.IntegrationAdvisoryObject;
 import com.figaf.integration.tpm.entity.integrationadvisory.MigVersion;
-import com.figaf.integration.tpm.entity.TpmObjectMetadata;
 import com.figaf.integration.tpm.entity.mig.DraftCreationResponse;
 import com.figaf.integration.tpm.exception.TpmException;
 import lombok.extern.slf4j.Slf4j;
@@ -59,7 +59,7 @@ public class MigClientTest {
         log.debug("#test_getAllLatestMetadata: customHostAgentTestData={}", customHostAgentTestData);
         RequestContext requestContext = customHostAgentTestData.createRequestContext(customHostAgentTestData.getTitle());
 
-        List<TpmObjectMetadata> messageImplementationGuides = migClient.getAllLatestMetadata(requestContext);
+        List<IntegrationAdvisoryObject> messageImplementationGuides = migClient.getAllLatestMetadata(requestContext);
 
         assertThat(messageImplementationGuides).as(METADATA_NOT_NULL_MSG).isNotNull();
     }
@@ -70,12 +70,12 @@ public class MigClientTest {
         log.debug("#test_getRawById: customHostAgentTestData={}", customHostAgentTestData);
         RequestContext requestContext = customHostAgentTestData.createRequestContext(customHostAgentTestData.getTitle());
 
-        List<TpmObjectMetadata> migs = migClient.getAllLatestMetadata(requestContext);
+        List<IntegrationAdvisoryObject> migs = migClient.getAllLatestMetadata(requestContext);
 
         assertFalse(CollectionUtils.isEmpty(migs), METADATA_NOT_NULL_MSG);
 
         //its too heavy test to trigger getRawById for all migs
-        TpmObjectMetadata migFirstMetadata = migs.get(0);
+        IntegrationAdvisoryObject migFirstMetadata = migs.get(0);
         String migRawResponse = migClient.getRawById(requestContext, migFirstMetadata.getVersionId());
         assertThat(migRawResponse).as(EXPECTED_NOT_NULL_RAW_MSG).isNotEmpty();
     }
@@ -86,8 +86,8 @@ public class MigClientTest {
         log.debug("#test_getMigVersions: customHostAgentTestData={}", customHostAgentTestData);
         RequestContext requestContext = customHostAgentTestData.createRequestContext(customHostAgentTestData.getTitle());
 
-        List<TpmObjectMetadata> migs = migClient.getAllLatestMetadata(requestContext);
-        TpmObjectMetadata migFirstMetadata = migs.get(0);
+        List<IntegrationAdvisoryObject> migs = migClient.getAllLatestMetadata(requestContext);
+        IntegrationAdvisoryObject migFirstMetadata = migs.get(0);
 
         List<MigVersion> migVersions = migClient.getMigVersions(requestContext, migFirstMetadata.getObjectId());
         assertThat(migVersions).isNotEmpty();
@@ -100,11 +100,11 @@ public class MigClientTest {
         log.debug("#getMigVersionInfoById: customHostAgentTestData={}", customHostAgentTestData);
         RequestContext requestContext = customHostAgentTestData.createRequestContext(customHostAgentTestData.getTitle());
 
-        List<TpmObjectMetadata> migs = migClient.getAllLatestMetadata(requestContext);
+        List<IntegrationAdvisoryObject> migs = migClient.getAllLatestMetadata(requestContext);
 
         assertFalse(CollectionUtils.isEmpty(migs), METADATA_NOT_NULL_MSG);
 
-        TpmObjectMetadata migFirstMetadata = migs.get(0);
+        IntegrationAdvisoryObject migFirstMetadata = migs.get(0);
         String migRawResponse = migClient.getMigVersionInfoById(requestContext, migFirstMetadata.getVersionId());
         assertThat(migRawResponse).as(EXPECTED_NOT_NULL_RAW_MSG).isNotEmpty();
     }
@@ -119,8 +119,8 @@ public class MigClientTest {
 
         assertTrue(Optional.ofNullable(properties).isPresent() && StringUtils.isNotBlank(migObjectNameForDraftCreation), OBJECT_NAME_CANNOT_BE_EMPTY);
 
-        List<TpmObjectMetadata> migs = migClient.getAllLatestMetadata(requestContext);
-        Optional<TpmObjectMetadata> tpmObjectMetadataForDraftCreation = migs
+        List<IntegrationAdvisoryObject> migs = migClient.getAllLatestMetadata(requestContext);
+        Optional<IntegrationAdvisoryObject> tpmObjectMetadataForDraftCreation = migs
             .stream()
             .filter(mig -> mig.getDisplayedName().equals(migObjectNameForDraftCreation) && mig.getStatus().equals("Active"))
             .findAny();

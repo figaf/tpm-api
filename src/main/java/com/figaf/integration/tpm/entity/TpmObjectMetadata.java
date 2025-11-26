@@ -14,7 +14,6 @@ public class TpmObjectMetadata implements Serializable {
 
     private String objectId;
     private TpmObjectType tpmObjectType;
-    private String versionId;
     private String displayedName;
     private String version;
     private String status;
