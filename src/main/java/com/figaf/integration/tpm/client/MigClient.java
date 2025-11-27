@@ -6,8 +6,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.figaf.integration.common.entity.RequestContext;
 import com.figaf.integration.common.exception.ClientIntegrationException;
 import com.figaf.integration.common.factory.HttpClientsFactory;
+import com.figaf.integration.tpm.entity.integrationadvisory.IntegrationAdvisoryObject;
 import com.figaf.integration.tpm.entity.integrationadvisory.MigVersion;
-import com.figaf.integration.tpm.entity.TpmObjectMetadata;
 import com.figaf.integration.tpm.entity.lock.MigLocker;
 import com.figaf.integration.tpm.entity.mig.DraftCreationResponse;
 import com.figaf.integration.tpm.exception.MigParseException;
@@ -31,7 +31,8 @@ public class MigClient extends TpmBaseClient {
     private static final String PATH_FOR_TOKEN = "/api/1.0/user";
     private static final String MIG_RESOURCE = "/api/1.0/migs";
     public static final String MIG_RESOURCE_BY_ID = "/api/1.0/migs/%s";
-    private static final String MIG_VERSION_INFO_RESOURCE = "/externalApi/1.0/migs/%s";
+    private static final String MIG_EXTERNAL_API_RESOURCE = "/externalApi/1.0/migs";
+    private static final String MIG_VERSIONS_EXTERNAL_API_RESOURCE = "/externalApi/1.0/migs/%s";
     private static final String MIG_VERSIONS_RESOURCE = "/api/1.0/migs/%s/migVersions";
     private static final String MIG_CREATE_DRAFT_RESOURCE = "/api/1.0/migs/%s/migVersions?source=%s&status=draft";
     public static final String MIG_DELETE_DRAFT_RESOURCE = "/api/1.0/migs/%s/migVersions/%s";
@@ -40,7 +41,7 @@ public class MigClient extends TpmBaseClient {
         super(httpClientsFactory);
     }
 
-    public List<TpmObjectMetadata> getAllLatestMetadata(RequestContext requestContext) {
+    public List<IntegrationAdvisoryObject> getAllLatestMetadata(RequestContext requestContext) {
         log.debug("#getAllLatestMetadata: requestContext = {}", requestContext);
         return executeGet(
             requestContext.withPreservingIntegrationSuiteUrl(),
@@ -73,7 +74,7 @@ public class MigClient extends TpmBaseClient {
 
         return executeGet(
             requestContext.withPreservingIntegrationSuiteUrl(),
-            String.format(MIG_VERSION_INFO_RESOURCE, migVersionId)
+            String.format(MIG_VERSIONS_EXTERNAL_API_RESOURCE, migVersionId)
         );
     }
 
