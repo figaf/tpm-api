@@ -91,6 +91,7 @@ public class MigClientTest {
 
         List<MigVersion> migVersions = migClient.getMigVersions(requestContext, migFirstMetadata.getObjectId());
         assertThat(migVersions).isNotEmpty();
+        migVersions.forEach(migVersion -> assertThat(migVersion).hasNoNullFieldsOrProperties());
     }
 
     @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)

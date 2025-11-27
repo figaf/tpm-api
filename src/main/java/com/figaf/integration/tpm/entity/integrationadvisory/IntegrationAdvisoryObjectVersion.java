@@ -13,5 +13,7 @@ public interface IntegrationAdvisoryObjectVersion {
     Date getModifiedDate();
     String getModifiedBy();
     TpmObjectType getObjectType();
+    String getImportCorrelationGroupId();
+    String getImportCorrelationObjectId();
 
 }
