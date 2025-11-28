@@ -7,6 +7,7 @@ import com.figaf.integration.tpm.client.MagClient;
 import com.figaf.integration.tpm.data_provider.AgentTestDataProvider;
 import com.figaf.integration.tpm.data_provider.CustomHostAgentTestData;
 import com.figaf.integration.tpm.entity.*;
+import com.figaf.integration.tpm.entity.integrationadvisory.IntegrationAdvisoryObject;
 import com.figaf.integration.tpm.entity.integrationadvisory.MagVersion;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
@@ -34,7 +35,7 @@ public class MagClientTest {
         log.debug("#test_getAllLatestMetadata: agentTestData={}", agentTestData);
         RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
 
-        List<TpmObjectMetadata> mags = magClient.getAllLatestMetadata(requestContext);
+        List<IntegrationAdvisoryObject> mags = magClient.getAllLatestMetadata(requestContext);
 
         assertThat(mags).isNotNull();
     }
@@ -45,7 +46,7 @@ public class MagClientTest {
         log.debug("#test_getMagVersions: customHostAgentTestData={}", customHostAgentTestData);
         RequestContext requestContext = customHostAgentTestData.createRequestContext(customHostAgentTestData.getTitle());
 
-        List<TpmObjectMetadata> mags = magClient.getAllLatestMetadata(requestContext);
+        List<IntegrationAdvisoryObject> mags = magClient.getAllLatestMetadata(requestContext);
 
         TpmObjectMetadata magFirstMetadata = mags.get(0);
         List<MagVersion> magVersions = magClient.getMagVersions(requestContext, magFirstMetadata.getObjectId());
@@ -59,9 +60,9 @@ public class MagClientTest {
         log.debug("#test_getRawById: customHostAgentTestData={}", customHostAgentTestData);
         RequestContext requestContext = customHostAgentTestData.createRequestContext(customHostAgentTestData.getTitle());
 
-        List<TpmObjectMetadata> mags = magClient.getAllLatestMetadata(requestContext);
+        List<IntegrationAdvisoryObject> mags = magClient.getAllLatestMetadata(requestContext);
 
-        TpmObjectMetadata magFirstMetadata = mags.get(0);
+        IntegrationAdvisoryObject magFirstMetadata = mags.get(0);
         String payload = magClient.getRawById(requestContext, magFirstMetadata.getVersionId());
         assertThat(payload).isNotNull();
     }
@@ -72,9 +73,9 @@ public class MagClientTest {
         log.debug("#test_getMagVersionInfoById: customHostAgentTestData={}", customHostAgentTestData);
         RequestContext requestContext = customHostAgentTestData.createRequestContext(customHostAgentTestData.getTitle());
 
-        List<TpmObjectMetadata> mags = magClient.getAllLatestMetadata(requestContext);
+        List<IntegrationAdvisoryObject> mags = magClient.getAllLatestMetadata(requestContext);
 
-        TpmObjectMetadata magFirstMetadata = mags.get(0);
+        IntegrationAdvisoryObject magFirstMetadata = mags.get(0);
         String payload = magClient.getMagVersionInfoById(requestContext, magFirstMetadata.getVersionId());
         assertThat(payload).isNotNull();
     }

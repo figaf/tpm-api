@@ -3,7 +3,7 @@ package com.figaf.integration.tpm.parser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.figaf.integration.tpm.entity.AdministrativeData;
-import com.figaf.integration.tpm.entity.TpmObjectMetadata;
+import com.figaf.integration.tpm.entity.integrationadvisory.IntegrationAdvisoryObject;
 import com.figaf.integration.tpm.enumtypes.TpmObjectType;
 import com.figaf.integration.tpm.exception.TpmException;
 import lombok.extern.slf4j.Slf4j;
@@ -19,18 +19,18 @@ public class MigResponseParser {
     private static final String MIG_DOES_NOT_CONTAIN_VALID_STRUCTURE = "Mig response doesnt contain a valid structure";
     private static final String MIGS = "Migs";
 
-    public List<TpmObjectMetadata> parseJsonToTpmObjectMetadata(String json) throws IOException, TpmException {
+    public List<IntegrationAdvisoryObject> parseJsonToTpmObjectMetadata(String json) throws IOException, TpmException {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode rootNode = objectMapper.readTree(json);
         if (!rootNode.isArray()) {
             throw new TpmException(MIG_DOES_NOT_CONTAIN_VALID_STRUCTURE);
         }
-        List<TpmObjectMetadata> tpmObjects = new ArrayList<>();
+        List<IntegrationAdvisoryObject> migEntities = new ArrayList<>();
 
         for (JsonNode rootElement : rootNode) {
             JsonNode migs = rootElement.get(MIGS);
             for (JsonNode node : migs) {
-                TpmObjectMetadata metadata = new TpmObjectMetadata();
+                IntegrationAdvisoryObject metadata = new IntegrationAdvisoryObject();
 
                 metadata.setTpmObjectType(TpmObjectType.CLOUD_MIG);
                 metadata.setObjectId(node.path("MIGGUID").asText());
@@ -38,6 +38,8 @@ public class MigResponseParser {
                 metadata.setDisplayedName(node.path("Documentation").path("Name").path("ArtifactValue").path("Id").asText());
                 metadata.setStatus(node.path("Status").asText());
                 metadata.setVersion(node.path("MIGVersionId").asText());
+                metadata.setImportCorrelationGroupId(node.path("ImportCorrelationGroupId").asText());
+                metadata.setImportCorrelationObjectId(node.path("ImportCorrelationObjectId").asText());
 
                 AdministrativeData adminData = new AdministrativeData();
                 adminData.setCreatedAt(new Date(node.path("CreationDate").asLong()));
@@ -46,9 +48,9 @@ public class MigResponseParser {
                 adminData.setModifiedBy(node.path("ModifiedBy").asText());
                 metadata.setAdministrativeData(adminData);
 
-                tpmObjects.add(metadata);
+                migEntities.add(metadata);
             }
         }
-        return tpmObjects;
+        return migEntities;
     }
 }

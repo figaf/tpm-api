@@ -5,6 +5,7 @@ import com.figaf.integration.common.entity.RequestContext;
 import com.figaf.integration.common.factory.HttpClientsFactory;
 import com.figaf.integration.common.utils.Utils;
 import com.figaf.integration.tpm.entity.*;
+import com.figaf.integration.tpm.entity.integrationadvisory.IntegrationAdvisoryObject;
 import com.figaf.integration.tpm.entity.integrationadvisory.MagVersion;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
@@ -29,23 +30,25 @@ public class MagClient extends TpmBaseClient {
         super(httpClientsFactory);
     }
 
-    public List<TpmObjectMetadata> getAllLatestMetadata(RequestContext requestContext) {
+    public List<IntegrationAdvisoryObject> getAllLatestMetadata(RequestContext requestContext) {
         log.debug("#getAllLatestMetadata: requestContext = {}", requestContext);
         return executeGet(
             requestContext.withPreservingIntegrationSuiteUrl(),
             MAG_RESOURCE,
            response -> {
-               List<TpmObjectMetadata> mags = new ArrayList<>();
+               List<IntegrationAdvisoryObject> mags = new ArrayList<>();
                JSONArray jsonArray = new JSONArray(response);
                for (int i = 0; i < jsonArray.length(); i++) {
                    JSONObject jsonObject = jsonArray.getJSONObject(i);
-                   TpmObjectMetadata mag = new TpmObjectMetadata();
+                   IntegrationAdvisoryObject mag = new IntegrationAdvisoryObject();
                    mag.setObjectId(jsonObject.getString("MAGGUID"));
                    mag.setTpmObjectType(CLOUD_MAG);
                    mag.setVersionId(jsonObject.getString("ObjectGUID"));
                    mag.setDisplayedName(jsonObject.getString("Name"));
                    mag.setVersion(jsonObject.getString("Version"));
                    mag.setStatus(jsonObject.getString("Status"));
+                   mag.setImportCorrelationGroupId(jsonObject.getString("ImportCorrelationGroupId"));
+                   mag.setImportCorrelationObjectId(jsonObject.getString("ImportCorrelationObjectId"));
 
                    AdministrativeData adminData = new AdministrativeData();
                    adminData.setCreatedAt(new Date(jsonObject.getLong("CreationDate")));
