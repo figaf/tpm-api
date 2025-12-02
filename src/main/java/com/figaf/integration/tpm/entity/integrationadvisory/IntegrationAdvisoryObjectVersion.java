@@ -6,6 +6,7 @@ import java.util.Date;
 
 public interface IntegrationAdvisoryObjectVersion {
 
+    String getName();
     String getObjectId();
     String getVersionId();
     String getVersion();
