@@ -7,18 +7,22 @@ import com.figaf.integration.common.entity.RequestContext;
 import com.figaf.integration.common.exception.ClientIntegrationException;
 import com.figaf.integration.common.factory.HttpClientsFactory;
 import com.figaf.integration.tpm.entity.integrationadvisory.IntegrationAdvisoryObject;
+import com.figaf.integration.tpm.entity.integrationadvisory.external_api.Mig;
 import com.figaf.integration.tpm.entity.integrationadvisory.MigVersion;
 import com.figaf.integration.tpm.entity.lock.MigLocker;
 import com.figaf.integration.tpm.entity.mig.DraftCreationResponse;
 import com.figaf.integration.tpm.exception.MigParseException;
 import com.figaf.integration.tpm.parser.MigResponseParser;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.zip.*;
@@ -75,6 +79,28 @@ public class MigClient extends TpmBaseClient {
         return executeGet(
             requestContext.withPreservingIntegrationSuiteUrl(),
             String.format(MIG_VERSIONS_EXTERNAL_API_RESOURCE, migVersionId)
+        );
+    }
+
+    public List<Mig> getAllMigsExternalApi(RequestContext requestContext) {
+        log.debug("#getAllMigsExternalApi: requestContext = {}", requestContext);
+
+        return executeGet(
+            requestContext.withPreservingIntegrationSuiteUrl(),
+            MIG_EXTERNAL_API_RESOURCE,
+            response -> {
+                JSONObject jsonObjectResponse = new JSONObject(response);
+                JSONArray migsJsonArray = jsonObjectResponse.getJSONArray("value");
+                List<Mig> migs = new ArrayList<>();
+                for (int i = 0; i < migsJsonArray.length(); i++) {
+                    JSONObject migJsonObject = migsJsonArray.getJSONObject(i);
+                    Mig mig = new Mig();
+                    mig.setMigGuid(migJsonObject.getString("MIGGUID"));
+                    mig.setMigVersions(migJsonObject.getJSONArray("MIGVersions"));
+                    migs.add(mig);
+                }
+                return migs;
+            }
         );
     }
 
