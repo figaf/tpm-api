@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.github.figaf'
-version = '2.10-IRT-5414-rev2-SNAPSHOT'
+version = '2.11-IRT-5230-SNAPSHOT'
 
 ext {
     enableSnapshotsForDependencyResolutionAndPublishing = project.findProperty('enableSnapshots') ?: 'false'

@@ -9,6 +9,7 @@ import com.figaf.integration.tpm.data_provider.CustomHostAgentTestData;
 import com.figaf.integration.tpm.entity.*;
 import com.figaf.integration.tpm.entity.integrationadvisory.IntegrationAdvisoryObject;
 import com.figaf.integration.tpm.entity.integrationadvisory.MagVersion;
+import com.figaf.integration.tpm.entity.integrationadvisory.external_api.Mag;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -78,6 +79,17 @@ public class MagClientTest {
         IntegrationAdvisoryObject magFirstMetadata = mags.get(0);
         String payload = magClient.getMagVersionInfoById(requestContext, magFirstMetadata.getVersionId());
         assertThat(payload).isNotNull();
+    }
+
+    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
+    @ArgumentsSource(AgentTestDataProvider.class)
+    void test_getAllMagsExternalApi(CustomHostAgentTestData customHostAgentTestData) {
+        log.debug("#test_getAllMagsExternalApi: customHostAgentTestData={}", customHostAgentTestData);
+        RequestContext requestContext = customHostAgentTestData.createRequestContext(customHostAgentTestData.getTitle());
+
+        List<Mag> mags = magClient.getAllMagsExternalApi(requestContext);
+        assertThat(mags).isNotEmpty();
+        mags.forEach(mag -> assertThat(mag).hasNoNullFieldsOrProperties());
     }
 
 }

@@ -7,6 +7,7 @@ import com.figaf.integration.tpm.data_provider.AgentTestDataProvider;
 import com.figaf.integration.tpm.data_provider.CustomHostAgentTestData;
 import com.figaf.integration.tpm.entity.integrationadvisory.IntegrationAdvisoryObject;
 import com.figaf.integration.tpm.entity.integrationadvisory.MigVersion;
+import com.figaf.integration.tpm.entity.integrationadvisory.external_api.Mig;
 import com.figaf.integration.tpm.entity.mig.DraftCreationResponse;
 import com.figaf.integration.tpm.exception.TpmException;
 import lombok.extern.slf4j.Slf4j;
@@ -109,6 +110,16 @@ public class MigClientTest {
         assertThat(migRawResponse).as(EXPECTED_NOT_NULL_RAW_MSG).isNotEmpty();
     }
 
+    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
+    @ArgumentsSource(AgentTestDataProvider.class)
+    void test_getAllMigsExternalApi(CustomHostAgentTestData customHostAgentTestData) {
+        log.debug("#test_getAllMigsExternalApi: customHostAgentTestData={}", customHostAgentTestData);
+        RequestContext requestContext = customHostAgentTestData.createRequestContext(customHostAgentTestData.getTitle());
+
+        List<Mig> migs = migClient.getAllMigsExternalApi(requestContext);
+        assertThat(migs).isNotEmpty();
+        migs.forEach(mig -> assertThat(mig).hasNoNullFieldsOrProperties());
+    }
 
     @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
     @ArgumentsSource(AgentTestDataProvider.class)
