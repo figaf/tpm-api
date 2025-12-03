@@ -7,6 +7,7 @@ import com.figaf.integration.common.utils.Utils;
 import com.figaf.integration.tpm.entity.*;
 import com.figaf.integration.tpm.entity.integrationadvisory.IntegrationAdvisoryObject;
 import com.figaf.integration.tpm.entity.integrationadvisory.MagVersion;
+import com.figaf.integration.tpm.entity.integrationadvisory.external_api.Mag;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -24,7 +25,8 @@ public class MagClient extends TpmBaseClient {
     private static final String MAG_RESOURCE = "/api/1.0/mags";
     private static final String MAG_VERSIONS_RESOURCE = "/api/1.0/mags/%s/magVersions";
     private static final String MAG_VERSION_RESOURCE = "/api/1.0/mags/%s";
-    private static final String MAG_VERSION_INFO_RESOURCE = "/externalApi/1.0/mags/%s";
+    private static final String MAG_EXTERNAL_API_RESOURCE = "/externalApi/1.0/mags";
+    private static final String MAG_VERSIONS_EXTERNAL_API_RESOURCE = "/externalApi/1.0/mags/%s";
 
     public MagClient(HttpClientsFactory httpClientsFactory) {
         super(httpClientsFactory);
@@ -108,7 +110,31 @@ public class MagClient extends TpmBaseClient {
 
         return executeGet(
             requestContext.withPreservingIntegrationSuiteUrl(),
-            String.format(MAG_VERSION_INFO_RESOURCE, magVersionId)
+            String.format(MAG_VERSIONS_EXTERNAL_API_RESOURCE, magVersionId)
         );
     }
+
+    public List<Mag> getAllMagsExternalApi(RequestContext requestContext) {
+        log.debug("#getAllMagsExternalApi: requestContext = {}", requestContext);
+
+        return executeGet(
+            requestContext.withPreservingIntegrationSuiteUrl(),
+            MAG_EXTERNAL_API_RESOURCE,
+            response -> {
+                JSONObject jsonObjectResponse = new JSONObject(response);
+                JSONArray magsJsonArray = jsonObjectResponse.getJSONArray("value");
+                List<Mag> mags = new ArrayList<>();
+                for (int i = 0; i < magsJsonArray.length(); i++) {
+                    JSONObject magJsonObject = magsJsonArray.getJSONObject(i);
+                    Mag mag = new Mag();
+                    mag.setMagGuid(magJsonObject.getString("MAGGUID"));
+                    mag.setMagVersions(magJsonObject.getJSONArray("MAGVersions"));
+                    mags.add(mag);
+                }
+
+                return mags;
+            }
+        );
+    }
+
 }
