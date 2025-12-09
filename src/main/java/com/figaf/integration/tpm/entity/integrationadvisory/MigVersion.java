@@ -7,6 +7,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.util.Date;
+import java.util.Optional;
 
 @Getter
 @Setter
@@ -38,8 +39,54 @@ public class MigVersion implements IntegrationAdvisoryObjectVersion {
     @JsonProperty("ImportCorrelationObjectId")
     private String importCorrelationObjectId;
 
+    @JsonProperty("Documentation")
+    private Documentation documentation;
+
+    @Override
+    public String getName() {
+        return Optional.ofNullable(documentation)
+            .map(Documentation::getName)
+            .map(Name::getArtifactValue)
+            .map(ArtifactValue::getId)
+            .orElse(null);
+    }
+
     @Override
     public TpmObjectType getObjectType() {
         return TpmObjectType.CLOUD_MIG;
     }
+
+    @Getter
+    @Setter
+    @ToString
+    public static class Documentation {
+
+        @JsonProperty("Name")
+        private Name name;
+    }
+
+    @Getter
+    @Setter
+    @ToString
+    public static class Name {
+
+        @JsonProperty("ArtifactValue")
+        private ArtifactValue artifactValue;
+    }
+
+    @Getter
+    @Setter
+    @ToString
+    public static class ArtifactValue {
+
+        @JsonProperty("Id")
+        private String id;
+
+        @JsonProperty("LanguageCode")
+        private String languageCode;
+
+        @JsonProperty("action")
+        private String action;
+    }
+
 }
