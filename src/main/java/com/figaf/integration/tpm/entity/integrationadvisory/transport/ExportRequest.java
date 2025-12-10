@@ -22,8 +22,8 @@ public class ExportRequest {
     private List<Map<String, Object>> migs = new ArrayList<>();
 
     @JsonProperty("Msgs")
-    private List<String> msgs = new ArrayList<>();
+    private List<Map<String, Object>> msgs = new ArrayList<>();
 
     @JsonProperty("PTSs")
-    private List<String> ptss = new ArrayList<>();
+    private List<Map<String, Object>> ptss = new ArrayList<>();
 }
