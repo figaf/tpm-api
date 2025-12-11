@@ -4,16 +4,19 @@ import com.figaf.integration.common.entity.RequestContext;
 import com.figaf.integration.common.factory.HttpClientsFactory;
 import com.figaf.integration.tpm.entity.*;
 import com.figaf.integration.tpm.enumtypes.TpmObjectType;
+import com.figaf.integration.tpm.parser.B2BScenarioResponseParser;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import static com.figaf.integration.common.utils.Utils.optString;
+import static java.lang.String.format;
 
 @Slf4j
 public class AgreementTemplateClient extends TpmBaseClient {
@@ -102,6 +105,20 @@ public class AgreementTemplateClient extends TpmBaseClient {
             requestContext.withPreservingIntegrationSuiteUrl(),
             String.format(AGREEMENT_TEMPLATE_B2B_SCENARIOS_RESOURCE, agreementTemplateId, b2BScenarioDetailsId)
         );
+    }
+
+    public List<TpmObjectReference> getAgreementTemplateIntegrationAdvisoryLinks(RequestContext requestContext, String agreementTemplateId, String b2bScenarioDetailsId) {
+        log.debug("#getAgreementTemplateIntegrationAdvisoryLinks: requestContext = {}, agreementTemplateId = {}, b2bScenarioDetailsId = {}", requestContext, agreementTemplateId, b2bScenarioDetailsId);
+        try {
+            return executeGet(
+                requestContext.withPreservingIntegrationSuiteUrl(),
+                format(AGREEMENT_TEMPLATE_B2B_SCENARIOS_RESOURCE, agreementTemplateId, b2bScenarioDetailsId),
+                (response) -> new B2BScenarioResponseParser().fetchIntegrationAdvisoryLinks(response)
+            );
+        } catch (HttpClientErrorException.NotFound ex) {
+            log.warn("Can't get B2B Scenarios for Agreement Template {}. This Agreement Template is broken", agreementTemplateId);
+            return Collections.emptyList();
+        }
     }
 
 }

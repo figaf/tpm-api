@@ -7,6 +7,7 @@ import com.figaf.integration.tpm.client.AgreementTemplateClient;
 import com.figaf.integration.tpm.data_provider.AgentTestDataProvider;
 import com.figaf.integration.tpm.entity.AgreementTemplateMetadata;
 import com.figaf.integration.tpm.entity.B2BScenarioInAgreementTemplate;
+import com.figaf.integration.tpm.entity.TpmObjectReference;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -54,4 +55,23 @@ public class AgreementTemplateClientTest {
         assertThat(allB2bScenarios).isNotEmpty();
         allB2bScenarios.forEach(b2bScenario -> assertThat(b2bScenario).hasNoNullFieldsOrProperties());
     }
+
+    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
+    @ArgumentsSource(AgentTestDataProvider.class)
+    void test_getAgreementTemplateIntegrationAdvisoryLinks(AgentTestData agentTestData) {
+        RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
+
+        List<AgreementTemplateMetadata> agreementTemplates = agreementTemplateClient.getAllMetadata(requestContext);
+
+        List<TpmObjectReference> allIntegrationAdvisoryLinks = new ArrayList<>();
+        for (AgreementTemplateMetadata agreementTemplate : agreementTemplates) {
+            allIntegrationAdvisoryLinks.addAll(
+                agreementTemplateClient.getAgreementTemplateIntegrationAdvisoryLinks(requestContext, agreementTemplate.getObjectId(), agreementTemplate.getB2bScenarioDetailsId())
+            );
+        }
+
+        assertThat(allIntegrationAdvisoryLinks).isNotEmpty();
+        allIntegrationAdvisoryLinks.forEach(tpmObjectReference -> assertThat(tpmObjectReference).hasNoNullFieldsOrProperties());
+    }
+
 }
