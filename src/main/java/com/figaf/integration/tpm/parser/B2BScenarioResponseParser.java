@@ -75,6 +75,59 @@ public class B2BScenarioResponseParser extends GenericTpmResponseParser {
         return b2BScenarioMetadataList;
     }
 
+    public List<TpmObjectReference> fetchIntegrationAdvisoryLinks(String response) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode rootNode = objectMapper.readTree(response);
+
+        List<TpmObjectReference> integrationAdvisoryLinks = new ArrayList<>();
+
+        JsonNode businessTransactions = rootNode.get("BusinessTransactions");
+        for (JsonNode businessTransaction : businessTransactions) {
+            JsonNode businessTransactionActivities = businessTransaction.path("BusinessTransactionActivities");
+            if (businessTransactionActivities.isMissingNode()) {
+                continue;
+            }
+
+            for (JsonNode businessTransactionActivity : businessTransactionActivities) {
+                JsonNode choreographyProperties = businessTransactionActivity.path("ChoreographyProperties");
+                if (choreographyProperties.isMissingNode()) {
+                    continue;
+                }
+                JsonNode propertiesNode = choreographyProperties.path("Properties");
+                if (propertiesNode.isMissingNode()) {
+                    continue;
+                }
+
+                for (Map.Entry<String, JsonNode> property : propertiesNode.properties()) {
+                    String propertyKey = property.getKey();
+                    JsonNode propertiesInnerNode = property.getValue().get("Properties");
+                    switch (propertyKey) {
+                        case "MAPPING" -> {
+                            MagMetadata magMetadata = buildMagMetadata(propertiesInnerNode);
+                            if (magMetadata != null) {
+                                integrationAdvisoryLinks.add(createTpmObjectReference(magMetadata));
+                            }
+                        }
+                        case "SENDER_INTERCHANGE" -> {
+                            MigMetadata migMetadata = buildMigMetadata(propertiesInnerNode);
+                            if (migMetadata != null) {
+                                integrationAdvisoryLinks.add(createTpmObjectReference(migMetadata));
+                            }
+                        }
+                        case "RECEIVER_INTERCHANGE" -> {
+                            MigMetadata migMetadata = buildMigMetadata(propertiesInnerNode);
+                            if (migMetadata != null) {
+                                integrationAdvisoryLinks.add(createTpmObjectReference(migMetadata));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return integrationAdvisoryLinks;
+    }
+
     private void initDisplayedName(B2BScenarioMetadata b2bScenarioMetadata, JsonNode businessTransaction) {
         JsonNode transactionProperties = businessTransaction.get("TransactionProperties");
         JsonNode properties = transactionProperties.get("Properties");
