@@ -40,6 +40,7 @@ public class AgreementClientTest {
         List<TpmObjectMetadata> agreementsMetadata = agreementClient.getAllMetadata(requestContext);
 
         assertThat(agreementsMetadata).as(METADATA_NOT_NULL_MSG).isNotNull();
+        assertThat(agreementsMetadata.get(0).getAgreementLifeCycleMetadata()).isNotNull();
     }
 
     @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)

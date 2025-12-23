@@ -22,6 +22,7 @@ public class TpmObjectMetadata implements Serializable {
     private String payload;
 
     //only for agreement
-    private String b2bScenarioDetailsId; //TODO it's better to create a separate class for the AgreementMetadata (as it's done for AgreementTemplateMetadata and others)
+    private AgreementLifeCycleMetadata agreementLifeCycleMetadata;
+    private String b2bScenarioDetailsId; //TODO it's better to create a separate class for the AgreementLifeCycleMetadata (as it's done for AgreementTemplateMetadata and others)
 
 }

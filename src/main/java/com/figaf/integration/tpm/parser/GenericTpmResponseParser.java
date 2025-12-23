@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.figaf.integration.tpm.entity.AdministrativeData;
+import com.figaf.integration.tpm.entity.AgreementLifeCycleMetadata;
 import com.figaf.integration.tpm.entity.TpmObjectMetadata;
 import com.figaf.integration.tpm.entity.TpmObjectReference;
 import com.figaf.integration.tpm.enumtypes.TpmObjectType;
@@ -53,6 +54,7 @@ public class GenericTpmResponseParser {
         );
 
         if (tpmObjectType == TpmObjectType.CLOUD_AGREEMENT) {
+            initAgreementMetadata(tpmObject, node);
             tpmObject.setB2bScenarioDetailsId(node.path("B2BScenarioDetailsId").asText(null));
         }
 
@@ -69,6 +71,17 @@ public class GenericTpmResponseParser {
             administrativeData.setModifiedAt(new Date(administrativeDataNode.path("modifiedAt").asLong()));
             administrativeData.setModifiedBy(administrativeDataNode.path("modifiedBy").asText());
             tpmObject.setAdministrativeData(administrativeData);
+        }
+    }
+
+    protected void initAgreementMetadata(TpmObjectMetadata tpmObject, JsonNode node) {
+        JsonNode agreementLifeCycleStatus = node.path("AgreementLifeCycleStatus");
+        if (!agreementLifeCycleStatus.isMissingNode()) {
+            AgreementLifeCycleMetadata agreementMetadata = new AgreementLifeCycleMetadata();
+            agreementMetadata.setActivatedAt(new Date(agreementLifeCycleStatus.path("ActivatedAt").asLong()));
+            agreementMetadata.setActivated(agreementLifeCycleStatus.path("Activated").asBoolean());
+            agreementMetadata.setUpdatedStatus(agreementLifeCycleStatus.path("UpdateStatus").asText());
+            tpmObject.setAgreementLifeCycleMetadata(agreementMetadata);
         }
     }
 
