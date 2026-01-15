@@ -10,4 +10,5 @@ import lombok.ToString;
 public class AgreementTemplateMetadata extends TpmObjectMetadata {
 
     private String b2bScenarioDetailsId;
+    private AdministrativeData b2bScenarioDetailsAdministrativeData;
 }

@@ -40,14 +40,19 @@ public class AgreementTemplateClient extends TpmBaseClient {
                 for (int i = 0; i < agreementTemplates.length(); i++) {
                     JSONObject agreementTemplateJSONObject = agreementTemplates.getJSONObject(i);
                     AgreementTemplateMetadata agreementTemplateMetadata = new AgreementTemplateMetadata();
-                    agreementTemplateMetadata.setObjectId(agreementTemplateJSONObject.getString("id"));
+                    String agreementTemplateId = agreementTemplateJSONObject.getString("id");
+                    agreementTemplateMetadata.setObjectId(agreementTemplateId);
                     agreementTemplateMetadata.setTpmObjectType(TpmObjectType.CLOUD_AGREEMENT_TEMPLATE);
                     agreementTemplateMetadata.setDisplayedName(agreementTemplateJSONObject.getString("displayName"));
                     JSONObject administrativeDataJsonObject = agreementTemplateJSONObject.getJSONObject("administrativeData");
                     AdministrativeData administrativeData = buildAdministrativeDataObject(administrativeDataJsonObject);
                     agreementTemplateMetadata.setAdministrativeData(administrativeData);
                     agreementTemplateMetadata.setPayload(agreementTemplateJSONObject.toString());
-                    agreementTemplateMetadata.setB2bScenarioDetailsId(optString(agreementTemplateJSONObject, "B2BScenarioDetailsId"));
+                    String b2BScenarioDetailsId = optString(agreementTemplateJSONObject, "B2BScenarioDetailsId");
+                    agreementTemplateMetadata.setB2bScenarioDetailsId(b2BScenarioDetailsId);
+
+                    AdministrativeData b2bScenarioAdministrativeData = getB2bScenarioDetailsAdministrativeData(requestContext, agreementTemplateId, b2BScenarioDetailsId);
+                    agreementTemplateMetadata.setB2bScenarioDetailsAdministrativeData(b2bScenarioAdministrativeData);
 
                     JSONObject companyDataJsonObject = agreementTemplateJSONObject.getJSONObject("CompanyData");
                     TpmObjectReference tpmObjectReference = new TpmObjectReference();
@@ -119,6 +124,18 @@ public class AgreementTemplateClient extends TpmBaseClient {
             log.warn("Can't get B2B Scenarios for Agreement Template {}. This Agreement Template is broken", agreementTemplateId);
             return Collections.emptyList();
         }
+    }
+
+    public AdministrativeData getB2bScenarioDetailsAdministrativeData(RequestContext requestContext, String agreementTemplateId, String b2BScenarioDetailsId) {
+        log.debug("#getB2bScenarioDetailsAdministrativeData: requestContext = {}, agreementTemplateId = {}, b2BScenarioDetailsId = {}", requestContext, agreementTemplateId, b2BScenarioDetailsId);
+        return executeGet(
+            requestContext.withPreservingIntegrationSuiteUrl(),
+            String.format(AGREEMENT_TEMPLATE_B2B_SCENARIOS_RESOURCE, agreementTemplateId, b2BScenarioDetailsId),
+            response -> {
+                JSONObject jsonObject = new JSONObject(response);
+                return buildAdministrativeDataObject(jsonObject.getJSONObject("administrativeData"));
+            }
+        );
     }
 
 }

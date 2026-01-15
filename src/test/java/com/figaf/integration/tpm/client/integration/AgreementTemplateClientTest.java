@@ -5,6 +5,7 @@ import com.figaf.integration.common.entity.RequestContext;
 import com.figaf.integration.common.factory.HttpClientsFactory;
 import com.figaf.integration.tpm.client.AgreementTemplateClient;
 import com.figaf.integration.tpm.data_provider.AgentTestDataProvider;
+import com.figaf.integration.tpm.entity.AdministrativeData;
 import com.figaf.integration.tpm.entity.AgreementTemplateMetadata;
 import com.figaf.integration.tpm.entity.B2BScenarioInAgreementTemplate;
 import com.figaf.integration.tpm.entity.TpmObjectReference;
@@ -72,6 +73,22 @@ public class AgreementTemplateClientTest {
 
         assertThat(allIntegrationAdvisoryLinks).isNotEmpty();
         allIntegrationAdvisoryLinks.forEach(tpmObjectReference -> assertThat(tpmObjectReference).hasNoNullFieldsOrProperties());
+    }
+
+    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
+    @ArgumentsSource(AgentTestDataProvider.class)
+    void getB2bScenarioDetailsAdministrativeData(AgentTestData agentTestData) {
+        RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
+
+        List<AgreementTemplateMetadata> agreementTemplates = agreementTemplateClient.getAllMetadata(requestContext);
+
+        List<AdministrativeData> b2bScenarioDetailsAdministrativeDatas = new ArrayList<>();
+        for (AgreementTemplateMetadata agreementTemplate : agreementTemplates) {
+            b2bScenarioDetailsAdministrativeDatas.add(agreementTemplateClient.getB2bScenarioDetailsAdministrativeData(requestContext, agreementTemplate.getObjectId(), agreementTemplate.getB2bScenarioDetailsId()));
+        }
+
+        assertThat(b2bScenarioDetailsAdministrativeDatas).isNotEmpty();
+        b2bScenarioDetailsAdministrativeDatas.forEach(b2bScenarioDetailsAdministrativeData -> assertThat(b2bScenarioDetailsAdministrativeData).hasNoNullFieldsOrProperties());
     }
 
 }
