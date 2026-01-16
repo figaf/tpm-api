@@ -128,14 +128,24 @@ public class AgreementTemplateClient extends TpmBaseClient {
 
     public AdministrativeData getB2bScenarioDetailsAdministrativeData(RequestContext requestContext, String agreementTemplateId, String b2BScenarioDetailsId) {
         log.debug("#getB2bScenarioDetailsAdministrativeData: requestContext = {}, agreementTemplateId = {}, b2BScenarioDetailsId = {}", requestContext, agreementTemplateId, b2BScenarioDetailsId);
-        return executeGet(
-            requestContext.withPreservingIntegrationSuiteUrl(),
-            String.format(AGREEMENT_TEMPLATE_B2B_SCENARIOS_RESOURCE, agreementTemplateId, b2BScenarioDetailsId),
-            response -> {
-                JSONObject jsonObject = new JSONObject(response);
-                return buildAdministrativeDataObject(jsonObject.getJSONObject("administrativeData"));
-            }
-        );
+
+        if (StringUtils.isBlank(b2BScenarioDetailsId)) {
+            return null;
+        }
+
+        try {
+            return executeGet(
+                requestContext.withPreservingIntegrationSuiteUrl(),
+                String.format(AGREEMENT_TEMPLATE_B2B_SCENARIOS_RESOURCE, agreementTemplateId, b2BScenarioDetailsId),
+                response -> {
+                    JSONObject jsonObject = new JSONObject(response);
+                    return buildAdministrativeDataObject(jsonObject.getJSONObject("administrativeData"));
+                }
+            );
+        } catch (HttpClientErrorException.NotFound e) {
+            log.warn("B2B Scenario not found for agreementTemplateId={} b2BScenarioDetailsId={}", agreementTemplateId, b2BScenarioDetailsId);
+            return null;
+        }
     }
 
 }
