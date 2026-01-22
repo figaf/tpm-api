@@ -192,11 +192,11 @@ public class CommunicationPartnerClientTest {
         assertThat(communicationTradingPartner).isNotNull();
 
         // Shouldn't delete because the wrong id
-        ClientIntegrationException exception = assertThrows(ClientIntegrationException.class, () -> communicationPartnerPartnerClient.deletePartnerProfile(requestContext, wrongCommunicationTradingPartner, request));
+        ClientIntegrationException exception = assertThrows(ClientIntegrationException.class, () -> communicationPartnerPartnerClient.deletePartnerProfile(requestContext, wrongCommunicationTradingPartner));
         assertTrue(exception.getMessage().contains("Could not delete artifact, because Cannot read resource with ID"));
 
         // Delete created communication trading partner
-        assertDoesNotThrow(() -> communicationPartnerPartnerClient.deletePartnerProfile(requestContext, communicationTradingPartnerId, request));
+        assertDoesNotThrow(() -> communicationPartnerPartnerClient.deletePartnerProfile(requestContext, communicationTradingPartnerId));
     }
 
     @Disabled
