@@ -162,6 +162,27 @@ public abstract class PartnerProfileAbstractClient extends BusinessEntityAbstrac
         );
     }
 
+    public void deletePartnerProfile(RequestContext requestContext, String partnerProfileId, CreateBusinessEntityRequest createBusinessEntityRequest) {
+        log.debug("#deletePartnerProfile: requestContext = {}, partnerProfileId = {}, createBusinessEntityRequest = {}", requestContext, partnerProfileId, createBusinessEntityRequest);
+
+        executeMethod(
+            requestContext.withPreservingIntegrationSuiteUrl(),
+            PATH_FOR_TOKEN,
+            format(getPartnerProfileResourceById(), partnerProfileId),
+            (url, token, restTemplateWrapper) -> {
+                HttpHeaders httpHeaders = createHttpHeadersWithCSRFToken(token);
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                HttpEntity<CreateBusinessEntityRequest> requestEntity = new HttpEntity<>(createBusinessEntityRequest, httpHeaders);
+                ResponseEntity<String> responseEntity = restTemplateWrapper.getRestTemplate().exchange(url, HttpMethod.DELETE, requestEntity, String.class);
+                if (!responseEntity.getStatusCode().is2xxSuccessful()) {
+                    throw new ClientIntegrationException(format("Couldn't delete trading partner. Code: %d, Message: %s", responseEntity.getStatusCode().value(), requestEntity.getBody()));
+                }
+
+                return null;
+            }
+        );
+    }
+
     public System createSystem(RequestContext requestContext, String partnerProfileId, CreateSystemRequest createSystemRequest) {
         log.debug("#createSystem: requestContext = {}, partnerProfileId = {}, createSystemRequest = {}", requestContext, partnerProfileId, createSystemRequest);
 
