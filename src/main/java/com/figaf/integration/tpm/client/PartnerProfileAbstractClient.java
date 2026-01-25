@@ -175,7 +175,7 @@ public abstract class PartnerProfileAbstractClient extends BusinessEntityAbstrac
                 HttpEntity<CreateBusinessEntityRequest> requestEntity = new HttpEntity<>(httpHeaders);
                 ResponseEntity<String> responseEntity = restTemplateWrapper.getRestTemplate().exchange(url, HttpMethod.DELETE, requestEntity, String.class);
                 if (!responseEntity.getStatusCode().is2xxSuccessful()) {
-                    throw new ClientIntegrationException(format("Couldn't delete trading partner. Code: %d, Message: %s", responseEntity.getStatusCode().value(), responseEntity.getBody()));
+                    throw new ClientIntegrationException(format("Couldn't delete partner profile. Code: %d, Message: %s", responseEntity.getStatusCode().value(), responseEntity.getBody()));
                 }
 
                 return null;
