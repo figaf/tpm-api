@@ -2,14 +2,18 @@ package com.figaf.integration.tpm.client.integration;
 
 import com.figaf.integration.common.data_provider.AgentTestData;
 import com.figaf.integration.common.entity.RequestContext;
+import com.figaf.integration.common.exception.ClientIntegrationException;
 import com.figaf.integration.common.factory.HttpClientsFactory;
 import com.figaf.integration.tpm.client.CommunicationPartnerPartnerClient;
-import com.figaf.integration.tpm.client.TradingPartnerClient;
 import com.figaf.integration.tpm.data_provider.AgentTestDataProvider;
 import com.figaf.integration.tpm.data_provider.CustomHostAgentTestData;
 import com.figaf.integration.tpm.entity.CreateBusinessEntityRequest;
 import com.figaf.integration.tpm.entity.TpmBusinessEntity;
-import com.figaf.integration.tpm.entity.trading.*;
+import com.figaf.integration.tpm.entity.trading.AggregatedTpmObject;
+import com.figaf.integration.tpm.entity.trading.Channel;
+import com.figaf.integration.tpm.entity.trading.CreateCommunicationRequest;
+import com.figaf.integration.tpm.entity.trading.CreateSignatureVerificationConfigurationRequest;
+import com.figaf.integration.tpm.entity.trading.CreateSystemRequest;
 import com.figaf.integration.tpm.entity.trading.System;
 import com.figaf.integration.tpm.entity.trading.verbose.TpmObjectDetails;
 import lombok.extern.slf4j.Slf4j;
@@ -21,9 +25,13 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static com.figaf.integration.tpm.utils.Constants.PARAMETERIZED_TEST_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
 public class CommunicationPartnerClientTest {
@@ -153,6 +161,42 @@ public class CommunicationPartnerClientTest {
         TpmObjectDetails tradingPartner = communicationPartnerPartnerClient.createPartnerProfile(requestContext, request);
 
         assertThat(tradingPartner).isNotNull();
+    }
+
+    @Disabled
+    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
+    @ArgumentsSource(AgentTestDataProvider.class)
+    void test_createAndDeleteCommunicationTradingPartner(CustomHostAgentTestData customHostAgentTestData) {
+        log.debug("#test_createAndDeleteCommunicationTradingPartner: customHostAgentTestData={}", customHostAgentTestData);
+        RequestContext requestContext = customHostAgentTestData.createRequestContext(customHostAgentTestData.getTitle());
+        requestContext.getConnectionProperties().setHost(customHostAgentTestData.getIntegrationSuiteHost());
+
+        CreateBusinessEntityRequest request = new CreateBusinessEntityRequest("COMMUNICATION_PARTNER");
+        request.setName("Arsenii 7 Communication Partner");
+        request.setShortName("Ars7 Communication Partner");
+        request.setWebURL("http://example.com");
+        request.getProfile().setPartnerType("COMMUNICATION_PARTNER");
+        request.getProfile().getAddress().setCityName("Glostrup");
+        request.getProfile().getAddress().setCountryCode("DK");
+        request.getProfile().getAddress().setHouseNumber("33333");
+        request.getProfile().getAddress().setPoBox("123");
+        request.getProfile().getAddress().setPoBoxPostalCode("345");
+        request.getProfile().getAddress().setStreetName("My Street");
+        request.getProfile().getAddress().setStreetPostalCode("567");
+
+        TpmObjectDetails communicationTradingPartner = communicationPartnerPartnerClient.createPartnerProfile(requestContext, request);
+
+        String communicationTradingPartnerId = communicationTradingPartner.getId();
+        String wrongCommunicationTradingPartner = communicationTradingPartnerId + UUID.randomUUID();
+
+        assertThat(communicationTradingPartner).isNotNull();
+
+        // Shouldn't delete because the wrong id
+        ClientIntegrationException exception = assertThrows(ClientIntegrationException.class, () -> communicationPartnerPartnerClient.deletePartnerProfile(requestContext, wrongCommunicationTradingPartner));
+        assertTrue(exception.getMessage().contains("Could not delete artifact, because Cannot read resource with ID"));
+
+        // Delete created communication trading partner
+        assertDoesNotThrow(() -> communicationPartnerPartnerClient.deletePartnerProfile(requestContext, communicationTradingPartnerId));
     }
 
     @Disabled

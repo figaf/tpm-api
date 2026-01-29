@@ -2,6 +2,7 @@ package com.figaf.integration.tpm.client.integration;
 
 import com.figaf.integration.common.data_provider.AgentTestData;
 import com.figaf.integration.common.entity.RequestContext;
+import com.figaf.integration.common.exception.ClientIntegrationException;
 import com.figaf.integration.common.factory.HttpClientsFactory;
 import com.figaf.integration.tpm.client.TradingPartnerClient;
 import com.figaf.integration.tpm.data_provider.AgentTestDataProvider;
@@ -20,9 +21,13 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static com.figaf.integration.tpm.utils.Constants.PARAMETERIZED_TEST_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
 public class TradingPartnerClientTest {
@@ -175,6 +180,41 @@ public class TradingPartnerClientTest {
         TpmObjectDetails tradingPartner = tradingPartnerClient.createPartnerProfile(requestContext, request);
 
         assertThat(tradingPartner).as(METADATA_NOT_NULL_MSG).isNotNull();
+    }
+
+    @Disabled
+    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
+    @ArgumentsSource(AgentTestDataProvider.class)
+    void test_createAndDeleteTradingPartner(CustomHostAgentTestData customHostAgentTestData) {
+        log.debug("#test_createAndDeleteTradingPartner: customHostAgentTestData={}", customHostAgentTestData);
+        RequestContext requestContext = customHostAgentTestData.createRequestContext(customHostAgentTestData.getTitle());
+        requestContext.getConnectionProperties().setHost(customHostAgentTestData.getIntegrationSuiteHost());
+
+        CreateBusinessEntityRequest request = new CreateBusinessEntityRequest("TRADING_PARTNER");
+        request.setName("Arsenii 7");
+        request.setShortName("Ars7");
+        request.setWebURL("http://example.com");
+        request.getProfile().getAddress().setCityName("Glostrup");
+        request.getProfile().getAddress().setCountryCode("DK");
+        request.getProfile().getAddress().setHouseNumber("33333");
+        request.getProfile().getAddress().setPoBox("123");
+        request.getProfile().getAddress().setPoBoxPostalCode("345");
+        request.getProfile().getAddress().setStreetName("My Street");
+        request.getProfile().getAddress().setStreetPostalCode("567");
+
+        TpmObjectDetails tradingPartner = tradingPartnerClient.createPartnerProfile(requestContext, request);
+
+        String tradingPartnerId = tradingPartner.getId();
+        String wrongTradingPartnerId = tradingPartnerId + UUID.randomUUID();
+
+        assertThat(tradingPartner).as(METADATA_NOT_NULL_MSG).isNotNull();
+
+        // Shouldn't delete because the wrong id
+        ClientIntegrationException exception = assertThrows(ClientIntegrationException.class, () -> tradingPartnerClient.deletePartnerProfile(requestContext, wrongTradingPartnerId));
+        assertTrue(exception.getMessage().contains("Could not delete artifact, because Cannot read resource with ID"));
+
+        // Delete created trading partner
+        assertDoesNotThrow(() -> tradingPartnerClient.deletePartnerProfile(requestContext, tradingPartnerId));
     }
 
     @Disabled

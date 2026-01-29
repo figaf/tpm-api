@@ -153,11 +153,32 @@ public abstract class PartnerProfileAbstractClient extends BusinessEntityAbstrac
                     throw new ClientIntegrationException(format(
                         "Couldn't create trading partner. Code: %d, Message: %s",
                         responseEntity.getStatusCode().value(),
-                        requestEntity.getBody())
+                        responseEntity.getBody())
                     );
                 }
 
                 return buildTpmObjectDetails(responseEntity.getBody());
+            }
+        );
+    }
+
+    public void deletePartnerProfile(RequestContext requestContext, String partnerProfileId) {
+        log.debug("#deletePartnerProfile: requestContext = {}, partnerProfileId = {}", requestContext, partnerProfileId);
+
+        executeMethod(
+            requestContext.withPreservingIntegrationSuiteUrl(),
+            PATH_FOR_TOKEN,
+            format(getPartnerProfileResourceById(), partnerProfileId),
+            (url, token, restTemplateWrapper) -> {
+                HttpHeaders httpHeaders = createHttpHeadersWithCSRFToken(token);
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                HttpEntity<CreateBusinessEntityRequest> requestEntity = new HttpEntity<>(httpHeaders);
+                ResponseEntity<String> responseEntity = restTemplateWrapper.getRestTemplate().exchange(url, HttpMethod.DELETE, requestEntity, String.class);
+                if (!responseEntity.getStatusCode().is2xxSuccessful()) {
+                    throw new ClientIntegrationException(format("Couldn't delete partner profile. Code: %d, Message: %s", responseEntity.getStatusCode().value(), responseEntity.getBody()));
+                }
+
+                return null;
             }
         );
     }
@@ -178,7 +199,7 @@ public abstract class PartnerProfileAbstractClient extends BusinessEntityAbstrac
                     throw new ClientIntegrationException(format(
                         "Couldn't create system. Code: %d, Message: %s",
                         responseEntity.getStatusCode().value(),
-                        requestEntity.getBody())
+                        responseEntity.getBody())
                     );
                 }
                 try {
@@ -206,7 +227,7 @@ public abstract class PartnerProfileAbstractClient extends BusinessEntityAbstrac
                     throw new ClientIntegrationException(format(
                         "Couldn't create communication. Code: %d, Message: %s",
                         responseEntity.getStatusCode().value(),
-                        requestEntity.getBody())
+                        responseEntity.getBody())
                     );
                 }
                 return null;
@@ -230,7 +251,7 @@ public abstract class PartnerProfileAbstractClient extends BusinessEntityAbstrac
                     throw new ClientIntegrationException(format(
                         "Couldn't create signature verification configurations. Code: %d, Message: %s",
                         responseEntity.getStatusCode().value(),
-                        requestEntity.getBody())
+                        responseEntity.getBody())
                     );
                 }
                 return null;
