@@ -29,7 +29,7 @@ class B2BScenarioClientTest {
     static void setUp() {
         HttpClientsFactory httpClientsFactory = new HttpClientsFactory();
         agreementClient = new AgreementClient(httpClientsFactory);
-        b2BScenarioClient = new B2BScenarioClient(httpClientsFactory);
+        b2BScenarioClient = new B2BScenarioClient(httpClientsFactory, agreementClient);
     }
 
     @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
@@ -81,13 +81,16 @@ class B2BScenarioClientTest {
 
     @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
     @ArgumentsSource(AgentTestDataProvider.class)
-    void test_getSingleMetadata(AgentTestData agentTestData) {
+    void test_getSingleB2BScenarioMetadata(AgentTestData agentTestData) {
         RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
         List<TpmObjectMetadata> agreements = agreementClient.getAllMetadata(requestContext);
 
         for (TpmObjectMetadata agreement : agreements) {
-            TpmObjectMetadata tpmObjectMetadata = b2BScenarioClient.getSingleMetadata(requestContext, agreement.getObjectId(), agreement.getB2bScenarioDetailsId());
-            assertThat(tpmObjectMetadata).isNotNull();
+            List<B2BScenarioMetadata> b2BScenariosForAgreement = b2BScenarioClient.getB2BScenariosForAgreement(requestContext, agreement);
+            for (B2BScenarioMetadata b2BScenarioForAgreement : b2BScenariosForAgreement) {
+                B2BScenarioMetadata b2BScenarioMetadata = b2BScenarioClient.getSingleMetadata(requestContext, agreement.getObjectId(), b2BScenarioForAgreement.getObjectId());
+                assertThat(b2BScenarioMetadata).isNotNull();
+            }
         }
     }
 
