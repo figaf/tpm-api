@@ -3,9 +3,7 @@ package com.figaf.integration.tpm.client;
 import com.figaf.integration.common.entity.RequestContext;
 import com.figaf.integration.common.factory.HttpClientsFactory;
 import com.figaf.integration.tpm.entity.*;
-import com.figaf.integration.tpm.enumtypes.TpmObjectType;
 import com.figaf.integration.tpm.parser.B2BScenarioResponseParser;
-import com.figaf.integration.tpm.parser.GenericTpmResponseParser;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
@@ -17,6 +15,9 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.figaf.integration.common.utils.Utils.optString;
+import static com.figaf.integration.tpm.enumtypes.TpmObjectType.CLOUD_AGREEMENT_TEMPLATE;
+import static com.figaf.integration.tpm.enumtypes.TpmObjectType.CLOUD_COMPANY_PROFILE;
+import static com.figaf.integration.tpm.enumtypes.TpmObjectType.CLOUD_SUBSIDIARY;
 import static java.lang.String.format;
 
 @Slf4j
@@ -40,48 +41,19 @@ public class AgreementTemplateClient extends TpmBaseClient {
                 JSONArray agreementTemplates = new JSONArray(response);
                 List<AgreementTemplateMetadata> agreementTemplateMetadataList = new ArrayList<>();
                 for (int i = 0; i < agreementTemplates.length(); i++) {
-                    JSONObject agreementTemplateJSONObject = agreementTemplates.getJSONObject(i);
-                    AgreementTemplateMetadata agreementTemplateMetadata = new AgreementTemplateMetadata();
-                    String agreementTemplateId = agreementTemplateJSONObject.getString("id");
-                    agreementTemplateMetadata.setObjectId(agreementTemplateId);
-                    agreementTemplateMetadata.setTpmObjectType(TpmObjectType.CLOUD_AGREEMENT_TEMPLATE);
-                    agreementTemplateMetadata.setDisplayedName(agreementTemplateJSONObject.getString("displayName"));
-                    JSONObject administrativeDataJsonObject = agreementTemplateJSONObject.getJSONObject("administrativeData");
-                    AdministrativeData administrativeData = buildAdministrativeDataObject(administrativeDataJsonObject);
-                    agreementTemplateMetadata.setAdministrativeData(administrativeData);
-                    agreementTemplateMetadata.setPayload(agreementTemplateJSONObject.toString());
-                    String b2BScenarioDetailsId = optString(agreementTemplateJSONObject, "B2BScenarioDetailsId");
-                    agreementTemplateMetadata.setB2bScenarioDetailsId(b2BScenarioDetailsId);
-
-                    AdministrativeData b2bScenarioAdministrativeData = getB2bScenarioDetailsAdministrativeData(requestContext, agreementTemplateId, b2BScenarioDetailsId);
-                    agreementTemplateMetadata.setB2bScenarioDetailsAdministrativeData(b2bScenarioAdministrativeData);
-
-                    JSONObject companyDataJsonObject = agreementTemplateJSONObject.getJSONObject("CompanyData");
-                    TpmObjectReference tpmObjectReference = new TpmObjectReference();
-                    tpmObjectReference.setObjectId(companyDataJsonObject.getString("Id"));
-                    String selectedProfileType = optString(companyDataJsonObject, "SelectedProfileType");
-                    if ("SUBSIDIARY".equals(selectedProfileType)) {
-                        tpmObjectReference.setTpmObjectType(TpmObjectType.CLOUD_SUBSIDIARY);
-                    } else {
-                        tpmObjectReference.setTpmObjectType(TpmObjectType.CLOUD_COMPANY_PROFILE);
-                    }
-                    agreementTemplateMetadata.setTpmObjectReferences(Collections.singletonList(tpmObjectReference));
-
-                    agreementTemplateMetadataList.add(agreementTemplateMetadata);
+                    agreementTemplateMetadataList.add(parseSingleObject(requestContext, agreementTemplates.getJSONObject(i)));
                 }
-
                 return agreementTemplateMetadataList;
             }
-
         );
     }
 
-    public TpmObjectMetadata getSingleMetadata(RequestContext requestContext, String agreementTemplateId) {
+    public AgreementTemplateMetadata getSingleMetadata(RequestContext requestContext, String agreementTemplateId) {
         log.debug("#getSingleMetadata: requestContext = {}, agreementTemplateId = {}", requestContext, agreementTemplateId);
         return executeGet(
             requestContext.withPreservingIntegrationSuiteUrl(),
             format(AGREEMENT_TEMPLATE_RESOURCE, agreementTemplateId),
-            response -> new GenericTpmResponseParser().parseSingleObject(response, TpmObjectType.CLOUD_AGREEMENT_TEMPLATE)
+            response -> parseSingleObject(requestContext, new JSONObject(response))
         );
     }
 
@@ -157,6 +129,39 @@ public class AgreementTemplateClient extends TpmBaseClient {
             log.warn("B2B Scenario not found for agreementTemplateId={} b2BScenarioDetailsId={}", agreementTemplateId, b2BScenarioDetailsId);
             return null;
         }
+    }
+
+    private AgreementTemplateMetadata parseSingleObject(RequestContext requestContext, JSONObject agreementTemplateJSONObject) {
+        AgreementTemplateMetadata agreementTemplateMetadata = new AgreementTemplateMetadata();
+
+        String agreementTemplateId = agreementTemplateJSONObject.getString("id");
+        agreementTemplateMetadata.setObjectId(agreementTemplateId);
+        agreementTemplateMetadata.setTpmObjectType(CLOUD_AGREEMENT_TEMPLATE);
+        agreementTemplateMetadata.setDisplayedName(agreementTemplateJSONObject.getString("displayName"));
+
+        JSONObject administrativeDataJsonObject = agreementTemplateJSONObject.getJSONObject("administrativeData");
+        AdministrativeData administrativeData = buildAdministrativeDataObject(administrativeDataJsonObject);
+        agreementTemplateMetadata.setAdministrativeData(administrativeData);
+
+        agreementTemplateMetadata.setPayload(agreementTemplateJSONObject.toString());
+
+        String b2BScenarioDetailsId = optString(agreementTemplateJSONObject, "B2BScenarioDetailsId");
+        agreementTemplateMetadata.setB2bScenarioDetailsId(b2BScenarioDetailsId);
+
+        AdministrativeData b2bScenarioAdministrativeData = getB2bScenarioDetailsAdministrativeData(requestContext, agreementTemplateId, b2BScenarioDetailsId);
+        agreementTemplateMetadata.setB2bScenarioDetailsAdministrativeData(b2bScenarioAdministrativeData);
+
+        JSONObject companyDataJsonObject = agreementTemplateJSONObject.getJSONObject("CompanyData");
+
+        TpmObjectReference tpmObjectReference = new TpmObjectReference();
+        tpmObjectReference.setObjectId(companyDataJsonObject.getString("Id"));
+
+        String selectedProfileType = optString(companyDataJsonObject, "SelectedProfileType");
+        tpmObjectReference.setTpmObjectType("SUBSIDIARY".equals(selectedProfileType) ? CLOUD_SUBSIDIARY : CLOUD_COMPANY_PROFILE);
+
+        agreementTemplateMetadata.setTpmObjectReferences(Collections.singletonList(tpmObjectReference));
+
+        return agreementTemplateMetadata;
     }
 
 }
