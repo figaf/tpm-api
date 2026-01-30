@@ -5,6 +5,7 @@ import com.figaf.integration.common.factory.HttpClientsFactory;
 import com.figaf.integration.tpm.entity.*;
 import com.figaf.integration.tpm.enumtypes.TpmObjectType;
 import com.figaf.integration.tpm.parser.B2BScenarioResponseParser;
+import com.figaf.integration.tpm.parser.GenericTpmResponseParser;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
@@ -21,7 +22,8 @@ import static java.lang.String.format;
 @Slf4j
 public class AgreementTemplateClient extends TpmBaseClient {
 
-    private static final String AGREEMENT_TEMPLATE_RESOURCE = "/itspaces/tpm/api/2.0/agreementtemplates";
+    private static final String AGREEMENT_TEMPLATE_RESOURCE = "/itspaces/tpm/api/2.0/agreementtemplates/%s";
+    private static final String AGREEMENT_TEMPLATES_RESOURCE = "/itspaces/tpm/api/2.0/agreementtemplates";
     private static final String AGREEMENT_TEMPLATE_B2B_SCENARIOS_RESOURCE = "/itspaces/tpm/api/2.0/agreementtemplates/%s/b2bscenario/%s";
 
     public AgreementTemplateClient(HttpClientsFactory httpClientsFactory) {
@@ -33,7 +35,7 @@ public class AgreementTemplateClient extends TpmBaseClient {
 
         return executeGet(
             requestContext.withPreservingIntegrationSuiteUrl(),
-            AGREEMENT_TEMPLATE_RESOURCE,
+            AGREEMENT_TEMPLATES_RESOURCE,
             response -> {
                 JSONArray agreementTemplates = new JSONArray(response);
                 List<AgreementTemplateMetadata> agreementTemplateMetadataList = new ArrayList<>();
@@ -71,6 +73,15 @@ public class AgreementTemplateClient extends TpmBaseClient {
                 return agreementTemplateMetadataList;
             }
 
+        );
+    }
+
+    public TpmObjectMetadata getSingleMetadata(RequestContext requestContext, String agreementTemplateId) {
+        log.debug("#getSingleMetadata: requestContext = {}, agreementTemplateId = {}", requestContext, agreementTemplateId);
+        return executeGet(
+            requestContext.withPreservingIntegrationSuiteUrl(),
+            format(AGREEMENT_TEMPLATE_RESOURCE, agreementTemplateId),
+            response -> new GenericTpmResponseParser().parseSingleObject(response, TpmObjectType.CLOUD_AGREEMENT_TEMPLATE)
         );
     }
 

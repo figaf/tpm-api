@@ -81,6 +81,18 @@ class B2BScenarioClientTest {
 
     @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
     @ArgumentsSource(AgentTestDataProvider.class)
+    void test_getSingleMetadata(AgentTestData agentTestData) {
+        RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
+        List<TpmObjectMetadata> agreements = agreementClient.getAllMetadata(requestContext);
+
+        for (TpmObjectMetadata agreement : agreements) {
+            TpmObjectMetadata tpmObjectMetadata = b2BScenarioClient.getSingleMetadata(requestContext, agreement.getObjectId(), agreement.getB2bScenarioDetailsId());
+            assertThat(tpmObjectMetadata).isNotNull();
+        }
+    }
+
+    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
+    @ArgumentsSource(AgentTestDataProvider.class)
     void test_getB2BScenariosForAgreementAsJsonObject(AgentTestData agentTestData) {
         RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
 

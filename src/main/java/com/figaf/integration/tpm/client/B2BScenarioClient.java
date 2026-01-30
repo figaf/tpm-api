@@ -5,6 +5,7 @@ import com.figaf.integration.common.exception.ClientIntegrationException;
 import com.figaf.integration.common.factory.HttpClientsFactory;
 import com.figaf.integration.tpm.entity.B2BScenarioMetadata;
 import com.figaf.integration.tpm.entity.TpmObjectMetadata;
+import com.figaf.integration.tpm.enumtypes.TpmObjectType;
 import com.figaf.integration.tpm.parser.B2BScenarioResponseParser;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
@@ -34,6 +35,15 @@ public class B2BScenarioClient extends TpmBaseClient {
             requestContext.withPreservingIntegrationSuiteUrl(),
             format(B2B_SCENARIOS_RESOURCE, agreementMetadata.getObjectId()),
             (response) -> new B2BScenarioResponseParser().parseResponse(response, agreementMetadata)
+        );
+    }
+
+    public TpmObjectMetadata getSingleMetadata(RequestContext requestContext, String agreementId, String b2BScenarioDetailsId) {
+        log.debug("#getSingleMetadata: requestContext = {}, agreementId = {}", requestContext, agreementId);
+        return executeGet(
+            requestContext.withPreservingIntegrationSuiteUrl(),
+            String.format(B2B_SCENARIO_RESOURCE, agreementId, b2BScenarioDetailsId),
+            response -> new B2BScenarioResponseParser().parseSingleObject(response, TpmObjectType.CLOUD_B2B_SCENARIO)
         );
     }
 
