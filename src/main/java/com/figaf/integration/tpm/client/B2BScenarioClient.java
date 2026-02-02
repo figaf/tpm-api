@@ -51,7 +51,7 @@ public class B2BScenarioClient extends TpmBaseClient {
         return allScenarios.stream()
             .filter(scenario -> scenario.getObjectId().equals(compositeB2bScenarioId))
             .findFirst()
-            .orElse(null);
+            .orElseThrow(() -> new ClientIntegrationException(format("B2B scenario with ID '%s' not found for agreement '%s'", compositeB2bScenarioId, agreementId)));
     }
 
     public JSONObject getB2BScenariosForAgreementAsJsonObject(RequestContext requestContext, String agreementId) {

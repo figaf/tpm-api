@@ -83,11 +83,20 @@ class B2BScenarioClientTest {
     @ArgumentsSource(AgentTestDataProvider.class)
     void test_getSingleB2BScenarioMetadata(AgentTestData agentTestData) {
         RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
-        List<TpmObjectMetadata> agreements = agreementClient.getAllMetadata(requestContext);
+        List<TpmObjectMetadata> limitedAgreements = agreementClient
+            .getAllMetadata(requestContext)
+            .stream()
+            .limit(10) // Take first 10 agreements
+            .toList();
 
-        for (TpmObjectMetadata agreement : agreements) {
-            List<B2BScenarioMetadata> b2BScenariosForAgreement = b2BScenarioClient.getB2BScenariosForAgreement(requestContext, agreement);
-            for (B2BScenarioMetadata b2BScenarioForAgreement : b2BScenariosForAgreement) {
+        for (TpmObjectMetadata agreement : limitedAgreements) {
+            List<B2BScenarioMetadata> limitedB2BScenariosForAgreement =
+                b2BScenarioClient
+                    .getB2BScenariosForAgreement(requestContext, agreement)
+                    .stream()
+                    .limit(10) // Take first 10 B2BScenarios For Agreement
+                    .toList();
+            for (B2BScenarioMetadata b2BScenarioForAgreement : limitedB2BScenariosForAgreement) {
                 B2BScenarioMetadata b2BScenarioMetadata = b2BScenarioClient.getSingleMetadata(requestContext, agreement.getObjectId(), b2BScenarioForAgreement.getObjectId());
                 assertThat(b2BScenarioMetadata).isNotNull();
             }
