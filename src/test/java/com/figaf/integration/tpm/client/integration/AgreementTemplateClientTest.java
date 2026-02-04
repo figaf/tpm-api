@@ -8,6 +8,7 @@ import com.figaf.integration.tpm.data_provider.AgentTestDataProvider;
 import com.figaf.integration.tpm.entity.AdministrativeData;
 import com.figaf.integration.tpm.entity.AgreementTemplateMetadata;
 import com.figaf.integration.tpm.entity.B2BScenarioInAgreementTemplate;
+import com.figaf.integration.tpm.entity.TpmObjectMetadata;
 import com.figaf.integration.tpm.entity.TpmObjectReference;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
@@ -38,6 +39,20 @@ public class AgreementTemplateClientTest {
 
         List<AgreementTemplateMetadata> agreementTemplateMetadataList = agreementTemplateClient.getAllMetadata(requestContext);
 
+        assertThat(agreementTemplateMetadataList).isNotEmpty();
+    }
+
+    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
+    @ArgumentsSource(AgentTestDataProvider.class)
+    void test_getSingleMetadata(AgentTestData agentTestData) {
+        log.debug("#test_getSingleMetadata: agentTestData={}", agentTestData);
+        RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
+
+        List<AgreementTemplateMetadata> agreementTemplateMetadataList = agreementTemplateClient.getAllMetadata(requestContext);
+        for (AgreementTemplateMetadata agreementTemplateMetadata : agreementTemplateMetadataList) {
+            TpmObjectMetadata tpmObjectMetadata = agreementTemplateClient.getSingleMetadata(requestContext, agreementTemplateMetadata.getObjectId());
+            assertThat(tpmObjectMetadata).isNotNull();
+        }
         assertThat(agreementTemplateMetadataList).isNotEmpty();
     }
 

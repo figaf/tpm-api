@@ -23,9 +23,11 @@ public class B2BScenarioClient extends TpmBaseClient {
 
     private static final String B2B_SCENARIOS_RESOURCE = "/itspaces/tpm/api/2.0/tradingpartneragreements/%s/b2bscenario";
     private static final String B2B_SCENARIO_RESOURCE = "/itspaces/tpm/api/2.0/tradingpartneragreements/%s/b2bscenario/%s";
+    private final AgreementClient agreementClient;
 
-    public B2BScenarioClient(HttpClientsFactory httpClientsFactory) {
+    public B2BScenarioClient(HttpClientsFactory httpClientsFactory, AgreementClient agreementClient) {
         super(httpClientsFactory);
+        this.agreementClient = agreementClient;
     }
 
     public List<B2BScenarioMetadata> getB2BScenariosForAgreement(RequestContext requestContext, TpmObjectMetadata agreementMetadata) {
@@ -35,6 +37,21 @@ public class B2BScenarioClient extends TpmBaseClient {
             format(B2B_SCENARIOS_RESOURCE, agreementMetadata.getObjectId()),
             (response) -> new B2BScenarioResponseParser().parseResponse(response, agreementMetadata)
         );
+    }
+
+    public B2BScenarioMetadata getSingleMetadata(RequestContext requestContext, String agreementId, String compositeB2bScenarioId) {
+        log.debug("#getSingleMetadata: requestContext = {}, agreementId = {}, compositeB2bScenarioId = {}", requestContext, agreementId, compositeB2bScenarioId);
+        TpmObjectMetadata agreementMetadata = agreementClient.getSingleMetadata(requestContext, agreementId);
+
+        // First get all scenarios
+        List<B2BScenarioMetadata> allScenarios = getB2BScenariosForAgreement(requestContext, agreementMetadata);
+
+
+        // Then filter by the specific ID
+        return allScenarios.stream()
+            .filter(scenario -> scenario.getObjectId().equals(compositeB2bScenarioId))
+            .findFirst()
+            .orElseThrow(() -> new ClientIntegrationException(format("B2B scenario with ID '%s' not found for agreement '%s'", compositeB2bScenarioId, agreementId)));
     }
 
     public JSONObject getB2BScenariosForAgreementAsJsonObject(RequestContext requestContext, String agreementId) {

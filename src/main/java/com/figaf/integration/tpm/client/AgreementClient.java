@@ -36,6 +36,15 @@ public class AgreementClient extends TpmBaseClient {
         );
     }
 
+    public TpmObjectMetadata getSingleMetadata(RequestContext requestContext, String agreementId) {
+        log.debug("#getSingleMetadata: requestContext = {}, agreementId = {}", requestContext, agreementId);
+        return executeGet(
+            requestContext.withPreservingIntegrationSuiteUrl(),
+            String.format(AGREEMENT_RESOURCE, agreementId),
+            response -> new GenericTpmResponseParser().parseSingleObject(response, TpmObjectType.CLOUD_AGREEMENT)
+        );
+    }
+
     public TpmObjectMetadata createAgreement(RequestContext requestContext, AgreementCreationRequest agreementCreationRequest) {
         log.debug("#createAgreement: requestContext = {}, agreementCreationRequest = {}", requestContext, agreementCreationRequest);
         String payload = serializeToJson(agreementCreationRequest);

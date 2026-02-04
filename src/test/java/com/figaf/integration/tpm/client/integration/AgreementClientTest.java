@@ -45,6 +45,18 @@ public class AgreementClientTest {
 
     @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
     @ArgumentsSource(AgentTestDataProvider.class)
+    void test_getSingleMetadata(AgentTestData agentTestData) {
+        log.debug("#test_getSingleMetadata: agentTestData={}", agentTestData);
+        RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
+        List<TpmObjectMetadata> agreementsMetadata = agreementClient.getAllMetadata(requestContext);
+        for (TpmObjectMetadata singleMetadata : agreementsMetadata) {
+            TpmObjectMetadata agreementMetadata = agreementClient.getSingleMetadata(requestContext, singleMetadata.getObjectId());
+            assertThat(agreementMetadata).as(METADATA_NOT_NULL_MSG).isNotNull();
+        }
+    }
+
+    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
+    @ArgumentsSource(AgentTestDataProvider.class)
     void test_createAndDeleteAgreement(CustomHostAgentTestData customHostAgentTestData) {
         RequestContext requestContext = customHostAgentTestData.createRequestContext(customHostAgentTestData.getTitle());
 //         ---------- Transaction option ----------
