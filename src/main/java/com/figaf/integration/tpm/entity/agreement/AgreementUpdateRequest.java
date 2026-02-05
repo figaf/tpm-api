@@ -17,5 +17,6 @@ public class AgreementUpdateRequest extends AgreementCreationRequest {
     private AdministrativeData administrativeData;
     private String uniqueId;
     private String id;
+    private String displayName;
 
 }
