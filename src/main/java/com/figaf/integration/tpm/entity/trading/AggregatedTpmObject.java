@@ -17,6 +17,7 @@ public class AggregatedTpmObject {
     private TpmObjectDetails tpmObjectDetails;
     private List<System> systems;
     private List<Identifier> identifiers;
+    private List<Parameter> parameters;
     private Map<String, List<Channel>> systemIdToChannels;
     private ProfileConfiguration profileConfiguration;
 
@@ -46,6 +47,7 @@ public class AggregatedTpmObject {
                 Stream.of(tpmObjectDetails.getAdministrativeData()),
                 systems.stream().map(System::getAdministrativeData),
                 identifiers.stream().map(Identifier::getAdministrativeData),
+                parameters.stream().map(Parameter::getAdministrativeData),
                 systemIdToChannels.values().stream()
                     .flatMap(channels -> channels.stream().map(Channel::getAdministrativeData)),
                 profileConfiguration == null ? Stream.<AdministrativeData>empty() : Stream.of(profileConfiguration.getAdministrativeData())

@@ -141,6 +141,22 @@ public class TradingPartnerClientTest {
 
     @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
     @ArgumentsSource(AgentTestDataProvider.class)
+    void test_getPartnerProfileParameters(AgentTestData agentTestData) {
+        RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
+
+        List<TpmBusinessEntity> tradingPartners = tradingPartnerClient.getAllMetadata(requestContext);
+
+        List<Parameter> allParameters = new ArrayList<>();
+        tradingPartners.forEach(tradingPartner -> {
+            allParameters.addAll(tradingPartnerClient.getPartnerProfileParameters(requestContext, tradingPartner.getObjectId()));
+        });
+
+        assertThat(allParameters).isNotEmpty();
+        allParameters.forEach(parameter -> assertThat(parameter).hasNoNullFieldsOrProperties());
+    }
+
+    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
+    @ArgumentsSource(AgentTestDataProvider.class)
     void test_getPartnerProfileChannels(AgentTestData agentTestData) {
         RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
 

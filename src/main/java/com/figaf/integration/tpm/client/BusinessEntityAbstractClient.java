@@ -4,9 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.figaf.integration.common.factory.HttpClientsFactory;
 import com.figaf.integration.tpm.entity.ArtifactProperties;
 import com.figaf.integration.tpm.entity.TpmBusinessEntity;
-import com.figaf.integration.tpm.entity.trading.Channel;
-import com.figaf.integration.tpm.entity.trading.Identifier;
-import com.figaf.integration.tpm.entity.trading.ProfileConfiguration;
+import com.figaf.integration.tpm.entity.trading.*;
 import com.figaf.integration.tpm.entity.trading.System;
 import com.figaf.integration.tpm.entity.trading.verbose.*;
 import com.figaf.integration.tpm.enumtypes.TpmObjectType;
@@ -83,6 +81,21 @@ public abstract class BusinessEntityAbstractClient extends TpmBaseClient {
         }
         return channels.stream()
             .sorted(Comparator.comparing(Channel::getId))
+            .toList();
+    }
+
+    protected List<Parameter> parseParametersList(String response) throws JsonProcessingException {
+        JSONArray jsonArray = new JSONArray(response);
+        List<Parameter> parameters = new ArrayList<>();
+        for (int i = 0; i < jsonArray.length(); i++) {
+            JSONObject jsonObject = jsonArray.getJSONObject(i);
+            String rawPayload = jsonObject.toString();
+            Parameter parameter = jsonMapper.readValue(rawPayload, Parameter.class);
+            parameter.setRawPayload(rawPayload);
+            parameters.add(parameter);
+        }
+        return parameters.stream()
+            .sorted(Comparator.comparing(Parameter::getId))
             .toList();
     }
 

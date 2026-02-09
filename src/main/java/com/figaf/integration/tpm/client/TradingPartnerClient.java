@@ -24,6 +24,7 @@ public class TradingPartnerClient extends PartnerProfileAbstractClient {
     private static final String COMMUNICATION_PARTNER_RESOURCE_BY_ID = "/itspaces/tpm/tradingpartners/%s";
     private static final String COMMUNICATION_PARTNER_SYSTEMS_RESOURCE = "/itspaces/tpm/tradingpartners/%s/systems";
     private static final String COMMUNICATION_PARTNER_IDENTIFIERS_RESOURCE = "/itspaces/tpm/tradingpartners/%s/identifiers";
+    private static final String COMMUNICATION_PARTNER_PARAMETERS_RESOURCE = "/itspaces/tpm/tradingpartners/%s/parameters";
     private static final String COMMUNICATION_PARTNER_COMMUNICATIONS_RESOURCE = "/itspaces/tpm/tradingpartners/%s/systems/%s/channels";
 
     private static final String COMMUNICATION_PARTNER_CONFIGURATION_RESOURCE = "/itspaces/tpm/tradingpartners/%s::profileConfiguration";
@@ -75,8 +76,10 @@ public class TradingPartnerClient extends PartnerProfileAbstractClient {
             return null;
         }
 
-        List<com.figaf.integration.tpm.entity.trading.System> systems = getPartnerProfileSystems(requestContext, partnerProfileId);
+        List<System> systems = getPartnerProfileSystems(requestContext, partnerProfileId);
         List<Identifier> identifiers = getPartnerProfileIdentifiers(requestContext, partnerProfileId);
+        List<Parameter> parameters = getPartnerProfileParameters(requestContext, partnerProfileId);
+
         Map<String, List<Channel>> systemIdToChannels = new LinkedHashMap<>();
         for (System system : systems) {
             List<Channel> partnerProfileChannels = getPartnerProfileChannels(requestContext, partnerProfileId, system.getId());
@@ -85,7 +88,7 @@ public class TradingPartnerClient extends PartnerProfileAbstractClient {
 
         ProfileConfiguration profileConfiguration = resolveProfileConfiguration(requestContext, partnerProfileId);
 
-        return new AggregatedTpmObject(tpmObjectDetails, systems, identifiers, systemIdToChannels, profileConfiguration);
+        return new AggregatedTpmObject(tpmObjectDetails, systems, identifiers, parameters, systemIdToChannels, profileConfiguration);
     }
 
     public List<Identifier> getPartnerProfileIdentifiers(RequestContext requestContext, String tradingPartnerId) {
@@ -94,6 +97,15 @@ public class TradingPartnerClient extends PartnerProfileAbstractClient {
                 requestContext.withPreservingIntegrationSuiteUrl(),
                 format(COMMUNICATION_PARTNER_IDENTIFIERS_RESOURCE, tradingPartnerId),
                 this::parseIdentifiersList
+        );
+    }
+
+    public List<Parameter> getPartnerProfileParameters(RequestContext requestContext, String partnerProfileId) {
+        log.debug("#getPartnerProfileParameters: requestContext = {}, partnerProfileId = {}", requestContext, partnerProfileId);
+        return executeGet(
+            requestContext.withPreservingIntegrationSuiteUrl(),
+            format(COMMUNICATION_PARTNER_PARAMETERS_RESOURCE, partnerProfileId),
+            this::parseParametersList
         );
     }
 
