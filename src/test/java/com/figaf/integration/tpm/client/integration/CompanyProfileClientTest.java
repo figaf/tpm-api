@@ -156,6 +156,17 @@ public class CompanyProfileClientTest {
 
     @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
     @ArgumentsSource(AgentTestDataProvider.class)
+    void test_getCompanyParameters(AgentTestData agentTestData) {
+        RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
+
+        List<Parameter> parameters = companyProfileClient.getCompanyParameters(requestContext, COMPANY_ID);
+
+        assertThat(parameters).isNotEmpty();
+        parameters.forEach(parameter -> assertThat(parameter).hasNoNullFieldsOrProperties());
+    }
+
+    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
+    @ArgumentsSource(AgentTestDataProvider.class)
     void test_getSubsidiaryIdentifiers(AgentTestData agentTestData) {
         RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
 
@@ -167,6 +178,21 @@ public class CompanyProfileClientTest {
 
         assertThat(allIdentifiers).isNotEmpty();
         allIdentifiers.forEach(identifier -> assertThat(identifier).hasNoNullFieldsOrProperties());
+    }
+
+    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)
+    @ArgumentsSource(AgentTestDataProvider.class)
+    void test_getSubsidiaryParameters(AgentTestData agentTestData) {
+        RequestContext requestContext = agentTestData.createRequestContext(agentTestData.getTitle());
+
+        List<Parameter> allParameters = new ArrayList<>();
+        List<TpmBusinessEntity> subsidiaries = companyProfileClient.getSubsidiaries(requestContext, COMPANY_ID);
+        for (TpmBusinessEntity subsidiary : subsidiaries) {
+            allParameters.addAll(companyProfileClient.getSubsidiaryParameters(requestContext, COMPANY_ID, subsidiary.getObjectId()));
+        }
+
+        assertThat(allParameters).isNotEmpty();
+        allParameters.forEach(parameter -> assertThat(parameter).hasNoNullFieldsOrProperties());
     }
 
     @ParameterizedTest(name = PARAMETERIZED_TEST_NAME)

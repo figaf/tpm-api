@@ -80,7 +80,7 @@ public class CommunicationPartnerPartnerClient extends PartnerProfileAbstractCli
 
         ProfileConfiguration profileConfiguration = resolveProfileConfiguration(requestContext, partnerProfileId);
 
-        return new AggregatedTpmObject(tpmObjectDetails, systems, Collections.emptyList(), systemIdToChannels, profileConfiguration);
+        return new AggregatedTpmObject(tpmObjectDetails, systems, Collections.emptyList(), Collections.emptyList(), systemIdToChannels, profileConfiguration);
     }
 
 }

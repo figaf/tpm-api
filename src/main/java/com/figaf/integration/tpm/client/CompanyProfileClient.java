@@ -32,7 +32,9 @@ public class CompanyProfileClient extends BusinessEntityAbstractClient {
     private static final String COMPANY_SYSTEMS_RESOURCE = "/itspaces/tpm/company/%s/systems";
     private static final String SUBSIDIARY_SYSTEMS_RESOURCE = "/itspaces/tpm/company/%s/subsidiaries/%s/systems";
     private static final String COMPANY_IDENTIFIERS_RESOURCE = "/itspaces/tpm/company/%s/identifiers";
+    private static final String COMPANY_PARAMETERS_RESOURCE = "/itspaces/tpm/company/%s/parameters";
     private static final String SUBSIDIARY_IDENTIFIERS_RESOURCE = "/itspaces/tpm/company/%s/subsidiaries/%s/identifiers";
+    private static final String SUBSIDIARY_PARAMETERS_RESOURCE = "/itspaces/tpm/company/%s/subsidiaries/%s/parameters";
     private static final String COMPANY_CHANNELS_RESOURCE = "/itspaces/tpm/company/%s/systems/%s/channels";
     private static final String SUBSIDIARY_CHANNELS_RESOURCE = "/itspaces/tpm/company/%s/subsidiaries/%s/systems/%s/channels";
     private static final String COMPANY_PROFILE_CONFIGURATION_RESOURCE = "/itspaces/tpm/company/%s::profileConfiguration";
@@ -129,6 +131,8 @@ public class CompanyProfileClient extends BusinessEntityAbstractClient {
 
         List<System> systems = getCompanySystems(requestContext, tpmObjectDetails.getId());
         List<Identifier> identifiers = getCompanyIdentifiers(requestContext, tpmObjectDetails.getId());
+        List<Parameter> parameters = getCompanyParameters(requestContext, tpmObjectDetails.getId());
+
         Map<String, List<Channel>> systemIdToChannels = new LinkedHashMap<>();
         for (System system : systems) {
             List<Channel> channels = getCompanyChannels(requestContext, tpmObjectDetails.getId(), system.getId());
@@ -137,7 +141,7 @@ public class CompanyProfileClient extends BusinessEntityAbstractClient {
 
         ProfileConfiguration profileConfiguration = resolveCompanyProfileConfiguration(requestContext, tpmObjectDetails.getId());
 
-        return new AggregatedTpmObject(tpmObjectDetails, systems, identifiers, systemIdToChannels, profileConfiguration);
+        return new AggregatedTpmObject(tpmObjectDetails, systems, identifiers, parameters, systemIdToChannels, profileConfiguration);
     }
 
     public AggregatedTpmObject getAggregatedSubsidiary(RequestContext requestContext, String parentCompanyId, String subsidiaryId) {
@@ -150,6 +154,8 @@ public class CompanyProfileClient extends BusinessEntityAbstractClient {
 
         List<System> systems = getSubsidiarySystems(requestContext, parentCompanyId, subsidiaryId);
         List<Identifier> identifiers = getSubsidiaryIdentifiers(requestContext, parentCompanyId, subsidiaryId);
+        List<Parameter> parameters = getSubsidiaryParameters(requestContext, parentCompanyId, subsidiaryId);
+
         Map<String, List<Channel>> systemIdToChannels = new LinkedHashMap<>();
         for (System system : systems) {
             List<Channel> channels = getSubsidiaryChannels(requestContext, parentCompanyId, subsidiaryId, system.getId());
@@ -158,7 +164,7 @@ public class CompanyProfileClient extends BusinessEntityAbstractClient {
 
         ProfileConfiguration profileConfiguration = resolveSubsidiaryProfileConfiguration(requestContext, parentCompanyId, subsidiaryId);
 
-        return new AggregatedTpmObject(tpmObjectDetails, systems, identifiers, systemIdToChannels, profileConfiguration);
+        return new AggregatedTpmObject(tpmObjectDetails, systems, identifiers, parameters, systemIdToChannels, profileConfiguration);
     }
 
     public List<System> getCompanySystems(RequestContext requestContext, String companyId) {
@@ -188,12 +194,30 @@ public class CompanyProfileClient extends BusinessEntityAbstractClient {
         );
     }
 
+    public List<Parameter> getCompanyParameters(RequestContext requestContext, String companyId) {
+        log.debug("#getCompanyParameters: requestContext = {}, companyId = {}", requestContext, companyId);
+        return executeGet(
+            requestContext.withPreservingIntegrationSuiteUrl(),
+            format(COMPANY_PARAMETERS_RESOURCE, companyId),
+            this::parseParametersList
+        );
+    }
+
     public List<Identifier> getSubsidiaryIdentifiers(RequestContext requestContext, String parentCompanyId, String subsidiaryId) {
         log.debug("#getSubsidiaryIdentifiers: requestContext = {}, parentCompanyId = {}, subsidiaryId = {}", requestContext, parentCompanyId, subsidiaryId);
         return executeGet(
             requestContext.withPreservingIntegrationSuiteUrl(),
             format(SUBSIDIARY_IDENTIFIERS_RESOURCE, parentCompanyId, subsidiaryId),
             this::parseIdentifiersList
+        );
+    }
+
+    public List<Parameter> getSubsidiaryParameters(RequestContext requestContext, String parentCompanyId, String subsidiaryId) {
+        log.debug("#getSubsidiaryParameters: requestContext = {}, parentCompanyId = {}, subsidiaryId = {}", requestContext, parentCompanyId, subsidiaryId);
+        return executeGet(
+            requestContext.withPreservingIntegrationSuiteUrl(),
+            format(SUBSIDIARY_PARAMETERS_RESOURCE, parentCompanyId, subsidiaryId),
+            this::parseParametersList
         );
     }
 
