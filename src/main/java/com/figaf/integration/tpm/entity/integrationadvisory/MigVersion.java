@@ -42,6 +42,9 @@ public class MigVersion implements IntegrationAdvisoryObjectVersion {
     @JsonProperty("Documentation")
     private Documentation documentation;
 
+    @JsonProperty("MessageTemplate")
+    private MessageTemplate messageTemplate;
+
     @Override
     public String getName() {
         return Optional.ofNullable(documentation)
@@ -87,6 +90,21 @@ public class MigVersion implements IntegrationAdvisoryObjectVersion {
 
         @JsonProperty("action")
         private String action;
+    }
+
+    @Getter
+    @Setter
+    @ToString
+    public static class MessageTemplate {
+
+        @JsonProperty("Id")
+        private String id;
+
+        @JsonProperty("TypeSystemId")
+        private String typeSystemName;
+
+        @JsonProperty("VersionId")
+        private String typeSystemVersion;
     }
 
 }

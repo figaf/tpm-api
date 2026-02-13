@@ -2,6 +2,7 @@ package com.figaf.integration.tpm.client;
 
 import com.figaf.integration.common.entity.RequestContext;
 import com.figaf.integration.common.factory.HttpClientsFactory;
+import com.figaf.integration.common.utils.Utils;
 import com.figaf.integration.tpm.entity.*;
 import com.figaf.integration.tpm.parser.B2BScenarioResponseParser;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static com.figaf.integration.common.utils.Utils.optString;
 import static com.figaf.integration.tpm.enumtypes.TpmObjectType.CLOUD_AGREEMENT_TEMPLATE;
@@ -79,6 +81,36 @@ public class AgreementTemplateClient extends TpmBaseClient {
                     b2BScenarioInAgreementTemplate.setName(businessTransactionProperties.getString("Name"));
                     String initiator = businessTransactionProperties.optString("Initiator");
                     b2BScenarioInAgreementTemplate.setDirection(StringUtils.isNotEmpty(initiator) ? B2BScenarioInAgreementTemplate.Direction.OUTBOUND : B2BScenarioInAgreementTemplate.Direction.INBOUND);
+
+                    JSONArray businessTransactionActivities = businessTransaction.getJSONArray("BusinessTransactionActivities");
+                    //in fact, this is always not empty
+                    if (!businessTransactionActivities.isEmpty()) {
+                        JSONObject businessTransactionActivitiesJSONObject = businessTransactionActivities.getJSONObject(0);
+
+                        JSONObject senderInterchangeProperties = Optional.ofNullable(businessTransactionActivitiesJSONObject.optJSONObject("ChoreographyProperties"))
+                            .map(choreographyProperties -> choreographyProperties.optJSONObject("Properties"))
+                            .map(properties -> properties.optJSONObject("SENDER_INTERCHANGE"))
+                            .map(senderInterchange -> senderInterchange.optJSONObject("Properties"))
+                            .orElse(null);
+                        if (senderInterchangeProperties != null) {
+                            b2BScenarioInAgreementTemplate.setSenderInterchangeTypeSystem(Utils.optString(senderInterchangeProperties, "TypeSystem"));
+                            b2BScenarioInAgreementTemplate.setSenderInterchangeTypeSystemVersion(Utils.optString(senderInterchangeProperties, "TypeSystemVersion"));
+                            b2BScenarioInAgreementTemplate.setSenderInterchangeMigId(Utils.optString(senderInterchangeProperties, "MIGGUID"));
+                            b2BScenarioInAgreementTemplate.setSenderInterchangeMigVersionId(Utils.optString(senderInterchangeProperties, "ObjectGUID"));
+                        }
+
+                        JSONObject receiverInterchangeProperties = Optional.ofNullable(businessTransactionActivitiesJSONObject.optJSONObject("ChoreographyProperties"))
+                            .map(choreographyProperties -> choreographyProperties.optJSONObject("Properties"))
+                            .map(properties -> properties.optJSONObject("RECEIVER_INTERCHANGE"))
+                            .map(senderInterchange -> senderInterchange.optJSONObject("Properties"))
+                            .orElse(null);
+                        if (receiverInterchangeProperties != null) {
+                            b2BScenarioInAgreementTemplate.setReceiverInterchangeTypeSystem(Utils.optString(receiverInterchangeProperties, "TypeSystem"));
+                            b2BScenarioInAgreementTemplate.setReceiverInterchangeTypeSystemVersion(Utils.optString(receiverInterchangeProperties, "TypeSystemVersion"));
+                            b2BScenarioInAgreementTemplate.setReceiverInterchangeMigId(Utils.optString(receiverInterchangeProperties, "MIGGUID"));
+                            b2BScenarioInAgreementTemplate.setReceiverInterchangeMigVersionId(Utils.optString(receiverInterchangeProperties, "ObjectGUID"));
+                        }
+                    }
 
                     b2BScenarioInAgreementTemplates.add(b2BScenarioInAgreementTemplate);
                 }
